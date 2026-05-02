@@ -5,6 +5,14 @@ import { IDEA_SLUGS_QUERY, POST_SLUGS_QUERY } from '@/lib/sanity/queries'
 const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://yourdomain.com'
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  if (!process.env.NEXT_PUBLIC_SANITY_PROJECT_ID) {
+    return [
+      { url: BASE_URL,            changeFrequency: 'daily',  priority: 1 },
+      { url: `${BASE_URL}/ideas`, changeFrequency: 'daily',  priority: 0.9 },
+      { url: `${BASE_URL}/blog`,  changeFrequency: 'weekly', priority: 0.8 },
+    ]
+  }
+
   const [ideaSlugs, postSlugs] = await Promise.all([
     client.fetch<{ slug: string }[]>(IDEA_SLUGS_QUERY),
     client.fetch<{ slug: string }[]>(POST_SLUGS_QUERY),
