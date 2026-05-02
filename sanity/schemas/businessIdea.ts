@@ -1,0 +1,206 @@
+import { defineField, defineType } from 'sanity'
+
+export default defineType({
+  name: 'businessIdea',
+  title: 'Business Idea',
+  type: 'document',
+  fields: [
+    defineField({
+      name: 'title',
+      title: 'Title',
+      type: 'string',
+      validation: (Rule) => Rule.required().min(10).max(100),
+    }),
+    defineField({
+      name: 'slug',
+      title: 'Slug',
+      type: 'slug',
+      options: { source: 'title', maxLength: 96 },
+      validation: (Rule) => Rule.required(),
+    }),
+    defineField({
+      name: 'cover_image',
+      title: 'Cover Image',
+      type: 'image',
+      options: { hotspot: true },
+      fields: [
+        defineField({
+          name: 'alt',
+          type: 'string',
+          title: 'Alt Text',
+          validation: (Rule) => Rule.required(),
+        }),
+      ],
+    }),
+    defineField({
+      name: 'description',
+      title: 'Short Description',
+      description: 'One or two sentences shown on cards and meta description.',
+      type: 'text',
+      rows: 3,
+      validation: (Rule) => Rule.required().max(300),
+    }),
+    defineField({
+      name: 'problem',
+      title: 'Problem Being Solved',
+      type: 'array',
+      of: [{ type: 'block' }],
+    }),
+    defineField({
+      name: 'solution',
+      title: 'Proposed Solution',
+      type: 'array',
+      of: [{ type: 'block' }],
+    }),
+    defineField({
+      name: 'budget_range',
+      title: 'Budget Range',
+      type: 'string',
+      options: {
+        list: [
+          { title: 'Under $1K',     value: 'under_1k' },
+          { title: '$1K – $10K',    value: '1k_10k' },
+          { title: '$10K – $50K',   value: '10k_50k' },
+          { title: '$50K – $200K',  value: '50k_200k' },
+          { title: '$200K+',        value: '200k_plus' },
+        ],
+        layout: 'radio',
+      },
+      validation: (Rule) => Rule.required(),
+    }),
+    defineField({
+      name: 'industry',
+      title: 'Industry',
+      type: 'string',
+      options: {
+        list: [
+          'SaaS',
+          'E-commerce',
+          'Health & Wellness',
+          'EdTech',
+          'FinTech',
+          'Creator Economy',
+          'Local Services',
+          'Climate / Sustainability',
+          'AI / ML',
+          'Other',
+        ],
+      },
+      validation: (Rule) => Rule.required(),
+    }),
+    defineField({
+      name: 'stage',
+      title: 'Idea Stage',
+      type: 'string',
+      options: {
+        list: [
+          { title: 'Raw Concept',     value: 'concept' },
+          { title: 'Validated',       value: 'validated' },
+          { title: 'Has Competitors', value: 'competitive' },
+          { title: 'MVP Possible',    value: 'mvp_ready' },
+          { title: 'Proven Market',   value: 'proven' },
+        ],
+        layout: 'radio',
+      },
+    }),
+    defineField({
+      name: 'difficulty_level',
+      title: 'Difficulty Level',
+      type: 'string',
+      options: {
+        list: [
+          { title: 'Beginner',     value: 'beginner' },
+          { title: 'Intermediate', value: 'intermediate' },
+          { title: 'Advanced',     value: 'advanced' },
+          { title: 'Expert',       value: 'expert' },
+        ],
+        layout: 'radio',
+      },
+    }),
+    defineField({
+      name: 'revenue_model',
+      title: 'Revenue Model',
+      type: 'array',
+      of: [{ type: 'string' }],
+      options: {
+        list: [
+          'Subscription (SaaS)',
+          'One-time Sale',
+          'Marketplace %',
+          'Advertising',
+          'Freemium',
+          'Consulting / Services',
+          'Licensing',
+          'Affiliate',
+        ],
+      },
+    }),
+    defineField({
+      name: 'resources_needed',
+      title: 'Resources Needed',
+      type: 'array',
+      of: [{ type: 'string' }],
+      options: {
+        list: [
+          'Solo Founder OK',
+          'Technical Co-founder',
+          'Designer',
+          'Domain Expertise',
+          'Regulatory Approval',
+          'Physical Space',
+          'Hardware / Manufacturing',
+          'Large Capital',
+        ],
+      },
+    }),
+    defineField({
+      name: 'tags',
+      title: 'Tags / Keywords',
+      description: 'Add SEO keywords and topic tags. Users filter ideas by these.',
+      type: 'array',
+      of: [{ type: 'string' }],
+      options: { layout: 'tags' },
+    }),
+    defineField({
+      name: 'seo_title',
+      title: 'SEO Title',
+      description: 'Overrides the page title in search results (max 60 chars).',
+      type: 'string',
+      validation: (Rule) => Rule.max(60),
+    }),
+    defineField({
+      name: 'seo_description',
+      title: 'SEO Meta Description',
+      description: 'Shown in search results (max 160 chars).',
+      type: 'text',
+      rows: 2,
+      validation: (Rule) => Rule.max(160),
+    }),
+    defineField({
+      name: 'featured',
+      title: 'Featured on Homepage',
+      type: 'boolean',
+      initialValue: false,
+    }),
+    defineField({
+      name: 'published_at',
+      title: 'Published At',
+      type: 'datetime',
+      initialValue: () => new Date().toISOString(),
+    }),
+  ],
+  preview: {
+    select: {
+      title: 'title',
+      subtitle: 'industry',
+      media: 'cover_image',
+    },
+  },
+  orderings: [
+    {
+      title: 'Newest First',
+      name: 'publishedAtDesc',
+      by: [{ field: 'published_at', direction: 'desc' }],
+    },
+  ],
+})
