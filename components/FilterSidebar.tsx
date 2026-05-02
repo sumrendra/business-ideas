@@ -4,7 +4,7 @@ import { useRouter, usePathname } from 'next/navigation'
 import { useCallback } from 'react'
 import {
   BUDGET_OPTIONS,
-  STAGE_OPTIONS,
+  MARKET_SATURATION_OPTIONS,
   DIFFICULTY_OPTIONS,
   INDUSTRIES,
 } from '@/lib/sanity/types'
@@ -12,7 +12,7 @@ import {
 interface ActiveFilters {
   industry: string
   budget: string
-  stage: string
+  saturation: string
   difficulty: string
   tags: string[]
 }
@@ -27,14 +27,14 @@ export default function FilterSidebar({ allTags, activeFilters }: FilterSidebarP
   const pathname = usePathname()
 
   const buildUrl = useCallback(
-    (updates: Partial<ActiveFilters & { tags: string[] }>) => {
+    (updates: Partial<ActiveFilters>) => {
       const merged = { ...activeFilters, ...updates }
       const params = new URLSearchParams()
-      if (merged.industry)           params.set('industry',   merged.industry)
-      if (merged.budget)             params.set('budget',     merged.budget)
-      if (merged.stage)              params.set('stage',      merged.stage)
-      if (merged.difficulty)         params.set('difficulty', merged.difficulty)
-      merged.tags.forEach((t) =>     params.append('tags', t))
+      if (merged.industry)   params.set('industry',   merged.industry)
+      if (merged.budget)     params.set('budget',     merged.budget)
+      if (merged.saturation) params.set('saturation', merged.saturation)
+      if (merged.difficulty) params.set('difficulty', merged.difficulty)
+      merged.tags.forEach((t) => params.append('tags', t))
       const qs = params.toString()
       return `${pathname}${qs ? `?${qs}` : ''}`
     },
@@ -59,13 +59,12 @@ export default function FilterSidebar({ allTags, activeFilters }: FilterSidebarP
   const hasActiveFilters =
     activeFilters.industry ||
     activeFilters.budget ||
-    activeFilters.stage ||
+    activeFilters.saturation ||
     activeFilters.difficulty ||
     activeFilters.tags.length > 0
 
   return (
     <div className="space-y-6 rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
-      {/* Header */}
       <div className="flex items-center justify-between">
         <h2 className="font-semibold text-slate-900">Filters</h2>
         {hasActiveFilters && (
@@ -78,7 +77,6 @@ export default function FilterSidebar({ allTags, activeFilters }: FilterSidebarP
         )}
       </div>
 
-      {/* Industry */}
       <FilterGroup title="Industry">
         {INDUSTRIES.map((ind) => (
           <FilterButton
@@ -90,7 +88,6 @@ export default function FilterSidebar({ allTags, activeFilters }: FilterSidebarP
         ))}
       </FilterGroup>
 
-      {/* Budget */}
       <FilterGroup title="Budget Range">
         {BUDGET_OPTIONS.map(({ value, label }) => (
           <FilterButton
@@ -102,8 +99,18 @@ export default function FilterSidebar({ allTags, activeFilters }: FilterSidebarP
         ))}
       </FilterGroup>
 
-      {/* Difficulty */}
-      <FilterGroup title="Difficulty">
+      <FilterGroup title="Market Saturation">
+        {MARKET_SATURATION_OPTIONS.map(({ value, label }) => (
+          <FilterButton
+            key={value}
+            label={label}
+            active={activeFilters.saturation === value}
+            onClick={() => setFilter('saturation', value)}
+          />
+        ))}
+      </FilterGroup>
+
+      <FilterGroup title="Complexity">
         {DIFFICULTY_OPTIONS.map(({ value, label }) => (
           <FilterButton
             key={value}
@@ -114,19 +121,6 @@ export default function FilterSidebar({ allTags, activeFilters }: FilterSidebarP
         ))}
       </FilterGroup>
 
-      {/* Stage */}
-      <FilterGroup title="Idea Stage">
-        {STAGE_OPTIONS.map(({ value, label }) => (
-          <FilterButton
-            key={value}
-            label={label}
-            active={activeFilters.stage === value}
-            onClick={() => setFilter('stage', value)}
-          />
-        ))}
-      </FilterGroup>
-
-      {/* Tags */}
       {allTags.length > 0 && (
         <FilterGroup title="Tags">
           <div className="flex flex-wrap gap-1.5">
@@ -150,32 +144,16 @@ export default function FilterSidebar({ allTags, activeFilters }: FilterSidebarP
   )
 }
 
-function FilterGroup({
-  title,
-  children,
-}: {
-  title: string
-  children: React.ReactNode
-}) {
+function FilterGroup({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div>
-      <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-400">
-        {title}
-      </p>
+      <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-400">{title}</p>
       <div className="space-y-1">{children}</div>
     </div>
   )
 }
 
-function FilterButton({
-  label,
-  active,
-  onClick,
-}: {
-  label: string
-  active: boolean
-  onClick: () => void
-}) {
+function FilterButton({ label, active, onClick }: { label: string; active: boolean; onClick: () => void }) {
   return (
     <button
       onClick={onClick}

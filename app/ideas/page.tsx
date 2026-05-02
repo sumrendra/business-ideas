@@ -8,14 +8,14 @@ import FilterSidebar from '@/components/FilterSidebar'
 export const metadata: Metadata = {
   title: 'Browse Business Ideas',
   description:
-    'Filter hundreds of curated business ideas by budget, industry, difficulty, stage, and tags to find the perfect opportunity for you.',
+    'Filter curated business ideas by budget, industry, market saturation, difficulty and tags to find the perfect opportunity for you.',
 }
 
 interface PageProps {
   searchParams: Promise<{
     industry?: string
     budget?: string
-    stage?: string
+    saturation?: string
     difficulty?: string
     tags?: string | string[]
   }>
@@ -35,7 +35,7 @@ export default async function IdeasPage({ searchParams }: PageProps) {
       {
         industry:   sp.industry   ?? '',
         budget:     sp.budget     ?? '',
-        stage:      sp.stage      ?? '',
+        saturation: sp.saturation ?? '',
         difficulty: sp.difficulty ?? '',
         tags:       activeTags,
       },
@@ -47,7 +47,7 @@ export default async function IdeasPage({ searchParams }: PageProps) {
   const hasFilters =
     !!sp.industry ||
     !!sp.budget ||
-    !!sp.stage ||
+    !!sp.saturation ||
     !!sp.difficulty ||
     activeTags.length > 0
 
@@ -62,21 +62,19 @@ export default async function IdeasPage({ searchParams }: PageProps) {
       </div>
 
       <div className="flex flex-col gap-8 lg:flex-row">
-        {/* Sidebar */}
         <aside className="w-full lg:w-64 shrink-0">
           <FilterSidebar
             allTags={allTags}
             activeFilters={{
               industry:   sp.industry   ?? '',
               budget:     sp.budget     ?? '',
-              stage:      sp.stage      ?? '',
+              saturation: sp.saturation ?? '',
               difficulty: sp.difficulty ?? '',
               tags:       activeTags,
             }}
           />
         </aside>
 
-        {/* Grid */}
         <div className="flex-1">
           {ideas.length === 0 ? (
             <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-slate-300 py-24 text-center">

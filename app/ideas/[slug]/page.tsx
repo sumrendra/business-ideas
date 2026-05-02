@@ -8,7 +8,7 @@ import { urlFor } from '@/lib/sanity/image'
 import type { Idea } from '@/lib/sanity/types'
 import {
   BUDGET_LABELS,
-  STAGE_LABELS,
+  MARKET_SATURATION_LABELS,
   DIFFICULTY_LABELS,
 } from '@/lib/sanity/types'
 import { PortableText } from '@portabletext/react'
@@ -44,6 +44,13 @@ const DIFFICULTY_COLOR: Record<string, string> = {
   intermediate: 'bg-yellow-100 text-yellow-700',
   advanced:     'bg-orange-100 text-orange-700',
   expert:       'bg-red-100 text-red-700',
+}
+
+const SATURATION_COLOR: Record<string, string> = {
+  concept:     'bg-blue-100 text-blue-700',
+  validated:   'bg-teal-100 text-teal-700',
+  competitive: 'bg-orange-100 text-orange-700',
+  proven:      'bg-green-100 text-green-700',
 }
 
 export default async function IdeaPage({ params }: PageProps) {
@@ -102,7 +109,11 @@ export default async function IdeaPage({ params }: PageProps) {
           value={DIFFICULTY_LABELS[idea.difficulty_level] || idea.difficulty_level}
           valueClass={DIFFICULTY_COLOR[idea.difficulty_level]}
         />
-        <MetaItem label="Stage" value={STAGE_LABELS[idea.stage] || idea.stage} />
+        <MetaItem
+          label="Market"
+          value={MARKET_SATURATION_LABELS[idea.market_saturation] || idea.market_saturation}
+          valueClass={SATURATION_COLOR[idea.market_saturation]}
+        />
       </div>
 
       {/* Revenue model & resources */}
@@ -115,24 +126,133 @@ export default async function IdeaPage({ params }: PageProps) {
         )}
       </div>
 
-      {/* Problem */}
-      {idea.problem && (
-        <section className="mb-8">
-          <h2 className="mb-3 text-xl font-bold text-slate-900">The Problem</h2>
-          <div className="prose-content">
-            <PortableText value={idea.problem as Parameters<typeof PortableText>[0]['value']} />
+      {/* Introduction */}
+      {idea.introduction && (
+        <Section title="Introduction">
+          <PortableText value={idea.introduction as Parameters<typeof PortableText>[0]['value']} />
+        </Section>
+      )}
+
+      {/* Who Is It For */}
+      {idea.target_audience && (
+        <Section title="Who Is It For?">
+          <PortableText value={idea.target_audience as Parameters<typeof PortableText>[0]['value']} />
+        </Section>
+      )}
+
+      {/* What Works & Why */}
+      {idea.why_it_works && (
+        <Section title="What Works in This & Why?">
+          <PortableText value={idea.why_it_works as Parameters<typeof PortableText>[0]['value']} />
+        </Section>
+      )}
+
+      {/* Scope in India */}
+      {idea.scope_in_india && (
+        <Section title="Scope in India">
+          <PortableText value={idea.scope_in_india as Parameters<typeof PortableText>[0]['value']} />
+        </Section>
+      )}
+
+      {/* Things to Be Mindful Of */}
+      {idea.things_to_note && idea.things_to_note.length > 0 && (
+        <Section title="Things to Be Mindful Of">
+          <ul className="space-y-2">
+            {idea.things_to_note.map((item, i) => (
+              <li key={i} className="flex items-start gap-2 text-slate-700">
+                <span className="mt-1 h-2 w-2 shrink-0 rounded-full bg-amber-400" />
+                {item}
+              </li>
+            ))}
+          </ul>
+        </Section>
+      )}
+
+      {/* Current Landscape */}
+      {idea.current_landscape && (
+        <Section title="Current Landscape in India">
+          <PortableText value={idea.current_landscape as Parameters<typeof PortableText>[0]['value']} />
+        </Section>
+      )}
+
+      {/* Business Key Metrics */}
+      {(idea.gross_margin || idea.setup_cost_range || idea.pivot_options || idea.financing_options) && (
+        <section className="mb-10">
+          <h2 className="mb-4 text-xl font-bold text-slate-900">Business Key Metrics</h2>
+          <div className="grid gap-4 rounded-2xl border border-slate-100 bg-slate-50 p-6 sm:grid-cols-2">
+            {idea.gross_margin && (
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">Gross Margin</p>
+                <p className="mt-1 text-sm font-medium text-slate-700">{idea.gross_margin}</p>
+              </div>
+            )}
+            {idea.setup_cost_range && (
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">Setup Cost</p>
+                <p className="mt-1 text-sm font-medium text-slate-700">{idea.setup_cost_range}</p>
+              </div>
+            )}
+            {idea.pivot_options && (
+              <div className="sm:col-span-2">
+                <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">Pivot Options</p>
+                <p className="mt-1 text-sm text-slate-700 whitespace-pre-line">{idea.pivot_options}</p>
+              </div>
+            )}
+            {idea.financing_options && (
+              <div className="sm:col-span-2">
+                <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">Financing Options</p>
+                <p className="mt-1 text-sm text-slate-700 whitespace-pre-line">{idea.financing_options}</p>
+              </div>
+            )}
           </div>
         </section>
       )}
 
-      {/* Solution */}
-      {idea.solution && (
-        <section className="mb-8">
-          <h2 className="mb-3 text-xl font-bold text-slate-900">The Solution</h2>
-          <div className="prose-content">
-            <PortableText value={idea.solution as Parameters<typeof PortableText>[0]['value']} />
+      {/* Pros & Cons */}
+      {((idea.pros && idea.pros.length > 0) || (idea.cons && idea.cons.length > 0)) && (
+        <section className="mb-10">
+          <h2 className="mb-4 text-xl font-bold text-slate-900">Pros & Cons</h2>
+          <div className="grid gap-4 sm:grid-cols-2">
+            {idea.pros && idea.pros.length > 0 && (
+              <div className="rounded-xl border border-green-100 bg-green-50 p-4">
+                <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-green-600">Pros</p>
+                <ul className="space-y-2">
+                  {idea.pros.map((item, i) => (
+                    <li key={i} className="flex items-start gap-2 text-sm text-slate-700">
+                      <span className="mt-0.5 text-green-500">✓</span>
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            {idea.cons && idea.cons.length > 0 && (
+              <div className="rounded-xl border border-red-100 bg-red-50 p-4">
+                <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-red-600">Cons</p>
+                <ul className="space-y-2">
+                  {idea.cons.map((item, i) => (
+                    <li key={i} className="flex items-start gap-2 text-sm text-slate-700">
+                      <span className="mt-0.5 text-red-400">✕</span>
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </div>
         </section>
+      )}
+
+      {/* Legacy: Problem / Solution */}
+      {idea.problem && (
+        <Section title="The Problem">
+          <PortableText value={idea.problem as Parameters<typeof PortableText>[0]['value']} />
+        </Section>
+      )}
+      {idea.solution && (
+        <Section title="The Solution">
+          <PortableText value={idea.solution as Parameters<typeof PortableText>[0]['value']} />
+        </Section>
       )}
 
       {/* Tags */}
@@ -160,6 +280,15 @@ export default async function IdeaPage({ params }: PageProps) {
         </Link>
       </div>
     </article>
+  )
+}
+
+function Section({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <section className="mb-8">
+      <h2 className="mb-3 text-xl font-bold text-slate-900">{title}</h2>
+      <div className="prose-content">{children}</div>
+    </section>
   )
 }
 

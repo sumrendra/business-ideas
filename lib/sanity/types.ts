@@ -10,8 +10,9 @@ export interface Idea {
   description: string
   budget_range: string
   industry: string
-  stage: string
+  market_saturation: string
   difficulty_level: string
+  stage: string
   revenue_model: string[]
   resources_needed: string[]
   tags: string[]
@@ -19,6 +20,18 @@ export interface Idea {
   published_at: string
   cover_image: CoverImage | null
   // detail-only fields
+  introduction?: unknown[]
+  target_audience?: unknown[]
+  why_it_works?: unknown[]
+  scope_in_india?: unknown[]
+  things_to_note?: string[]
+  current_landscape?: unknown[]
+  gross_margin?: string
+  setup_cost_range?: string
+  pivot_options?: string
+  financing_options?: string
+  pros?: string[]
+  cons?: string[]
   problem?: unknown[]
   solution?: unknown[]
   seo_title?: string
@@ -41,13 +54,21 @@ export interface Post {
   seo_description?: string
 }
 
-// Maps stored enum values to human-readable labels
+// ── Label maps ────────────────────────────────────────────────────────────────
+
 export const BUDGET_LABELS: Record<string, string> = {
-  under_1k:    'Under $1K',
-  '1k_10k':    '$1K – $10K',
-  '10k_50k':   '$10K – $50K',
-  '50k_200k':  '$50K – $200K',
-  '200k_plus': '$200K+',
+  under_1l:  'Under ₹1 Lakh',
+  '1l_10l':  '₹1L – ₹10L',
+  '10l_50l': '₹10L – ₹50L',
+  '50l_2cr': '₹50L – ₹2Cr',
+  '2cr_plus':'₹2 Crore+',
+}
+
+export const MARKET_SATURATION_LABELS: Record<string, string> = {
+  concept:     'Concept Stage',
+  validated:   'Validated',
+  competitive: 'Competitive',
+  proven:      'Proven Market',
 }
 
 export const STAGE_LABELS: Record<string, string> = {
@@ -65,6 +86,8 @@ export const DIFFICULTY_LABELS: Record<string, string> = {
   expert:       'Expert',
 }
 
+// ── Filter options ────────────────────────────────────────────────────────────
+
 export const INDUSTRIES = [
   'SaaS',
   'E-commerce',
@@ -79,11 +102,18 @@ export const INDUSTRIES = [
 ]
 
 export const BUDGET_OPTIONS = [
-  { value: 'under_1k',    label: 'Under $1K' },
-  { value: '1k_10k',      label: '$1K – $10K' },
-  { value: '10k_50k',     label: '$10K – $50K' },
-  { value: '50k_200k',    label: '$50K – $200K' },
-  { value: '200k_plus',   label: '$200K+' },
+  { value: 'under_1l',  label: 'Under ₹1 Lakh' },
+  { value: '1l_10l',    label: '₹1L – ₹10L' },
+  { value: '10l_50l',   label: '₹10L – ₹50L' },
+  { value: '50l_2cr',   label: '₹50L – ₹2Cr' },
+  { value: '2cr_plus',  label: '₹2 Crore+' },
+]
+
+export const MARKET_SATURATION_OPTIONS = [
+  { value: 'concept',     label: 'Concept Stage' },
+  { value: 'validated',   label: 'Validated' },
+  { value: 'competitive', label: 'Competitive' },
+  { value: 'proven',      label: 'Proven Market' },
 ]
 
 export const STAGE_OPTIONS = [

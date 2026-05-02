@@ -9,6 +9,7 @@ const IDEA_CARD_FIELDS = groq`
   description,
   budget_range,
   industry,
+  market_saturation,
   stage,
   difficulty_level,
   revenue_model,
@@ -32,29 +33,36 @@ const POST_CARD_FIELDS = groq`
 
 // ─── Business Ideas ───────────────────────────────────────────────────────────
 
-/**
- * All published ideas, filtered by optional metadata params.
- * All params default to "" (empty string) which means "no filter applied".
- */
 export const IDEAS_QUERY = groq`
   *[
     _type == "businessIdea"
     && defined(slug.current)
     && defined(published_at)
-    && ($industry    == "" || industry        == $industry)
-    && ($budget      == "" || budget_range    == $budget)
-    && ($stage       == "" || stage           == $stage)
-    && ($difficulty  == "" || difficulty_level == $difficulty)
+    && ($industry    == "" || industry           == $industry)
+    && ($budget      == "" || budget_range       == $budget)
+    && ($saturation  == "" || market_saturation  == $saturation)
+    && ($difficulty  == "" || difficulty_level   == $difficulty)
     && (count($tags) == 0  || count(tags[@ in $tags]) > 0)
   ] | order(featured desc, published_at desc) {
     ${IDEA_CARD_FIELDS}
   }
 `
 
-/** Single idea by slug — full detail */
 export const IDEA_BY_SLUG_QUERY = groq`
   *[_type == "businessIdea" && slug.current == $slug][0] {
     ${IDEA_CARD_FIELDS},
+    introduction,
+    target_audience,
+    why_it_works,
+    scope_in_india,
+    things_to_note,
+    current_landscape,
+    gross_margin,
+    setup_cost_range,
+    pivot_options,
+    financing_options,
+    pros,
+    cons,
     problem,
     solution,
     resources_needed,
@@ -63,12 +71,10 @@ export const IDEA_BY_SLUG_QUERY = groq`
   }
 `
 
-/** All idea slugs — for generateStaticParams */
 export const IDEA_SLUGS_QUERY = groq`
   *[_type == "businessIdea" && defined(slug.current)] { "slug": slug.current }
 `
 
-/** Featured ideas for homepage */
 export const FEATURED_IDEAS_QUERY = groq`
   *[_type == "businessIdea" && featured == true && defined(published_at)]
   | order(published_at desc)[0...6] {
@@ -76,14 +82,12 @@ export const FEATURED_IDEAS_QUERY = groq`
   }
 `
 
-/** All unique tags across all ideas — used to populate the filter sidebar */
 export const IDEA_TAGS_QUERY = groq`
   array::unique(*[_type == "businessIdea" && defined(tags)].tags[])
 `
 
 // ─── Blog Posts ───────────────────────────────────────────────────────────────
 
-/** All published blog posts, optionally filtered by category or tag */
 export const POSTS_QUERY = groq`
   *[
     _type == "post"
@@ -96,7 +100,6 @@ export const POSTS_QUERY = groq`
   }
 `
 
-/** Single post by slug — full detail */
 export const POST_BY_SLUG_QUERY = groq`
   *[_type == "post" && slug.current == $slug][0] {
     ${POST_CARD_FIELDS},
@@ -106,12 +109,10 @@ export const POST_BY_SLUG_QUERY = groq`
   }
 `
 
-/** All post slugs — for generateStaticParams */
 export const POST_SLUGS_QUERY = groq`
   *[_type == "post" && defined(slug.current)] { "slug": slug.current }
 `
 
-/** Recent posts for homepage */
 export const RECENT_POSTS_QUERY = groq`
   *[_type == "post" && defined(published_at)]
   | order(published_at desc)[0...3] {

@@ -5,6 +5,7 @@ export default defineType({
   title: 'Business Idea',
   type: 'document',
   fields: [
+    // ── Core ────────────────────────────────────────────────────────────────
     defineField({
       name: 'title',
       title: 'Title',
@@ -35,34 +36,24 @@ export default defineType({
     defineField({
       name: 'description',
       title: 'Short Description',
-      description: 'One or two sentences shown on cards and meta description.',
+      description: 'One or two sentences shown on cards and in meta description.',
       type: 'text',
       rows: 3,
       validation: (Rule) => Rule.required().max(300),
     }),
-    defineField({
-      name: 'problem',
-      title: 'Problem Being Solved',
-      type: 'array',
-      of: [{ type: 'block' }],
-    }),
-    defineField({
-      name: 'solution',
-      title: 'Proposed Solution',
-      type: 'array',
-      of: [{ type: 'block' }],
-    }),
+
+    // ── Filters ─────────────────────────────────────────────────────────────
     defineField({
       name: 'budget_range',
       title: 'Budget Range',
       type: 'string',
       options: {
         list: [
-          { title: 'Under $1K',     value: 'under_1k' },
-          { title: '$1K – $10K',    value: '1k_10k' },
-          { title: '$10K – $50K',   value: '10k_50k' },
-          { title: '$50K – $200K',  value: '50k_200k' },
-          { title: '$200K+',        value: '200k_plus' },
+          { title: 'Under ₹1 Lakh',        value: 'under_1l' },
+          { title: '₹1 Lakh – ₹10 Lakh',   value: '1l_10l' },
+          { title: '₹10 Lakh – ₹50 Lakh',  value: '10l_50l' },
+          { title: '₹50 Lakh – ₹2 Crore',  value: '50l_2cr' },
+          { title: '₹2 Crore+',            value: '2cr_plus' },
         ],
         layout: 'radio',
       },
@@ -70,7 +61,7 @@ export default defineType({
     }),
     defineField({
       name: 'industry',
-      title: 'Industry',
+      title: 'Industry / Category',
       type: 'string',
       options: {
         list: [
@@ -89,6 +80,143 @@ export default defineType({
       validation: (Rule) => Rule.required(),
     }),
     defineField({
+      name: 'market_saturation',
+      title: 'Market Saturation',
+      description: 'How competitive / proven is this market right now?',
+      type: 'string',
+      options: {
+        list: [
+          { title: 'Concept Stage',   value: 'concept' },
+          { title: 'Validated',       value: 'validated' },
+          { title: 'Competitive',     value: 'competitive' },
+          { title: 'Proven Market',   value: 'proven' },
+        ],
+        layout: 'radio',
+      },
+      validation: (Rule) => Rule.required(),
+    }),
+    defineField({
+      name: 'difficulty_level',
+      title: 'Complexity to Establish',
+      type: 'string',
+      options: {
+        list: [
+          { title: 'Beginner',     value: 'beginner' },
+          { title: 'Intermediate', value: 'intermediate' },
+          { title: 'Advanced',     value: 'advanced' },
+          { title: 'Expert',       value: 'expert' },
+        ],
+        layout: 'radio',
+      },
+    }),
+
+    // ── Rich Content Sections ────────────────────────────────────────────────
+    defineField({
+      name: 'introduction',
+      title: 'Introduction',
+      description: 'What is this business? Set the scene in 2–4 paragraphs.',
+      type: 'array',
+      of: [{ type: 'block' }],
+    }),
+    defineField({
+      name: 'target_audience',
+      title: 'Who Is It For?',
+      description: 'Describe the ideal founder profile and target customer.',
+      type: 'array',
+      of: [{ type: 'block' }],
+    }),
+    defineField({
+      name: 'why_it_works',
+      title: 'What Works in This & Why?',
+      description: 'Core reasons why this business model is viable.',
+      type: 'array',
+      of: [{ type: 'block' }],
+    }),
+    defineField({
+      name: 'scope_in_india',
+      title: 'Scope in India',
+      description: 'Market size, relevant geographies, and growth potential in India.',
+      type: 'array',
+      of: [{ type: 'block' }],
+    }),
+    defineField({
+      name: 'things_to_note',
+      title: 'Things to Be Mindful Of',
+      description: 'Key risks, gotchas and operational considerations. Add one per line.',
+      type: 'array',
+      of: [{ type: 'string' }],
+      options: { layout: 'tags' },
+    }),
+    defineField({
+      name: 'current_landscape',
+      title: 'Current Landscape in India',
+      description: 'Who are the existing players? What does the competitive map look like?',
+      type: 'array',
+      of: [{ type: 'block' }],
+    }),
+
+    // ── Business Key Metrics ─────────────────────────────────────────────────
+    defineField({
+      name: 'gross_margin',
+      title: 'Gross Margin',
+      description: 'e.g. "55–70%" or "20–30% on installation; 60–70% on AMC"',
+      type: 'string',
+    }),
+    defineField({
+      name: 'setup_cost_range',
+      title: 'Setup Cost',
+      description: 'e.g. "₹20,000–₹60,000"',
+      type: 'string',
+    }),
+    defineField({
+      name: 'pivot_options',
+      title: 'Pivot Options',
+      description: 'Adjacent pivots and expansion paths if the primary model needs adjusting.',
+      type: 'text',
+      rows: 2,
+    }),
+    defineField({
+      name: 'financing_options',
+      title: 'Financing Options',
+      description: 'How can a founder fund this? e.g. bootstrapped, angel, MUDRA loan.',
+      type: 'text',
+      rows: 2,
+    }),
+
+    // ── Pros & Cons ──────────────────────────────────────────────────────────
+    defineField({
+      name: 'pros',
+      title: 'Pros',
+      description: 'Key advantages of this business. One item per entry.',
+      type: 'array',
+      of: [{ type: 'string' }],
+      options: { layout: 'tags' },
+    }),
+    defineField({
+      name: 'cons',
+      title: 'Cons',
+      description: 'Key challenges or risks. One item per entry.',
+      type: 'array',
+      of: [{ type: 'string' }],
+      options: { layout: 'tags' },
+    }),
+
+    // ── Legacy Rich Content (kept for backward compat) ───────────────────────
+    defineField({
+      name: 'problem',
+      title: 'Problem Being Solved (legacy)',
+      type: 'array',
+      of: [{ type: 'block' }],
+    }),
+    defineField({
+      name: 'solution',
+      title: 'Proposed Solution (legacy)',
+      type: 'array',
+      of: [{ type: 'block' }],
+    }),
+
+    // ── Meta & Taxonomy ──────────────────────────────────────────────────────
+    defineField({
       name: 'stage',
       title: 'Idea Stage',
       type: 'string',
@@ -99,20 +227,6 @@ export default defineType({
           { title: 'Has Competitors', value: 'competitive' },
           { title: 'MVP Possible',    value: 'mvp_ready' },
           { title: 'Proven Market',   value: 'proven' },
-        ],
-        layout: 'radio',
-      },
-    }),
-    defineField({
-      name: 'difficulty_level',
-      title: 'Difficulty Level',
-      type: 'string',
-      options: {
-        list: [
-          { title: 'Beginner',     value: 'beginner' },
-          { title: 'Intermediate', value: 'intermediate' },
-          { title: 'Advanced',     value: 'advanced' },
-          { title: 'Expert',       value: 'expert' },
         ],
         layout: 'radio',
       },
@@ -156,7 +270,7 @@ export default defineType({
     defineField({
       name: 'tags',
       title: 'Tags / Keywords',
-      description: 'Add SEO keywords and topic tags. Users filter ideas by these.',
+      description: 'Add SEO keywords and topic tags. Users can filter by these.',
       type: 'array',
       of: [{ type: 'string' }],
       options: { layout: 'tags' },
@@ -164,14 +278,12 @@ export default defineType({
     defineField({
       name: 'seo_title',
       title: 'SEO Title',
-      description: 'Overrides the page title in search results (max 60 chars).',
       type: 'string',
       validation: (Rule) => Rule.max(60),
     }),
     defineField({
       name: 'seo_description',
       title: 'SEO Meta Description',
-      description: 'Shown in search results (max 160 chars).',
       type: 'text',
       rows: 2,
       validation: (Rule) => Rule.max(160),
