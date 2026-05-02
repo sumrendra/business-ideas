@@ -12,30 +12,31 @@ export const metadata: Metadata = {
 }
 
 interface PageProps {
-  searchParams: {
+  searchParams: Promise<{
     industry?: string
     budget?: string
     stage?: string
     difficulty?: string
     tags?: string | string[]
-  }
+  }>
 }
 
 export default async function IdeasPage({ searchParams }: PageProps) {
-  const activeTags = searchParams.tags
-    ? Array.isArray(searchParams.tags)
-      ? searchParams.tags
-      : [searchParams.tags]
+  const sp = await searchParams
+  const activeTags = sp.tags
+    ? Array.isArray(sp.tags)
+      ? sp.tags
+      : [sp.tags]
     : []
 
   const [ideas, allTags] = await Promise.all([
     client.fetch<Idea[]>(
       IDEAS_QUERY,
       {
-        industry:   searchParams.industry   ?? '',
-        budget:     searchParams.budget     ?? '',
-        stage:      searchParams.stage      ?? '',
-        difficulty: searchParams.difficulty ?? '',
+        industry:   sp.industry   ?? '',
+        budget:     sp.budget     ?? '',
+        stage:      sp.stage      ?? '',
+        difficulty: sp.difficulty ?? '',
         tags:       activeTags,
       },
       { next: { tags: ['business-ideas'] } }
@@ -44,10 +45,10 @@ export default async function IdeasPage({ searchParams }: PageProps) {
   ])
 
   const hasFilters =
-    !!searchParams.industry ||
-    !!searchParams.budget ||
-    !!searchParams.stage ||
-    !!searchParams.difficulty ||
+    !!sp.industry ||
+    !!sp.budget ||
+    !!sp.stage ||
+    !!sp.difficulty ||
     activeTags.length > 0
 
   return (
@@ -66,10 +67,10 @@ export default async function IdeasPage({ searchParams }: PageProps) {
           <FilterSidebar
             allTags={allTags}
             activeFilters={{
-              industry:   searchParams.industry   ?? '',
-              budget:     searchParams.budget     ?? '',
-              stage:      searchParams.stage      ?? '',
-              difficulty: searchParams.difficulty ?? '',
+              industry:   sp.industry   ?? '',
+              budget:     sp.budget     ?? '',
+              stage:      sp.stage      ?? '',
+              difficulty: sp.difficulty ?? '',
               tags:       activeTags,
             }}
           />

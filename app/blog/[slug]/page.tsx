@@ -9,7 +9,7 @@ import { urlFor } from '@/lib/sanity/image'
 import type { Post } from '@/lib/sanity/types'
 
 interface PageProps {
-  params: { slug: string }
+  params: Promise<{ slug: string }>
 }
 
 export async function generateStaticParams() {
@@ -18,7 +18,8 @@ export async function generateStaticParams() {
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
-  const post = await client.fetch<Post | null>(POST_BY_SLUG_QUERY, { slug: params.slug })
+  const { slug } = await params
+  const post = await client.fetch<Post | null>(POST_BY_SLUG_QUERY, { slug })
   if (!post) return {}
   return {
     title: post.seo_title || post.title,
@@ -34,9 +35,10 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 }
 
 export default async function BlogPostPage({ params }: PageProps) {
+  const { slug } = await params
   const post = await client.fetch<Post | null>(
     POST_BY_SLUG_QUERY,
-    { slug: params.slug },
+    { slug },
     { next: { tags: ['posts'] } }
   )
 

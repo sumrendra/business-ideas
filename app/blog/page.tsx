@@ -13,19 +13,20 @@ export const metadata: Metadata = {
 }
 
 interface PageProps {
-  searchParams: {
+  searchParams: Promise<{
     category?: string
     tag?: string
-  }
+  }>
 }
 
 export default async function BlogPage({ searchParams }: PageProps) {
-  const activeTags = searchParams.tag ? [searchParams.tag] : []
+  const sp = await searchParams
+  const activeTags = sp.tag ? [sp.tag] : []
 
   const posts = await client.fetch<Post[]>(
     POSTS_QUERY,
     {
-      category: searchParams.category ?? '',
+      category: sp.category ?? '',
       tags:     activeTags,
     },
     { next: { tags: ['posts'] } }
@@ -46,7 +47,7 @@ export default async function BlogPage({ searchParams }: PageProps) {
         <Link
           href="/blog"
           className={`badge px-3 py-1.5 text-sm font-medium transition-colors ${
-            !searchParams.category
+            !sp.category
               ? 'bg-indigo-600 text-white'
               : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
           }`}
@@ -58,7 +59,7 @@ export default async function BlogPage({ searchParams }: PageProps) {
             key={cat}
             href={`/blog?category=${encodeURIComponent(cat)}`}
             className={`badge px-3 py-1.5 text-sm font-medium transition-colors ${
-              searchParams.category === cat
+              sp.category === cat
                 ? 'bg-indigo-600 text-white'
                 : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
             }`}
@@ -69,10 +70,10 @@ export default async function BlogPage({ searchParams }: PageProps) {
       </div>
 
       {/* Active tag pill */}
-      {searchParams.tag && (
+      {sp.tag && (
         <div className="mb-6 flex items-center gap-2">
           <span className="text-sm text-slate-500">Filtered by tag:</span>
-          <span className="badge bg-indigo-100 text-indigo-700">{searchParams.tag}</span>
+          <span className="badge bg-indigo-100 text-indigo-700">{sp.tag}</span>
           <Link href="/blog" className="text-sm text-slate-400 hover:text-red-500">
             ✕ Clear
           </Link>

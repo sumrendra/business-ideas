@@ -14,7 +14,7 @@ import {
 import { PortableText } from '@portabletext/react'
 
 interface PageProps {
-  params: { slug: string }
+  params: Promise<{ slug: string }>
 }
 
 export async function generateStaticParams() {
@@ -23,7 +23,8 @@ export async function generateStaticParams() {
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
-  const idea = await client.fetch<Idea | null>(IDEA_BY_SLUG_QUERY, { slug: params.slug })
+  const { slug } = await params
+  const idea = await client.fetch<Idea | null>(IDEA_BY_SLUG_QUERY, { slug })
   if (!idea) return {}
   return {
     title: idea.seo_title || idea.title,
@@ -46,9 +47,10 @@ const DIFFICULTY_COLOR: Record<string, string> = {
 }
 
 export default async function IdeaPage({ params }: PageProps) {
+  const { slug } = await params
   const idea = await client.fetch<Idea | null>(
     IDEA_BY_SLUG_QUERY,
-    { slug: params.slug },
+    { slug },
     { next: { tags: ['business-ideas'] } }
   )
 
