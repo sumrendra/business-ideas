@@ -9,7 +9,7 @@ export default function Navbar() {
         <Link href="/" className="flex items-center gap-2 shrink-0">
           <Image src="/logo.png" alt="businessideas.live" width={32} height={32} className="h-8 w-auto" />
           <span className="font-bold text-slate-900 text-lg">
-            <span className="text-indigo-600">business</span>ideas.live
+            <span className="text-indigo-600">Business</span> Ideas
           </span>
         </Link>
 

@@ -11,11 +11,11 @@ export const metadata: Metadata = {
   title: 'Browse Business Ideas in India – Filter by Budget, Sector & Difficulty',
   description:
     'Explore 500+ business ideas in India filtered by investment, category, scalability, and profit potential. Find the right opportunity for you.',
-  alternates: { canonical: 'https://businessideas.live/business-ideas' },
+  alternates: { canonical: 'https://businessideas.live/business-ideas/' },
   openGraph: {
     title: 'Browse Business Ideas in India – Filter by Budget, Sector & Difficulty',
     description: 'Explore 500+ business ideas filtered by investment, category, scalability, and profit potential.',
-    url: 'https://businessideas.live/business-ideas',
+    url: 'https://businessideas.live/business-ideas/',
     type: 'website',
   },
 }
@@ -24,7 +24,7 @@ const collectionPageSchema = {
   '@context': 'https://schema.org',
   '@type': 'CollectionPage',
   name: 'Business Ideas in India',
-  url: 'https://businessideas.live/business-ideas',
+  url: 'https://businessideas.live/business-ideas/',
   description: 'Explore 500+ business ideas in India filtered by investment, category, scalability, and profit potential.',
   isPartOf: {
     '@type': 'WebSite',
@@ -38,7 +38,7 @@ const breadcrumbSchema = {
   '@type': 'BreadcrumbList',
   itemListElement: [
     { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://businessideas.live/' },
-    { '@type': 'ListItem', position: 2, name: 'Business Ideas', item: 'https://businessideas.live/business-ideas' },
+    { '@type': 'ListItem', position: 2, name: 'Business Ideas', item: 'https://businessideas.live/business-ideas/' },
   ],
 }
 
