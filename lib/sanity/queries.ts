@@ -69,6 +69,7 @@ export const IDEA_BY_SLUG_QUERY = groq`
     problem,
     solution,
     resources_needed,
+    proof_points,
     seo_title,
     seo_description
   }
@@ -142,6 +143,13 @@ export const POST_BY_SLUG_QUERY = groq`
     faqs,
     seo_title,
     seo_description
+  }
+`
+
+export const POLICY_PULSE_QUERY = groq`
+  *[_type == "post" && "policy-pulse" in tags && defined(published_at)]
+  | order(published_at desc)[0...3] {
+    ${POST_CARD_FIELDS}
   }
 `
 

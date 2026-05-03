@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.92.0",
     "@portabletext/react": "^3.1.0",
     "@sanity/image-url": "^1.0.2",
     "@sanity/vision": "^3.62.3",

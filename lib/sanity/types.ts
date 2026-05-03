@@ -34,8 +34,20 @@ export interface Idea {
   cons?: string[]
   problem?: unknown[]
   solution?: unknown[]
+  proof_points?: ProofPoint[]
   seo_title?: string
   seo_description?: string
+}
+
+export interface ProofPoint {
+  _key: string
+  type: 'Case Study' | 'Market Data' | 'Government Source'
+  source: string
+  url?: string
+  headline: string
+  founder?: string
+  key_stat?: string
+  quote?: string
 }
 
 export interface Post {

@@ -289,6 +289,30 @@ export default defineType({
       validation: (Rule) => Rule.max(160),
     }),
     defineField({
+      name: 'proof_points',
+      title: 'Proof Points',
+      description: 'Real case studies and data sources that validate this idea.',
+      type: 'array',
+      of: [
+        {
+          type: 'object',
+          name: 'proof_point',
+          fields: [
+            defineField({ name: 'type', title: 'Type', type: 'string', options: { list: ['Case Study', 'Market Data', 'Government Source'], layout: 'radio' }, validation: (Rule) => Rule.required() }),
+            defineField({ name: 'source', title: 'Source Name', type: 'string', validation: (Rule) => Rule.required() }),
+            defineField({ name: 'url', title: 'URL', type: 'url' }),
+            defineField({ name: 'headline', title: 'Headline / Stat', type: 'string', validation: (Rule) => Rule.required() }),
+            defineField({ name: 'founder', title: 'Founder / Author', type: 'string' }),
+            defineField({ name: 'key_stat', title: 'Key Number / Milestone', type: 'string' }),
+            defineField({ name: 'quote', title: 'Pull Quote', type: 'text', rows: 2 }),
+          ],
+          preview: {
+            select: { title: 'headline', subtitle: 'source' },
+          },
+        },
+      ],
+    }),
+    defineField({
       name: 'featured',
       title: 'Featured on Homepage',
       type: 'boolean',
