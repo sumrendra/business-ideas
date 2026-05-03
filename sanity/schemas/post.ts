@@ -41,6 +41,12 @@ export default defineType({
       validation: (Rule) => Rule.required().max(300),
     }),
     defineField({
+      name: 'author',
+      title: 'Author Name',
+      type: 'string',
+      initialValue: 'BusinessIdeas.live',
+    }),
+    defineField({
       name: 'reading_time',
       title: 'Reading Time (minutes)',
       description: 'Estimated minutes to read this post.',
