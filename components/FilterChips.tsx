@@ -1,13 +1,13 @@
 import Link from 'next/link'
 
 const CHIPS = [
-  { group: 'Budget',     label: 'Under ₹1L',     href: '/ideas?budget=under_1k' },
-  { group: 'Budget',     label: '₹1L–5L',         href: '/ideas?budget=1k_10k' },
-  { group: 'Budget',     label: '₹5L+',           href: '/ideas?budget=10k_50k' },
-  { group: 'Complexity', label: 'Beginner',       href: '/ideas?difficulty=beginner' },
-  { group: 'Complexity', label: 'Intermediate',   href: '/ideas?difficulty=intermediate' },
-  { group: 'Scale',      label: 'Local',          href: '/ideas?scalability=local' },
-  { group: 'Scale',      label: 'Scalable',       href: '/ideas?scalability=pan_india' },
+  { group: 'Budget',     label: 'Under ₹1L',   href: '/ideas?budget=under_1l' },
+  { group: 'Budget',     label: '₹1L-5L',       href: '/ideas?budget=1l_10l' },
+  { group: 'Budget',     label: '₹5L+',         href: '/ideas?budget=10l_50l' },
+  { group: 'Complexity', label: 'Beginner',     href: '/ideas?difficulty=beginner' },
+  { group: 'Complexity', label: 'Intermediate', href: '/ideas?difficulty=intermediate' },
+  { group: 'Scale',      label: 'Local',        href: '/ideas?tags=Local' },
+  { group: 'Scale',      label: 'Scalable',     href: '/ideas?tags=Scalable' },
 ]
 
 const GROUPS = ['Budget', 'Complexity', 'Scale']

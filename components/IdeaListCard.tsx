@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import type { Idea } from '@/lib/sanity/types'
-import { BUDGET_LABELS, DIFFICULTY_LABELS, SCALABILITY_LABELS } from '@/lib/sanity/types'
+import { BUDGET_LABELS, DIFFICULTY_LABELS, MARKET_SATURATION_LABELS } from '@/lib/sanity/types'
 
 interface IdeaListCardProps {
   idea: Idea
@@ -12,6 +12,13 @@ const DIFFICULTY_COLOR: Record<string, string> = {
   intermediate: 'bg-yellow-100 text-yellow-700',
   advanced:     'bg-orange-100 text-orange-700',
   expert:       'bg-red-100 text-red-700',
+}
+
+const SATURATION_COLOR: Record<string, string> = {
+  concept:     'bg-blue-100 text-blue-700',
+  validated:   'bg-teal-100 text-teal-700',
+  competitive: 'bg-orange-100 text-orange-700',
+  proven:      'bg-green-100 text-green-700',
 }
 
 export default function IdeaListCard({ idea, rank }: IdeaListCardProps) {
@@ -48,19 +55,19 @@ export default function IdeaListCard({ idea, rank }: IdeaListCardProps) {
             {DIFFICULTY_LABELS[idea.difficulty_level] || idea.difficulty_level}
           </span>
         )}
-        {idea.scalability && (
-          <span className="badge bg-blue-100 text-blue-700 text-xs">
-            {SCALABILITY_LABELS[idea.scalability] || idea.scalability}
+        {idea.market_saturation && (
+          <span className={`badge text-xs ${SATURATION_COLOR[idea.market_saturation] || 'bg-slate-100 text-slate-600'}`}>
+            {MARKET_SATURATION_LABELS[idea.market_saturation] || idea.market_saturation}
           </span>
         )}
       </div>
 
       {/* Row 3: Metrics grid */}
       <div className="mt-3 grid grid-cols-2 gap-3 rounded-xl bg-slate-50 p-3 sm:grid-cols-4">
-        <MetricCell label="Investment" value={BUDGET_LABELS[idea.budget_range] || idea.budget_range} />
-        <MetricCell label="Monthly profit" value={idea.monthly_profit || '—'} />
-        <MetricCell label="Scalability" value={idea.scalability ? (SCALABILITY_LABELS[idea.scalability] || idea.scalability) : '—'} />
-        <MetricCell label="Break-even" value={idea.break_even || '—'} />
+        <MetricCell label="Investment" value={BUDGET_LABELS[idea.budget_range] || idea.budget_range || '—'} />
+        <MetricCell label="Market" value={MARKET_SATURATION_LABELS[idea.market_saturation] || idea.market_saturation || '—'} />
+        <MetricCell label="Complexity" value={DIFFICULTY_LABELS[idea.difficulty_level] || idea.difficulty_level || '—'} />
+        <MetricCell label="Sector" value={idea.industry || '—'} />
       </div>
 
       {/* Row 4: Description */}
