@@ -1,7 +1,9 @@
 'use client'
 
 import { useRouter, usePathname } from 'next/navigation'
-import { useCallback } from 'react'
+import { useCallback, useState } from 'react'
+
+const TAGS_VISIBLE = 12
 import {
   BUDGET_OPTIONS,
   MARKET_SATURATION_OPTIONS,
@@ -26,6 +28,9 @@ interface FilterSidebarProps {
 export default function FilterSidebar({ allTags, activeFilters }: FilterSidebarProps) {
   const router = useRouter()
   const pathname = usePathname()
+  const [showAllTags, setShowAllTags] = useState(false)
+  const sortedTags = [...allTags].sort((a, b) => a.localeCompare(b))
+  const visibleTags = showAllTags ? sortedTags : sortedTags.slice(0, TAGS_VISIBLE)
 
   const buildUrl = useCallback(
     (updates: Partial<ActiveFilters>) => {
@@ -123,10 +128,10 @@ export default function FilterSidebar({ allTags, activeFilters }: FilterSidebarP
         ))}
       </FilterGroup>
 
-      {allTags.length > 0 && (
+      {sortedTags.length > 0 && (
         <FilterGroup title="Tags">
           <div className="flex flex-wrap gap-1.5">
-            {allTags.map((tag) => (
+            {visibleTags.map((tag) => (
               <button
                 key={tag}
                 onClick={() => toggleTag(tag)}
@@ -140,6 +145,16 @@ export default function FilterSidebar({ allTags, activeFilters }: FilterSidebarP
               </button>
             ))}
           </div>
+          {sortedTags.length > TAGS_VISIBLE && (
+            <button
+              onClick={() => setShowAllTags((v) => !v)}
+              className="mt-2 text-xs font-medium text-indigo-600 hover:underline"
+            >
+              {showAllTags
+                ? 'Show less ▲'
+                : `Show ${sortedTags.length - TAGS_VISIBLE} more ▼`}
+            </button>
+          )}
         </FilterGroup>
       )}
     </div>

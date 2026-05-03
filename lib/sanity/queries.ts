@@ -104,6 +104,23 @@ export const IDEA_TAGS_QUERY = groq`
   array::unique(*[_type == "businessIdea" && defined(tags)].tags[])
 `
 
+/** Paginated version — pass $from (0-based) and $to (inclusive) */
+export const IDEAS_PAGE_QUERY = groq`
+  *[
+    _type == "businessIdea"
+    && defined(slug.current)
+    && defined(published_at)
+    && ($industry    == "" || industry           == $industry)
+    && ($budget      == "" || budget_range       == $budget)
+    && ($saturation  == "" || market_saturation  == $saturation)
+    && ($difficulty  == "" || difficulty_level   == $difficulty)
+    && (count($tags) == 0  || count(tags[@ in $tags]) > 0)
+    && ($search      == "" || [title, description, industry, tags[]] match $search)
+  ] | order(featured desc, published_at desc) [$from..$to] {
+    ${IDEA_CARD_FIELDS}
+  }
+`
+
 // ─── Blog Posts ───────────────────────────────────────────────────────────────
 
 export const POSTS_QUERY = groq`
@@ -145,6 +162,30 @@ export const POST_TAGS_QUERY = groq`
 
 export const POST_SLUGS_QUERY = groq`
   *[_type == "post" && defined(slug.current)] { "slug": slug.current }
+`
+
+/** Count of posts matching the same filters */
+export const POSTS_COUNT_QUERY = groq`
+  count(*[
+    _type == "post"
+    && defined(slug.current)
+    && defined(published_at)
+    && ($category == "" || category == $category)
+    && (count($tags) == 0 || count(tags[@ in $tags]) > 0)
+  ])
+`
+
+/** Paginated version — pass $from and $to */
+export const POSTS_PAGE_QUERY = groq`
+  *[
+    _type == "post"
+    && defined(slug.current)
+    && defined(published_at)
+    && ($category == "" || category == $category)
+    && (count($tags) == 0 || count(tags[@ in $tags]) > 0)
+  ] | order(published_at desc) [$from..$to] {
+    ${POST_CARD_FIELDS}
+  }
 `
 
 export const RECENT_POSTS_QUERY = groq`

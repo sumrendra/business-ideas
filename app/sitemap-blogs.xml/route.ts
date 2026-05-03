@@ -14,16 +14,16 @@ export async function GET() {
   const landingUrls = ALL_SLUGS.map(
     (slug) => `  <url>
     <loc>${BASE}/blogs/${slug}</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.85</priority>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
   </url>`
   ).join('\n')
 
   const postUrls = postSlugs.map(
     ({ slug }) => `  <url>
     <loc>${BASE}/blog/${slug}</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
   </url>`
   ).join('\n')
 

@@ -13,8 +13,8 @@ export async function GET() {
   const ideaUrls = ideaSlugs.map(
     ({ slug }) => `  <url>
     <loc>${BASE}/business-ideas/${slug}</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
   </url>`
   ).join('\n')
 
