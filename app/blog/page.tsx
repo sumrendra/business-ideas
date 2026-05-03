@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { client } from '@/lib/sanity/client'
-import { POSTS_QUERY } from '@/lib/sanity/queries'
+import { POSTS_QUERY, POST_TAGS_QUERY } from '@/lib/sanity/queries'
 import type { Post } from '@/lib/sanity/types'
 import { BLOG_CATEGORIES } from '@/lib/sanity/types'
 import BlogCard from '@/components/BlogCard'
@@ -23,78 +23,102 @@ export default async function BlogPage({ searchParams }: PageProps) {
   const sp = await searchParams
   const activeTags = sp.tag ? [sp.tag] : []
 
-  const posts = await client.fetch<Post[]>(
-    POSTS_QUERY,
-    {
-      category: sp.category ?? '',
-      tags:     activeTags,
-    },
-    { next: { tags: ['posts'] } }
-  )
+  const [posts, allTags] = await Promise.all([
+    client.fetch<Post[]>(
+      POSTS_QUERY,
+      { category: sp.category ?? '', tags: activeTags },
+      { next: { tags: ['posts'] } }
+    ),
+    client.fetch<string[]>(POST_TAGS_QUERY, {}, { next: { tags: ['posts'] } }),
+  ])
+
+  const hasFilters = !!sp.category || !!sp.tag
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-10">
-      {/* Header */}
-      <div className="mb-10 text-center">
-        <h1 className="text-3xl font-bold text-slate-900 sm:text-4xl">Blog</h1>
-        <p className="mx-auto mt-3 max-w-xl text-slate-500">
-          Deep dives, market research, and practical guides for aspiring entrepreneurs.
+    <div className="mx-auto max-w-7xl px-4 py-10">
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-slate-900">Blog</h1>
+        <p className="mt-2 text-slate-500">
+          {posts.length} article{posts.length !== 1 ? 's' : ''} found
+          {hasFilters ? ' — filters applied' : ''}
         </p>
       </div>
 
-      {/* Category filter tabs */}
-      <div className="mb-8 flex flex-wrap gap-2">
-        <Link
-          href="/blog"
-          className={`badge px-3 py-1.5 text-sm font-medium transition-colors ${
-            !sp.category
-              ? 'bg-indigo-600 text-white'
-              : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-          }`}
-        >
-          All
-        </Link>
-        {BLOG_CATEGORIES.map((cat) => (
-          <Link
-            key={cat}
-            href={`/blog?category=${encodeURIComponent(cat)}`}
-            className={`badge px-3 py-1.5 text-sm font-medium transition-colors ${
-              sp.category === cat
-                ? 'bg-indigo-600 text-white'
-                : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-            }`}
-          >
-            {cat}
-          </Link>
-        ))}
+      <div className="flex flex-col gap-8 lg:flex-row">
+        {/* Sidebar */}
+        <aside className="w-full lg:w-64 shrink-0">
+          <div className="space-y-6 rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
+            <div className="flex items-center justify-between">
+              <h2 className="font-semibold text-slate-900">Filters</h2>
+              {hasFilters && (
+                <Link href="/blog" className="text-xs text-red-500 hover:text-red-700 font-medium transition-colors">
+                  Clear all
+                </Link>
+              )}
+            </div>
+
+            {/* Category filter */}
+            <div>
+              <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-400">Category</p>
+              <div className="space-y-1">
+                {BLOG_CATEGORIES.map((cat) => (
+                  <Link
+                    key={cat}
+                    href={sp.tag ? `/blog?category=${encodeURIComponent(cat)}&tag=${encodeURIComponent(sp.tag)}` : `/blog?category=${encodeURIComponent(cat)}`}
+                    className={`flex w-full items-center justify-between rounded-lg px-3 py-1.5 text-sm transition-colors text-left ${
+                      sp.category === cat
+                        ? 'bg-indigo-600 text-white font-medium'
+                        : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+                    }`}
+                  >
+                    {cat}
+                    {sp.category === cat && <span className="ml-2 text-xs opacity-75">✓</span>}
+                  </Link>
+                ))}
+              </div>
+            </div>
+
+            {/* Tag filter */}
+            {allTags.length > 0 && (
+              <div>
+                <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-400">Tags</p>
+                <div className="flex flex-wrap gap-1.5">
+                  {allTags.map((tag) => (
+                    <Link
+                      key={tag}
+                      href={sp.tag === tag ? (sp.category ? `/blog?category=${encodeURIComponent(sp.category)}` : '/blog') : (sp.category ? `/blog?category=${encodeURIComponent(sp.category)}&tag=${encodeURIComponent(tag)}` : `/blog?tag=${encodeURIComponent(tag)}`)}
+                      className={`badge text-xs transition-colors cursor-pointer ${
+                        sp.tag === tag
+                          ? 'bg-indigo-600 text-white'
+                          : 'bg-slate-100 text-slate-600 hover:bg-indigo-100 hover:text-indigo-700'
+                      }`}
+                    >
+                      {tag}
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        </aside>
+
+        {/* Posts grid */}
+        <div className="flex-1">
+          {posts.length === 0 ? (
+            <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-slate-300 py-24 text-center">
+              <p className="text-lg font-medium text-slate-700">No posts found</p>
+              <p className="mt-2 text-sm text-slate-400">Try removing some filters to see more results.</p>
+              <Link href="/blog" className="mt-4 btn-outline text-sm">Clear filters</Link>
+            </div>
+          ) : (
+            <div className="grid gap-8 sm:grid-cols-2 xl:grid-cols-3">
+              {posts.map((post) => (
+                <BlogCard key={post._id} post={post} />
+              ))}
+            </div>
+          )}
+        </div>
       </div>
-
-      {/* Active tag pill */}
-      {sp.tag && (
-        <div className="mb-6 flex items-center gap-2">
-          <span className="text-sm text-slate-500">Filtered by tag:</span>
-          <span className="badge bg-indigo-100 text-indigo-700">{sp.tag}</span>
-          <Link href="/blog" className="text-sm text-slate-400 hover:text-red-500">
-            ✕ Clear
-          </Link>
-        </div>
-      )}
-
-      {/* Posts grid */}
-      {posts.length === 0 ? (
-        <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-slate-300 py-24 text-center">
-          <p className="text-lg font-medium text-slate-700">No posts found</p>
-          <Link href="/blog" className="mt-4 btn-outline text-sm">
-            Clear filters
-          </Link>
-        </div>
-      ) : (
-        <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-          {posts.map((post) => (
-            <BlogCard key={post._id} post={post} />
-          ))}
-        </div>
-      )}
     </div>
   )
 }
