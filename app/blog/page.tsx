@@ -93,7 +93,7 @@ export default async function BlogPage({ searchParams }: PageProps) {
                   <Link
                     key={cat}
                     href={catUrl(cat)}
-                    className={`flex w-full items-center justify-between rounded-lg px-3 py-1.5 text-sm transition-colors ${
+                    className={`flex w-full items-center justify-between rounded-lg px-3 py-1.5 text-sm transition-colors text-left ${
                       sp.category === cat
                         ? 'bg-indigo-600 text-white font-medium'
                         : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
@@ -115,7 +115,7 @@ export default async function BlogPage({ searchParams }: PageProps) {
                     <Link
                       key={tag}
                       href={tagUrl(tag)}
-                      className={`badge text-xs transition-colors ${
+                      className={`badge text-xs transition-colors cursor-pointer ${
                         sp.tag === tag
                           ? 'bg-indigo-600 text-white'
                           : 'bg-slate-100 text-slate-600 hover:bg-indigo-100 hover:text-indigo-700'
