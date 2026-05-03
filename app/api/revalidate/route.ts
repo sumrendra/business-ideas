@@ -26,10 +26,10 @@ export async function POST(request: NextRequest) {
 
   if (_type === 'businessIdea') {
     revalidateTag('business-ideas')
-    revalidatePath('/ideas')
+    revalidatePath('/business-ideas')
     revalidatePath('/')
     if (slug?.current) {
-      revalidatePath(`/ideas/${slug.current}`)
+      revalidatePath(`/business-ideas/${slug.current}`)
     }
   }
 

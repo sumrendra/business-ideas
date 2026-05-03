@@ -44,6 +44,7 @@ export const IDEAS_QUERY = groq`
     && ($saturation  == "" || market_saturation  == $saturation)
     && ($difficulty  == "" || difficulty_level   == $difficulty)
     && (count($tags) == 0  || count(tags[@ in $tags]) > 0)
+    && ($search      == "" || [title, description, industry, tags[]] match $search)
   ] | order(featured desc, published_at desc) {
     ${IDEA_CARD_FIELDS}
   }
@@ -81,6 +82,21 @@ export const FEATURED_IDEAS_QUERY = groq`
   | order(published_at desc)[0...6] {
     ${IDEA_CARD_FIELDS}
   }
+`
+
+/** Count of ideas matching the same filters — for "Showing X ideas" display */
+export const IDEAS_COUNT_QUERY = groq`
+  count(*[
+    _type == "businessIdea"
+    && defined(slug.current)
+    && defined(published_at)
+    && ($industry   == "" || industry          == $industry)
+    && ($budget     == "" || budget_range      == $budget)
+    && ($saturation == "" || market_saturation == $saturation)
+    && ($difficulty == "" || difficulty_level  == $difficulty)
+    && (count($tags) == 0 || count(tags[@ in $tags]) > 0)
+    && ($search     == "" || [title, description, industry, tags[]] match $search)
+  ])
 `
 
 export const IDEA_TAGS_QUERY = groq`
@@ -132,7 +148,7 @@ export const POST_SLUGS_QUERY = groq`
 
 export const RECENT_POSTS_QUERY = groq`
   *[_type == "post" && defined(published_at)]
-  | order(published_at desc)[0...3] {
+  | order(published_at desc)[0...4] {
     ${POST_CARD_FIELDS}
   }
 `
