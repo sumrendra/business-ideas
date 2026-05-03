@@ -15,6 +15,7 @@ interface ActiveFilters {
   saturation: string
   difficulty: string
   tags: string[]
+  search?: string
 }
 
 interface FilterSidebarProps {
@@ -34,6 +35,7 @@ export default function FilterSidebar({ allTags, activeFilters }: FilterSidebarP
       if (merged.budget)     params.set('budget',     merged.budget)
       if (merged.saturation) params.set('saturation', merged.saturation)
       if (merged.difficulty) params.set('difficulty', merged.difficulty)
+      if (merged.search)     params.set('search',     merged.search)
       merged.tags.forEach((t) => params.append('tags', t))
       const qs = params.toString()
       return `${pathname}${qs ? `?${qs}` : ''}`
