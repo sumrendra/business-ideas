@@ -32,6 +32,8 @@ export default function IdeaListCard({ idea, rank }: IdeaListCardProps) {
           )}
           <Link
             href={`/business-ideas/${idea.slug}`}
+            target="_blank"
+            rel="noopener noreferrer"
             className="text-lg font-bold text-slate-900 hover:text-indigo-700 transition-colors"
           >
             {idea.title}
@@ -82,6 +84,8 @@ export default function IdeaListCard({ idea, rank }: IdeaListCardProps) {
         </div>
         <Link
           href={`/business-ideas/${idea.slug}`}
+          target="_blank"
+          rel="noopener noreferrer"
           className="text-sm font-medium text-indigo-600 hover:underline shrink-0"
         >
           View full idea →
