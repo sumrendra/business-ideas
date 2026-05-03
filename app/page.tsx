@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { client } from '@/lib/sanity/client'
-import { FEATURED_IDEAS_QUERY, RECENT_POSTS_QUERY } from '@/lib/sanity/queries'
+import { FEATURED_IDEAS_QUERY, RECENT_POSTS_QUERY, POLICY_PULSE_QUERY } from '@/lib/sanity/queries'
 import IdeaCard from '@/components/IdeaCard'
 import BlogCard from '@/components/BlogCard'
 import FeaturedBlogCard from '@/components/FeaturedBlogCard'
@@ -28,9 +28,10 @@ export const metadata: Metadata = {
 }
 
 export default async function HomePage() {
-  const [featuredIdeas, recentPosts] = await Promise.all([
+  const [featuredIdeas, recentPosts, policyPosts] = await Promise.all([
     client.fetch<Idea[]>(FEATURED_IDEAS_QUERY, {}, { next: { tags: ['business-ideas'] } }),
     client.fetch<Post[]>(RECENT_POSTS_QUERY, {}, { next: { tags: ['posts'] } }),
+    client.fetch<Post[]>(POLICY_PULSE_QUERY, {}, { next: { tags: ['posts'] } }),
   ])
 
   const [featuredPost, ...otherPosts] = recentPosts
@@ -127,6 +128,69 @@ export default async function HomePage() {
               ))}
             </div>
           )}
+        </section>
+      )}
+
+      {/* Policy Pulse */}
+      {policyPosts.length > 0 && (
+        <section className="bg-slate-950 text-white py-14">
+          <div className="mx-auto max-w-6xl px-4">
+            {/* Header */}
+            <div className="mb-8 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
+              <div>
+                <div className="mb-2 flex items-center gap-2">
+                  <span className="inline-block h-2 w-2 rounded-full bg-red-500 animate-pulse" />
+                  <span className="text-xs font-bold uppercase tracking-widest text-red-400">Policy Pulse</span>
+                </div>
+                <h2 className="text-2xl font-bold text-white">Opportunities from the news</h2>
+                <p className="mt-1 text-sm text-slate-400">New government policies creating real business windows right now</p>
+              </div>
+              <Link href="/blog?tag=policy-pulse" className="shrink-0 text-sm font-medium text-indigo-400 hover:text-indigo-300 hover:underline">
+                View all →
+              </Link>
+            </div>
+
+            {/* Cards */}
+            <div className="grid gap-5 sm:grid-cols-3">
+              {policyPosts.map((post) => {
+                const date = post.published_at
+                  ? new Date(post.published_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })
+                  : null
+                return (
+                  <Link
+                    key={post._id}
+                    href={`/blog/${post.slug}`}
+                    className="group flex flex-col rounded-xl border border-slate-800 bg-slate-900 p-5 hover:border-indigo-700 hover:bg-slate-800 transition-all"
+                  >
+                    {/* Tag pill */}
+                    <span className="mb-3 self-start rounded-full bg-red-500/10 px-2.5 py-0.5 text-xs font-semibold text-red-400">
+                      Policy Alert
+                    </span>
+
+                    {/* Title */}
+                    <h3 className="flex-1 text-base font-semibold leading-snug text-slate-100 group-hover:text-white line-clamp-3">
+                      {post.title}
+                    </h3>
+
+                    {/* Excerpt */}
+                    <p className="mt-2 text-sm text-slate-400 line-clamp-2">{post.excerpt}</p>
+
+                    {/* Footer */}
+                    <div className="mt-4 flex items-center justify-between border-t border-slate-800 pt-3">
+                      {date && <span className="text-xs text-slate-500">{date}</span>}
+                      {post.reading_time && (
+                        <span className="text-xs text-slate-500">{post.reading_time} min read</span>
+                      )}
+                    </div>
+
+                    <span className="mt-3 text-xs font-semibold text-indigo-400 group-hover:underline">
+                      Read the opportunity →
+                    </span>
+                  </Link>
+                )
+              })}
+            </div>
+          </div>
         </section>
       )}
 

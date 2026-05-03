@@ -255,6 +255,72 @@ export default async function IdeaPage({ params }: PageProps) {
         </Section>
       )}
 
+      {/* Proof Points */}
+      {idea.proof_points && idea.proof_points.length > 0 && (
+        <section className="mt-10 border-t border-slate-100 pt-8">
+          <h2 className="mb-6 text-xl font-bold text-slate-900">Real-World Proof</h2>
+          <div className="space-y-4">
+            {idea.proof_points.map((pp) => (
+              <div
+                key={pp._key}
+                className={`rounded-xl border p-5 ${
+                  pp.type === 'Case Study'
+                    ? 'border-indigo-100 bg-indigo-50'
+                    : pp.type === 'Government Source'
+                    ? 'border-green-100 bg-green-50'
+                    : 'border-amber-100 bg-amber-50'
+                }`}
+              >
+                {/* Header row */}
+                <div className="mb-2 flex flex-wrap items-center gap-2">
+                  <span className={`rounded-full px-2.5 py-0.5 text-xs font-bold uppercase tracking-wide ${
+                    pp.type === 'Case Study'
+                      ? 'bg-indigo-200 text-indigo-800'
+                      : pp.type === 'Government Source'
+                      ? 'bg-green-200 text-green-800'
+                      : 'bg-amber-200 text-amber-800'
+                  }`}>
+                    {pp.type}
+                  </span>
+                  <span className="text-xs font-semibold text-slate-500">{pp.source}</span>
+                  {pp.founder && (
+                    <span className="text-xs text-slate-500">· {pp.founder}</span>
+                  )}
+                </div>
+
+                {/* Headline */}
+                {pp.url ? (
+                  <a
+                    href={pp.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="font-semibold text-slate-800 hover:text-indigo-700 hover:underline leading-snug"
+                  >
+                    {pp.headline} ↗
+                  </a>
+                ) : (
+                  <p className="font-semibold text-slate-800 leading-snug">{pp.headline}</p>
+                )}
+
+                {/* Key stat */}
+                {pp.key_stat && (
+                  <p className="mt-2 text-sm font-medium text-slate-700">
+                    📊 {pp.key_stat}
+                  </p>
+                )}
+
+                {/* Quote */}
+                {pp.quote && (
+                  <blockquote className="mt-2 border-l-2 border-slate-300 pl-3 text-sm italic text-slate-600">
+                    "{pp.quote}"
+                  </blockquote>
+                )}
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
       {/* Tags */}
       {idea.tags?.length > 0 && (
         <div className="mt-10 border-t border-slate-100 pt-6">
