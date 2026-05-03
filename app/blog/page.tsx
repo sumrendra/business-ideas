@@ -1,10 +1,13 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { client } from '@/lib/sanity/client'
-import { POSTS_QUERY, POST_TAGS_QUERY } from '@/lib/sanity/queries'
+import { POSTS_PAGE_QUERY, POSTS_COUNT_QUERY, POST_TAGS_QUERY } from '@/lib/sanity/queries'
 import type { Post } from '@/lib/sanity/types'
 import { BLOG_CATEGORIES } from '@/lib/sanity/types'
 import BlogCard from '@/components/BlogCard'
+import Pagination from '@/components/Pagination'
+
+const POSTS_PER_PAGE = 9
 
 export const metadata: Metadata = {
   title: 'Blog',
@@ -16,30 +19,55 @@ interface PageProps {
   searchParams: Promise<{
     category?: string
     tag?: string
+    page?: string
   }>
 }
 
 export default async function BlogPage({ searchParams }: PageProps) {
   const sp = await searchParams
   const activeTags = sp.tag ? [sp.tag] : []
+  const currentPage = Math.max(1, parseInt(sp.page ?? '1', 10))
+  const from = (currentPage - 1) * POSTS_PER_PAGE
+  const to   = currentPage * POSTS_PER_PAGE - 1
 
-  const [posts, allTags] = await Promise.all([
-    client.fetch<Post[]>(
-      POSTS_QUERY,
-      { category: sp.category ?? '', tags: activeTags },
-      { next: { tags: ['posts'] } }
-    ),
+  const filterParams = { category: sp.category ?? '', tags: activeTags }
+
+  const [posts, count, allTags] = await Promise.all([
+    client.fetch<Post[]>(POSTS_PAGE_QUERY, { ...filterParams, from, to }, { next: { tags: ['posts'] } }),
+    client.fetch<number>(POSTS_COUNT_QUERY, filterParams, { next: { tags: ['posts'] } }),
     client.fetch<string[]>(POST_TAGS_QUERY, {}, { next: { tags: ['posts'] } }),
   ])
 
+  const totalPages = Math.ceil(count / POSTS_PER_PAGE)
   const hasFilters = !!sp.category || !!sp.tag
+
+  function pageUrl(page: number) {
+    const params = new URLSearchParams()
+    if (sp.category) params.set('category', sp.category)
+    if (sp.tag)      params.set('tag',      sp.tag)
+    params.set('page', String(page))
+    return `/blog?${params.toString()}`
+  }
+
+  function catUrl(cat: string) {
+    return sp.tag
+      ? `/blog?category=${encodeURIComponent(cat)}&tag=${encodeURIComponent(sp.tag)}`
+      : `/blog?category=${encodeURIComponent(cat)}`
+  }
+
+  function tagUrl(tag: string) {
+    if (sp.tag === tag) return sp.category ? `/blog?category=${encodeURIComponent(sp.category)}` : '/blog'
+    return sp.category
+      ? `/blog?category=${encodeURIComponent(sp.category)}&tag=${encodeURIComponent(tag)}`
+      : `/blog?tag=${encodeURIComponent(tag)}`
+  }
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-10">
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-slate-900">Blog</h1>
         <p className="mt-2 text-slate-500">
-          {posts.length} article{posts.length !== 1 ? 's' : ''} found
+          {count} article{count !== 1 ? 's' : ''} found
           {hasFilters ? ' — filters applied' : ''}
         </p>
       </div>
@@ -64,7 +92,7 @@ export default async function BlogPage({ searchParams }: PageProps) {
                 {BLOG_CATEGORIES.map((cat) => (
                   <Link
                     key={cat}
-                    href={sp.tag ? `/blog?category=${encodeURIComponent(cat)}&tag=${encodeURIComponent(sp.tag)}` : `/blog?category=${encodeURIComponent(cat)}`}
+                    href={catUrl(cat)}
                     className={`flex w-full items-center justify-between rounded-lg px-3 py-1.5 text-sm transition-colors text-left ${
                       sp.category === cat
                         ? 'bg-indigo-600 text-white font-medium'
@@ -83,10 +111,10 @@ export default async function BlogPage({ searchParams }: PageProps) {
               <div>
                 <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-400">Tags</p>
                 <div className="flex flex-wrap gap-1.5">
-                  {allTags.map((tag) => (
+                  {allTags.sort().map((tag) => (
                     <Link
                       key={tag}
-                      href={sp.tag === tag ? (sp.category ? `/blog?category=${encodeURIComponent(sp.category)}` : '/blog') : (sp.category ? `/blog?category=${encodeURIComponent(sp.category)}&tag=${encodeURIComponent(tag)}` : `/blog?tag=${encodeURIComponent(tag)}`)}
+                      href={tagUrl(tag)}
                       className={`badge text-xs transition-colors cursor-pointer ${
                         sp.tag === tag
                           ? 'bg-indigo-600 text-white'
@@ -111,11 +139,14 @@ export default async function BlogPage({ searchParams }: PageProps) {
               <Link href="/blog" className="mt-4 btn-outline text-sm">Clear filters</Link>
             </div>
           ) : (
-            <div className="grid gap-8 sm:grid-cols-2 xl:grid-cols-3">
-              {posts.map((post) => (
-                <BlogCard key={post._id} post={post} />
-              ))}
-            </div>
+            <>
+              <div className="grid gap-8 sm:grid-cols-2 xl:grid-cols-3">
+                {posts.map((post) => (
+                  <BlogCard key={post._id} post={post} />
+                ))}
+              </div>
+              <Pagination currentPage={currentPage} totalPages={totalPages} buildUrl={pageUrl} />
+            </>
           )}
         </div>
       </div>

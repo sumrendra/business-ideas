@@ -1,11 +1,14 @@
 import type { Metadata } from 'next'
 import { client } from '@/lib/sanity/client'
-import { IDEAS_QUERY, IDEAS_COUNT_QUERY, IDEA_TAGS_QUERY } from '@/lib/sanity/queries'
+import { IDEAS_PAGE_QUERY, IDEAS_COUNT_QUERY, IDEA_TAGS_QUERY } from '@/lib/sanity/queries'
 import type { Idea } from '@/lib/sanity/types'
 import IdeaListCard from '@/components/IdeaListCard'
 import FilterSidebar from '@/components/FilterSidebar'
 import SearchBox from '@/components/SearchBox'
 import SponsoredBanner from '@/components/SponsoredBanner'
+import Pagination from '@/components/Pagination'
+
+const IDEAS_PER_PAGE = 10
 
 export const metadata: Metadata = {
   title: 'Browse Business Ideas in India – Filter by Budget, Sector & Difficulty',
@@ -58,6 +61,7 @@ interface PageProps {
     tags?: string | string[]
     sort?: string
     search?: string
+    page?: string
   }>
 }
 
@@ -69,7 +73,11 @@ export default async function IdeasPage({ searchParams }: PageProps) {
       : [sp.tags]
     : []
 
-  const queryParams = {
+  const currentPage = Math.max(1, parseInt(sp.page ?? '1', 10))
+  const from = (currentPage - 1) * IDEAS_PER_PAGE
+  const to   = currentPage * IDEAS_PER_PAGE - 1
+
+  const filterParams = {
     industry:   sp.industry   ?? '',
     budget:     sp.budget     ?? '',
     saturation: sp.saturation ?? '',
@@ -79,10 +87,12 @@ export default async function IdeasPage({ searchParams }: PageProps) {
   }
 
   const [ideas, count, allTags] = await Promise.all([
-    client.fetch<Idea[]>(IDEAS_QUERY, queryParams, { next: { tags: ['business-ideas'] } }),
-    client.fetch<number>(IDEAS_COUNT_QUERY, queryParams, { next: { tags: ['business-ideas'] } }),
+    client.fetch<Idea[]>(IDEAS_PAGE_QUERY, { ...filterParams, from, to }, { next: { tags: ['business-ideas'] } }),
+    client.fetch<number>(IDEAS_COUNT_QUERY, filterParams, { next: { tags: ['business-ideas'] } }),
     client.fetch<string[]>(IDEA_TAGS_QUERY, {}, { next: { tags: ['business-ideas'] } }),
   ])
+
+  const totalPages = Math.ceil(count / IDEAS_PER_PAGE)
 
   const activeFilters = {
     industry:   sp.industry   ?? '',
@@ -95,7 +105,7 @@ export default async function IdeasPage({ searchParams }: PageProps) {
 
   const currentSort = sp.sort ?? 'popularity'
 
-  function sortUrl(value: string) {
+  function buildParams(overrides: Record<string, string | null> = {}) {
     const params = new URLSearchParams()
     if (activeFilters.industry)   params.set('industry',   activeFilters.industry)
     if (activeFilters.budget)     params.set('budget',     activeFilters.budget)
@@ -103,8 +113,20 @@ export default async function IdeasPage({ searchParams }: PageProps) {
     if (activeFilters.difficulty) params.set('difficulty', activeFilters.difficulty)
     if (activeFilters.search)     params.set('search',     activeFilters.search)
     activeFilters.tags.forEach((t) => params.append('tags', t))
-    params.set('sort', value)
+    params.set('sort', currentSort)
+    Object.entries(overrides).forEach(([k, v]) => {
+      if (v === null) params.delete(k)
+      else params.set(k, v)
+    })
     return `/business-ideas?${params.toString()}`
+  }
+
+  function sortUrl(value: string) {
+    return buildParams({ sort: value, page: '1' })
+  }
+
+  function pageUrl(page: number) {
+    return buildParams({ page: String(page) })
   }
 
   return (
@@ -163,28 +185,40 @@ export default async function IdeasPage({ searchParams }: PageProps) {
             <FilterSidebar allTags={allTags} activeFilters={activeFilters} />
           </aside>
 
-          <div className="flex-1 space-y-4">
+          <div className="flex-1">
             {ideas.length === 0 ? (
               <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-slate-300 py-24 text-center">
                 <p className="text-lg font-medium text-slate-700">No ideas match your filters</p>
                 <p className="mt-2 text-sm text-slate-400">Try removing some filters to see more results.</p>
               </div>
             ) : (
-              ideas.map((idea, i) => (
-                <div key={idea._id}>
-                  <IdeaListCard idea={idea} rank={i + 1} />
-                  {(i + 1) % 5 === 0 && (
-                    <div className="mt-4">
-                      <SponsoredBanner
-                        sponsor="HDFC Bank"
-                        text="Get a collateral-free business loan up to ₹50L to launch your business"
-                        ctaLabel="Apply Now"
-                        ctaHref="https://hdfcbank.com"
-                      />
-                    </div>
-                  )}
+              <>
+                <div className="space-y-4">
+                  {ideas.map((idea, i) => {
+                    const globalRank = from + i + 1
+                    return (
+                      <div key={idea._id}>
+                        <IdeaListCard idea={idea} rank={globalRank} />
+                        {(i + 1) % 5 === 0 && (
+                          <div className="mt-4">
+                            <SponsoredBanner
+                              sponsor="HDFC Bank"
+                              text="Get a collateral-free business loan up to ₹50L to launch your business"
+                              ctaLabel="Apply Now"
+                              ctaHref="https://hdfcbank.com"
+                            />
+                          </div>
+                        )}
+                      </div>
+                    )
+                  })}
                 </div>
-              ))
+                <Pagination
+                  currentPage={currentPage}
+                  totalPages={totalPages}
+                  buildUrl={pageUrl}
+                />
+              </>
             )}
           </div>
         </div>
