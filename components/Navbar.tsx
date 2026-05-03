@@ -16,7 +16,7 @@ export default function Navbar() {
         {/* Links */}
         <div className="flex items-center gap-1">
           <Link
-            href="/ideas"
+            href="/business-ideas"
             className="rounded-lg px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-colors hidden sm:inline-flex"
           >
             Browse Ideas

@@ -1,3 +1,4 @@
+import type { Metadata } from 'next'
 import Link from 'next/link'
 import { client } from '@/lib/sanity/client'
 import { FEATURED_IDEAS_QUERY, RECENT_POSTS_QUERY } from '@/lib/sanity/queries'
@@ -12,6 +13,19 @@ import FaqAccordion from '@/components/FaqAccordion'
 import type { Idea, Post } from '@/lib/sanity/types'
 
 export const revalidate = 3600
+
+export const metadata: Metadata = {
+  title: 'Business Suggestions in India – Low Investment, High Profit & Startup Guides 2026 | Business Ideas',
+  description:
+    'Discover 300+ business ideas in India with filters by investment, profit, and difficulty. Get cost, setup steps, and funding options to start today. Business ideas for small business. Enquire Today',
+  alternates: { canonical: 'https://businessideas.live/' },
+  openGraph: {
+    title: 'Business Suggestions in India – Low Investment, High Profit & Startup Guides 2026',
+    description: 'Discover 300+ business ideas in India with filters by investment, profit, and difficulty.',
+    url: 'https://businessideas.live/',
+    type: 'website',
+  },
+}
 
 export default async function HomePage() {
   const [featuredIdeas, recentPosts] = await Promise.all([
@@ -54,7 +68,7 @@ export default async function HomePage() {
             ))}
           </div>
           <div className="mt-6 text-center">
-            <Link href="/ideas" className="btn-outline text-sm">
+            <Link href="/business-ideas" className="btn-outline text-sm">
               View All Ideas →
             </Link>
           </div>

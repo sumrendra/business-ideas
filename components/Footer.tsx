@@ -20,7 +20,7 @@ export default function Footer() {
 
           {/* Links */}
           <div className="flex flex-wrap gap-x-6 gap-y-2 text-sm text-slate-500">
-            <Link href="/ideas" className="hover:text-indigo-600 transition-colors">Ideas</Link>
+            <Link href="/business-ideas" className="hover:text-indigo-600 transition-colors">Ideas</Link>
             <Link href="/blog"  className="hover:text-indigo-600 transition-colors">Blog</Link>
           </div>
         </div>

@@ -29,7 +29,7 @@ function SearchBoxInner({
     } else {
       params.delete('search')
     }
-    router.push(`/ideas?${params.toString()}`)
+    router.push(`/business-ideas?${params.toString()}`)
   }
 
   function handleClear() {
@@ -37,7 +37,7 @@ function SearchBoxInner({
     const params = new URLSearchParams(searchParams.toString())
     params.delete('search')
     const qs = params.toString()
-    router.push(`/ideas${qs ? '?' + qs : ''}`)
+    router.push(`/business-ideas${qs ? '?' + qs : ''}`)
   }
 
   return (

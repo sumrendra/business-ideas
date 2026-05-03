@@ -18,7 +18,7 @@ export default function IdeaCard({ idea }: { idea: Idea }) {
 
   return (
     <Link
-      href={`/ideas/${idea.slug}`}
+      href={`/business-ideas/${idea.slug}`}
       className="group flex flex-col rounded-2xl border border-slate-100 bg-white shadow-sm hover:shadow-md hover:border-indigo-200 transition-all overflow-hidden"
     >
       {/* Cover */}

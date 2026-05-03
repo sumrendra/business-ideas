@@ -8,9 +8,38 @@ import SearchBox from '@/components/SearchBox'
 import SponsoredBanner from '@/components/SponsoredBanner'
 
 export const metadata: Metadata = {
-  title: 'Browse Business Ideas',
+  title: 'Browse Business Ideas in India – Filter by Budget, Sector & Difficulty',
   description:
-    'Filter curated business ideas by budget, industry, market saturation, difficulty and tags to find the perfect opportunity for you.',
+    'Explore 500+ business ideas in India filtered by investment, category, scalability, and profit potential. Find the right opportunity for you.',
+  alternates: { canonical: 'https://businessideas.live/business-ideas' },
+  openGraph: {
+    title: 'Browse Business Ideas in India – Filter by Budget, Sector & Difficulty',
+    description: 'Explore 500+ business ideas filtered by investment, category, scalability, and profit potential.',
+    url: 'https://businessideas.live/business-ideas',
+    type: 'website',
+  },
+}
+
+const collectionPageSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'CollectionPage',
+  name: 'Business Ideas in India',
+  url: 'https://businessideas.live/business-ideas',
+  description: 'Explore 500+ business ideas in India filtered by investment, category, scalability, and profit potential.',
+  isPartOf: {
+    '@type': 'WebSite',
+    name: 'BusinessIdeas.live',
+    url: 'https://businessideas.live/',
+  },
+}
+
+const breadcrumbSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://businessideas.live/' },
+    { '@type': 'ListItem', position: 2, name: 'Business Ideas', item: 'https://businessideas.live/business-ideas' },
+  ],
 }
 
 const SORT_OPTIONS = [
@@ -75,11 +104,19 @@ export default async function IdeasPage({ searchParams }: PageProps) {
     if (activeFilters.search)     params.set('search',     activeFilters.search)
     activeFilters.tags.forEach((t) => params.append('tags', t))
     params.set('sort', value)
-    return `/ideas?${params.toString()}`
+    return `/business-ideas?${params.toString()}`
   }
 
   return (
     <div>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(collectionPageSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+      />
       {/* Banner */}
       <section className="bg-gradient-to-r from-slate-50 to-indigo-50 border-b border-slate-100">
         <div className="mx-auto max-w-7xl px-4 py-8">

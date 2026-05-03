@@ -73,7 +73,7 @@ export default async function IdeaPage({ params }: PageProps) {
       <nav className="mb-6 text-sm text-slate-500">
         <Link href="/" className="hover:text-indigo-600">Home</Link>
         <span className="mx-2">/</span>
-        <Link href="/ideas" className="hover:text-indigo-600">Ideas</Link>
+        <Link href="/business-ideas" className="hover:text-indigo-600">Ideas</Link>
         <span className="mx-2">/</span>
         <span className="text-slate-700">{idea.title}</span>
       </nav>
@@ -263,7 +263,7 @@ export default async function IdeaPage({ params }: PageProps) {
             {idea.tags.map((tag) => (
               <Link
                 key={tag}
-                href={`/ideas?tags=${encodeURIComponent(tag)}`}
+                href={`/business-ideas?tags=${encodeURIComponent(tag)}`}
                 className="badge bg-slate-100 text-slate-600 hover:bg-indigo-100 hover:text-indigo-700 transition-colors"
               >
                 {tag}
@@ -275,7 +275,7 @@ export default async function IdeaPage({ params }: PageProps) {
 
       {/* Back CTA */}
       <div className="mt-12 text-center">
-        <Link href="/ideas" className="btn-outline">
+        <Link href="/business-ideas" className="btn-outline">
           ← Browse More Ideas
         </Link>
       </div>
