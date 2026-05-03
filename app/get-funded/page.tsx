@@ -1,0 +1,90 @@
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = {
+  title: 'Get Funded',
+  description: 'Explore government schemes, bank loans, and startup grants to fund your business idea in India.',
+}
+
+const RESOURCES = [
+  {
+    name: 'MUDRA Loan',
+    description: 'Loans up to ₹10L for micro and small enterprises under Pradhan Mantri MUDRA Yojana.',
+    tag: 'Government',
+    href: 'https://mudra.org.in',
+  },
+  {
+    name: 'Startup India',
+    description: 'Flagship initiative offering tax benefits, fast-track IPR, and a fund-of-funds for startups.',
+    tag: 'Government',
+    href: 'https://startupindia.gov.in',
+  },
+  {
+    name: 'CGTMSE',
+    description: 'Credit Guarantee Fund scheme for MSMEs — collateral-free loans up to ₹2Cr through member banks.',
+    tag: 'Government',
+    href: 'https://cgtmse.in',
+  },
+  {
+    name: 'SBI SME Loan',
+    description: 'Flexible business loans for small and medium enterprises with competitive interest rates.',
+    tag: 'Bank Loan',
+    href: 'https://sbi.co.in',
+  },
+  {
+    name: 'Razorpay Rize',
+    description: 'Early-stage funding, banking, and compliance support for Indian startups.',
+    tag: 'Startup',
+    href: 'https://razorpay.com/rize',
+  },
+  {
+    name: 'iCreate',
+    description: 'International Centre for Entrepreneurship & Technology — grants and incubation for innovators.',
+    tag: 'Incubator',
+    href: 'https://icreate.org.in',
+  },
+]
+
+const TAG_COLOR: Record<string, string> = {
+  Government: 'bg-green-100 text-green-700',
+  'Bank Loan': 'bg-blue-100 text-blue-700',
+  Startup:    'bg-indigo-100 text-indigo-700',
+  Incubator:  'bg-amber-100 text-amber-700',
+}
+
+export default function GetFundedPage() {
+  return (
+    <div className="mx-auto max-w-4xl px-4 py-14">
+      <div className="mb-10">
+        <h1 className="text-3xl font-bold text-slate-900">Get Funded</h1>
+        <p className="mt-2 text-slate-500">
+          Government schemes, bank loans, and startup programs to help you launch your business idea in India.
+        </p>
+      </div>
+
+      <div className="grid gap-5 sm:grid-cols-2">
+        {RESOURCES.map((r) => (
+          <a
+            key={r.name}
+            href={r.href}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="group flex flex-col gap-3 rounded-2xl border border-slate-100 bg-white p-5 shadow-sm hover:shadow-md hover:border-indigo-200 transition-all"
+          >
+            <div className="flex items-center justify-between">
+              <span className={`badge text-xs ${TAG_COLOR[r.tag] ?? 'bg-slate-100 text-slate-600'}`}>
+                {r.tag}
+              </span>
+              <span className="text-xs text-slate-300 group-hover:text-indigo-400 transition-colors">↗</span>
+            </div>
+            <div>
+              <p className="font-semibold text-slate-900 group-hover:text-indigo-700 transition-colors">
+                {r.name}
+              </p>
+              <p className="mt-1 text-sm text-slate-500">{r.description}</p>
+            </div>
+          </a>
+        ))}
+      </div>
+    </div>
+  )
+}
