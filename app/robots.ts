@@ -12,6 +12,6 @@ export default function robots(): MetadataRoute.Robots {
         disallow: '/studio/',
       },
     ],
-    sitemap: `${BASE_URL}/sitemap.xml`,
+    sitemap: 'https://businessideas.live/sitemap.xml',
   }
 }
