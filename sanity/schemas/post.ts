@@ -41,6 +41,13 @@ export default defineType({
       validation: (Rule) => Rule.required().max(300),
     }),
     defineField({
+      name: 'reading_time',
+      title: 'Reading Time (minutes)',
+      description: 'Estimated minutes to read this post.',
+      type: 'number',
+      validation: (Rule) => Rule.min(1).max(60),
+    }),
+    defineField({
       name: 'body',
       title: 'Body',
       type: 'array',
@@ -50,17 +57,25 @@ export default defineType({
           type: 'image',
           options: { hotspot: true },
           fields: [
-            defineField({
-              name: 'alt',
-              type: 'string',
-              title: 'Alt Text',
-            }),
-            defineField({
-              name: 'caption',
-              type: 'string',
-              title: 'Caption',
-            }),
+            defineField({ name: 'alt', type: 'string', title: 'Alt Text' }),
+            defineField({ name: 'caption', type: 'string', title: 'Caption' }),
           ],
+        },
+      ],
+    }),
+    defineField({
+      name: 'faqs',
+      title: 'FAQs',
+      description: 'Frequently asked questions shown at the bottom of the post.',
+      type: 'array',
+      of: [
+        {
+          type: 'object',
+          fields: [
+            defineField({ name: 'question', title: 'Question', type: 'string', validation: (Rule) => Rule.required() }),
+            defineField({ name: 'answer', title: 'Answer', type: 'text', rows: 3, validation: (Rule) => Rule.required() }),
+          ],
+          preview: { select: { title: 'question' } },
         },
       ],
     }),

@@ -7,7 +7,7 @@ export default function Navbar() {
       <nav className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2 shrink-0">
-          <Image src="/logo.png" alt="businessideas.live" width={32} height={32} className="h-8 w-auto" />
+          <Image src="/icon.png" alt="businessideas.live" width={48} height={48} className="h-12 w-auto" />
           <span className="font-bold text-slate-900 text-lg">
             <span className="text-indigo-600">Business</span> Ideas
           </span>

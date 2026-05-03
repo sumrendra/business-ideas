@@ -48,8 +48,10 @@ export interface Post {
   featured: boolean
   published_at: string
   cover_image: CoverImage | null
+  reading_time?: number
   // detail-only fields
   body?: unknown[]
+  faqs?: { question: string; answer: string }[]
   seo_title?: string
   seo_description?: string
 }

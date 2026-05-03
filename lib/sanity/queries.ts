@@ -28,6 +28,7 @@ const POST_CARD_FIELDS = groq`
   tags,
   featured,
   published_at,
+  reading_time,
   "cover_image": cover_image { asset->{ url }, alt }
 `
 
@@ -137,9 +138,25 @@ export const POST_BY_SLUG_QUERY = groq`
   *[_type == "post" && slug.current == $slug][0] {
     ${POST_CARD_FIELDS},
     body,
+    faqs,
     seo_title,
     seo_description
   }
+`
+
+export const RELATED_POSTS_QUERY = groq`
+  *[
+    _type == "post"
+    && defined(slug.current)
+    && slug.current != $slug
+    && category == $category
+  ] | order(published_at desc)[0...3] {
+    ${POST_CARD_FIELDS}
+  }
+`
+
+export const POST_TAGS_QUERY = groq`
+  array::unique(*[_type == "post" && defined(tags)].tags[])
 `
 
 export const POST_SLUGS_QUERY = groq`
@@ -168,10 +185,6 @@ export const POSTS_PAGE_QUERY = groq`
   ] | order(published_at desc) [$from..$to] {
     ${POST_CARD_FIELDS}
   }
-`
-
-export const POST_TAGS_QUERY = groq`
-  array::unique(*[_type == "post" && defined(tags)].tags[])
 `
 
 export const RECENT_POSTS_QUERY = groq`
