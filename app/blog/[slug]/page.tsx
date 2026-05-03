@@ -59,12 +59,12 @@ export default async function BlogPostPage({ params }: PageProps) {
   return (
     <article className="mx-auto max-w-3xl px-4 py-10">
       {/* Breadcrumb */}
-      <nav className="mb-6 text-sm text-slate-500">
-        <Link href="/" className="hover:text-indigo-600">Home</Link>
-        <span className="mx-2">/</span>
-        <Link href="/blog" className="hover:text-indigo-600">Blog</Link>
-        <span className="mx-2">/</span>
-        <span className="text-slate-700 line-clamp-1">{post.title}</span>
+      <nav className="mb-6 flex min-w-0 items-center gap-1 text-sm text-slate-500">
+        <Link href="/" className="shrink-0 hover:text-indigo-600">Home</Link>
+        <span className="shrink-0">/</span>
+        <Link href="/blog" className="shrink-0 hover:text-indigo-600">Blog</Link>
+        <span className="shrink-0">/</span>
+        <span className="min-w-0 truncate text-slate-700">{post.title}</span>
       </nav>
 
       {/* Category & date */}

@@ -1,10 +1,13 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { client } from '@/lib/sanity/client'
-import { POSTS_QUERY } from '@/lib/sanity/queries'
+import { POSTS_PAGE_QUERY, POSTS_COUNT_QUERY } from '@/lib/sanity/queries'
 import type { Post } from '@/lib/sanity/types'
 import { BLOG_CATEGORIES } from '@/lib/sanity/types'
 import BlogCard from '@/components/BlogCard'
+import Pagination from '@/components/Pagination'
+
+const POSTS_PER_PAGE = 9
 
 export const metadata: Metadata = {
   title: 'Blog',
@@ -16,21 +19,33 @@ interface PageProps {
   searchParams: Promise<{
     category?: string
     tag?: string
+    page?: string
   }>
 }
 
 export default async function BlogPage({ searchParams }: PageProps) {
   const sp = await searchParams
   const activeTags = sp.tag ? [sp.tag] : []
+  const currentPage = Math.max(1, parseInt(sp.page ?? '1', 10))
+  const from = (currentPage - 1) * POSTS_PER_PAGE
+  const to   = currentPage * POSTS_PER_PAGE - 1
 
-  const posts = await client.fetch<Post[]>(
-    POSTS_QUERY,
-    {
-      category: sp.category ?? '',
-      tags:     activeTags,
-    },
-    { next: { tags: ['posts'] } }
-  )
+  const filterParams = { category: sp.category ?? '', tags: activeTags }
+
+  const [posts, count] = await Promise.all([
+    client.fetch<Post[]>(POSTS_PAGE_QUERY, { ...filterParams, from, to }, { next: { tags: ['posts'] } }),
+    client.fetch<number>(POSTS_COUNT_QUERY, filterParams, { next: { tags: ['posts'] } }),
+  ])
+
+  const totalPages = Math.ceil(count / POSTS_PER_PAGE)
+
+  function pageUrl(page: number) {
+    const params = new URLSearchParams()
+    if (sp.category) params.set('category', sp.category)
+    if (sp.tag)      params.set('tag',      sp.tag)
+    params.set('page', String(page))
+    return `/blog?${params.toString()}`
+  }
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-10">
@@ -89,11 +104,14 @@ export default async function BlogPage({ searchParams }: PageProps) {
           </Link>
         </div>
       ) : (
-        <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-          {posts.map((post) => (
-            <BlogCard key={post._id} post={post} />
-          ))}
-        </div>
+        <>
+          <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+            {posts.map((post) => (
+              <BlogCard key={post._id} post={post} />
+            ))}
+          </div>
+          <Pagination currentPage={currentPage} totalPages={totalPages} buildUrl={pageUrl} />
+        </>
       )}
     </div>
   )
