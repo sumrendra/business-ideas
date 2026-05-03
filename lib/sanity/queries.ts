@@ -28,6 +28,7 @@ const POST_CARD_FIELDS = groq`
   tags,
   featured,
   published_at,
+  author,
   reading_time,
   "cover_image": cover_image { asset->{ url }, alt }
 `

@@ -48,6 +48,7 @@ export interface Post {
   featured: boolean
   published_at: string
   cover_image: CoverImage | null
+  author?: string
   reading_time?: number
   // detail-only fields
   body?: unknown[]
