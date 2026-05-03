@@ -170,6 +170,10 @@ export const POSTS_PAGE_QUERY = groq`
   }
 `
 
+export const POST_TAGS_QUERY = groq`
+  array::unique(*[_type == "post" && defined(tags)].tags[])
+`
+
 export const RECENT_POSTS_QUERY = groq`
   *[_type == "post" && defined(published_at)]
   | order(published_at desc)[0...4] {
