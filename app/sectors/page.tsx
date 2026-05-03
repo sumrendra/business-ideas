@@ -34,7 +34,7 @@ export default function SectorsPage() {
         {INDUSTRIES.filter((ind) => ind !== 'Other').map((industry) => (
           <Link
             key={industry}
-            href={`/ideas?industry=${encodeURIComponent(industry)}`}
+            href={`/business-ideas?industry=${encodeURIComponent(industry)}`}
             className="group flex items-center gap-4 rounded-2xl border border-slate-100 bg-white p-5 shadow-sm hover:shadow-md hover:border-indigo-200 transition-all"
           >
             <span className="text-3xl">{SECTOR_ICONS[industry] ?? '💡'}</span>
