@@ -140,13 +140,13 @@ export default async function IdeasPage({ searchParams }: PageProps) {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
       />
       {/* Banner */}
-      <section className="bg-gradient-to-r from-slate-50 to-indigo-50 border-b border-slate-100">
-        <div className="mx-auto max-w-7xl px-4 py-8">
-          <p className="text-xs font-semibold uppercase tracking-widest text-indigo-600">
-            IDEA LOOKER — Browse 500+ Curated Business Ideas
+      <section className="mesh-bg border-b border-slate-200/60 dark:border-slate-800/60">
+        <div className="mx-auto max-w-7xl px-4 py-10">
+          <p className="text-xs font-semibold uppercase tracking-widest text-indigo-600 dark:text-indigo-400">
+            Opportunities — 298 curated business ideas
           </p>
-          <h1 className="mt-1 text-2xl font-bold text-slate-900">Find the right business idea for you</h1>
-          <p className="mt-1 text-sm text-slate-500">
+          <h1 className="mt-2 text-2xl sm:text-3xl font-bold text-slate-900 dark:text-slate-100">Find the right business idea for you</h1>
+          <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
             Filter by budget, sector, complexity &amp; market stage · Updated weekly for the Indian market
           </p>
           <div className="mt-4 flex gap-3">
@@ -159,11 +159,11 @@ export default async function IdeasPage({ searchParams }: PageProps) {
       <div className="mx-auto max-w-7xl px-4 py-8">
         {/* Results bar + sort */}
         <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
-          <p className="text-sm text-slate-500">
-            Showing <span className="font-semibold text-slate-800">{count}</span> ideas matching your filters
+          <p className="text-sm text-slate-500 dark:text-slate-400">
+            Showing <span className="font-semibold text-slate-800 dark:text-slate-100">{count}</span> ideas matching your filters
           </p>
           <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-xs text-slate-400 font-medium">Sort by:</span>
+            <span className="text-xs text-slate-400 dark:text-slate-500 font-medium">Sort by:</span>
             {SORT_OPTIONS.map(({ value, label }) => (
               <a
                 key={value}
@@ -171,7 +171,7 @@ export default async function IdeasPage({ searchParams }: PageProps) {
                 className={`rounded-full border px-3 py-1 text-xs font-medium transition-colors ${
                   currentSort === value
                     ? 'border-indigo-600 bg-indigo-600 text-white'
-                    : 'border-slate-200 bg-white text-slate-600 hover:border-indigo-300 hover:text-indigo-700'
+                    : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 hover:border-indigo-300 hover:text-indigo-700 dark:hover:border-indigo-700 dark:hover:text-indigo-300'
                 }`}
               >
                 {label}
@@ -187,9 +187,9 @@ export default async function IdeasPage({ searchParams }: PageProps) {
 
           <div className="flex-1">
             {ideas.length === 0 ? (
-              <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-slate-300 py-24 text-center">
-                <p className="text-lg font-medium text-slate-700">No ideas match your filters</p>
-                <p className="mt-2 text-sm text-slate-400">Try removing some filters to see more results.</p>
+              <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-slate-300 dark:border-slate-700 py-24 text-center">
+                <p className="text-lg font-medium text-slate-700 dark:text-slate-200">No ideas match your filters</p>
+                <p className="mt-2 text-sm text-slate-400 dark:text-slate-500">Try removing some filters to see more results.</p>
               </div>
             ) : (
               <>

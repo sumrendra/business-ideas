@@ -71,9 +71,9 @@ export default function FilterSidebar({ allTags, activeFilters }: FilterSidebarP
     activeFilters.tags.length > 0
 
   return (
-    <div className="space-y-6 rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
+    <div className="space-y-6 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-5 shadow-sm">
       <div className="flex items-center justify-between">
-        <h2 className="font-semibold text-slate-900">Filters</h2>
+        <h2 className="font-semibold text-slate-900 dark:text-slate-100">Filters</h2>
         {hasActiveFilters && (
           <button
             onClick={clearAll}
@@ -138,7 +138,7 @@ export default function FilterSidebar({ allTags, activeFilters }: FilterSidebarP
                 className={`badge text-xs transition-colors cursor-pointer ${
                   activeFilters.tags.includes(tag)
                     ? 'bg-indigo-600 text-white'
-                    : 'bg-slate-100 text-slate-600 hover:bg-indigo-100 hover:text-indigo-700'
+                    : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-indigo-100 dark:hover:bg-indigo-900/40 hover:text-indigo-700 dark:hover:text-indigo-300'
                 }`}
               >
                 {tag}
@@ -164,7 +164,7 @@ export default function FilterSidebar({ allTags, activeFilters }: FilterSidebarP
 function FilterGroup({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div>
-      <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-400">{title}</p>
+      <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">{title}</p>
       <div className="space-y-1">{children}</div>
     </div>
   )
@@ -177,7 +177,7 @@ function FilterButton({ label, active, onClick }: { label: string; active: boole
       className={`flex w-full items-center justify-between rounded-lg px-3 py-1.5 text-sm transition-colors text-left ${
         active
           ? 'bg-indigo-600 text-white font-medium'
-          : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+          : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-slate-100'
       }`}
     >
       {label}
