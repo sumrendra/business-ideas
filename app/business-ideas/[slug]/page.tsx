@@ -633,7 +633,7 @@ export default async function IdeaPage({ params }: PageProps) {
                     <td className="px-4 py-3 text-slate-500 hidden sm:table-cell">{c.city || '—'}</td>
                     <td className="px-4 py-3 text-slate-600 hidden md:table-cell">{c.funding_raised || '—'}</td>
                     <td className="px-4 py-3">
-                      <p className="text-slate-700">{c.revenue_signal || '—'}</p>
+                      <p className="text-slate-700">{c.revenue_signal || c.description || '—'}</p>
                       {c.differentiator && (
                         <p className="text-xs text-slate-400 mt-0.5">{c.differentiator}</p>
                       )}

@@ -48,6 +48,7 @@ export interface Idea {
   competitors?: {
     _key: string; name: string; type?: string; city?: string
     funding_raised?: string; revenue_signal?: string; differentiator?: string
+    description?: string
   }[]
   google_trends_keyword?: string
   trend_data?: {
