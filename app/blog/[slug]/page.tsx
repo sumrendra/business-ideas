@@ -240,6 +240,37 @@ export default async function BlogPostPage({ params }: PageProps) {
                       h2: headingComponent(2),
                       h3: headingComponent(3),
                     },
+                    marks: {
+                      link: ({ value, children }) => {
+                        const href: string = value?.href ?? ''
+                        const isInternal =
+                          href.startsWith('/') ||
+                          href.includes('businessideas.live')
+                        const internalHref = isInternal
+                          ? href.replace(/^https?:\/\/businessideas\.live/, '')
+                          : href
+                        if (isInternal) {
+                          return (
+                            <Link
+                              href={internalHref}
+                              className="text-indigo-600 underline underline-offset-2 hover:text-indigo-800 transition-colors"
+                            >
+                              {children}
+                            </Link>
+                          )
+                        }
+                        return (
+                          <a
+                            href={href}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-indigo-600 underline underline-offset-2 hover:text-indigo-800 transition-colors"
+                          >
+                            {children}
+                          </a>
+                        )
+                      },
+                    },
                     types: {
                       image: ({ value }) => {
                         if (!value?.asset) return null

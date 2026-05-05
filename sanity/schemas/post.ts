@@ -58,7 +58,28 @@ export default defineType({
       title: 'Body',
       type: 'array',
       of: [
-        { type: 'block' },
+        {
+          type: 'block',
+          marks: {
+            annotations: [
+              {
+                name: 'link',
+                type: 'object',
+                title: 'Link',
+                fields: [
+                  {
+                    name: 'href',
+                    type: 'url',
+                    title: 'URL',
+                    description: 'Use a full URL for external links (https://…) or a path for internal links (/business-ideas/my-idea)',
+                    validation: (Rule) =>
+                      Rule.uri({ allowRelative: true, scheme: ['http', 'https', 'mailto'] }),
+                  },
+                ],
+              },
+            ],
+          },
+        },
         {
           type: 'image',
           options: { hotspot: true },
