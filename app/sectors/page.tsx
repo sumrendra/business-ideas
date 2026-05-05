@@ -2,9 +2,32 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { INDUSTRIES } from '@/lib/sanity/types'
 
+const BASE = 'https://businessideas.live'
+
 export const metadata: Metadata = {
-  title: 'Browse by Sector',
-  description: 'Explore curated business ideas by industry sector — Food & Beverage, Technology, Retail, Agriculture, and more.',
+  title: 'Business Ideas by Industry Sector — Food, Tech, Retail, Agriculture & More',
+  description:
+    'Explore curated business ideas by industry sector — Food & Beverage, Technology, Retail, Agriculture, Manufacturing, and more. Find the right sector for your Indian startup.',
+  alternates: {
+    canonical: `${BASE}/sectors`,
+  },
+  openGraph: {
+    title: 'Business Ideas by Industry Sector | businessideas.live',
+    description:
+      'Browse 298 vetted Indian business ideas by sector — Food & Beverage, Technology, Retail, Agriculture, Manufacturing, and more.',
+    url: `${BASE}/sectors`,
+    siteName: 'businessideas.live',
+    images: [{ url: `${BASE}/og-default.png`, width: 1200, height: 630, alt: 'Browse Business Ideas by Sector' }],
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    site: '@businessideaslv',
+    title: 'Business Ideas by Industry Sector | businessideas.live',
+    description:
+      'Browse 298 vetted Indian business ideas by sector — Food & Beverage, Technology, Retail, Agriculture, Manufacturing, and more.',
+    images: [`${BASE}/og-default.png`],
+  },
 }
 
 const SECTOR_ICONS: Record<string, string> = {

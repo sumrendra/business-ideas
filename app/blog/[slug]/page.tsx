@@ -42,19 +42,38 @@ export async function generateStaticParams() {
   return slugs.map(({ slug }) => ({ slug }))
 }
 
+const BASE = 'https://businessideas.live'
+
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params
   const post = await client.fetch<Post | null>(POST_BY_SLUG_QUERY, { slug })
   if (!post) return {}
+  const title = post.seo_title || post.title
+  const description = post.seo_description || post.excerpt || ''
+  const ogImage = post.cover_image
+    ? urlFor(post.cover_image).width(1200).height(630).url()
+    : `${BASE}/og-blog.png`
   return {
-    title: post.seo_title || post.title,
-    description: post.seo_description || post.excerpt,
+    title,
+    description,
+    alternates: {
+      canonical: `${BASE}/blog/${slug}`,
+    },
     openGraph: {
-      title: post.seo_title || post.title,
-      description: post.seo_description || post.excerpt,
-      images: post.cover_image
-        ? [urlFor(post.cover_image).width(1200).height(630).url()]
-        : [],
+      title,
+      description,
+      url: `${BASE}/blog/${slug}`,
+      siteName: 'businessideas.live',
+      images: [{ url: ogImage, width: 1200, height: 630, alt: title }],
+      type: 'article',
+      publishedTime: post.published_at,
+    },
+    twitter: {
+      card: 'summary_large_image',
+      site: '@businessideaslv',
+      title,
+      description,
+      images: [ogImage],
     },
   }
 }

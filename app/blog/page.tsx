@@ -8,11 +8,32 @@ import BlogCard from '@/components/BlogCard'
 import Pagination from '@/components/Pagination'
 
 const POSTS_PER_PAGE = 9
+const BASE = 'https://businessideas.live'
 
 export const metadata: Metadata = {
-  title: 'Blog',
+  title: 'Blog — Startup Guides & Market Insights for Indian Entrepreneurs',
   description:
-    'Guides, market insights, and entrepreneurship articles to help you evaluate and launch your next business idea.',
+    'Guides, market insights, and entrepreneurship articles to help you evaluate and launch your next business idea in India.',
+  alternates: {
+    canonical: `${BASE}/blog`,
+  },
+  openGraph: {
+    title: 'Blog — Startup Guides & Market Insights | businessideas.live',
+    description:
+      'Actionable guides, Indian market research, and founder stories to help you launch your next business idea.',
+    url: `${BASE}/blog`,
+    siteName: 'businessideas.live',
+    images: [{ url: `${BASE}/og-blog.png`, width: 1200, height: 630, alt: 'businessideas.live Blog' }],
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    site: '@businessideaslv',
+    title: 'Blog — Startup Guides & Market Insights | businessideas.live',
+    description:
+      'Actionable guides, Indian market research, and founder stories to help you launch your next business idea.',
+    images: [`${BASE}/og-blog.png`],
+  },
 }
 
 interface PageProps {

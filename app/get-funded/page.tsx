@@ -1,9 +1,32 @@
 import type { Metadata } from 'next'
 import SchemesFinder from '@/components/SchemesFinder'
 
+const BASE = 'https://businessideas.live'
+
 export const metadata: Metadata = {
-  title: 'Get Funded',
-  description: 'Explore government schemes, bank loans, and startup grants to fund your business idea in India.',
+  title: 'Get Funded — Government Schemes, Bank Loans & Grants for Indian Startups',
+  description:
+    'Explore MUDRA loans, Startup India grants, CGTMSE, and other government schemes to fund your business idea in India. Find the right funding for your budget.',
+  alternates: {
+    canonical: `${BASE}/get-funded`,
+  },
+  openGraph: {
+    title: 'Get Funded — Government Schemes & Startup Grants | businessideas.live',
+    description:
+      'MUDRA loans, Startup India grants, CGTMSE, and more — find the right government funding scheme for your Indian business idea.',
+    url: `${BASE}/get-funded`,
+    siteName: 'businessideas.live',
+    images: [{ url: `${BASE}/og-default.png`, width: 1200, height: 630, alt: 'Get Funded — Startup Funding in India' }],
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    site: '@businessideaslv',
+    title: 'Get Funded — Government Schemes & Startup Grants | businessideas.live',
+    description:
+      'MUDRA loans, Startup India grants, CGTMSE, and more — find the right government funding scheme for your Indian business idea.',
+    images: [`${BASE}/og-default.png`],
+  },
 }
 
 const RESOURCES = [
