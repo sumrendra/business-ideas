@@ -90,6 +90,50 @@ export const IDEA_SLUGS_QUERY = groq`
   *[_type == "businessIdea" && defined(slug.current)] { "slug": slug.current }
 `
 
+export const CATEGORY_IDEAS_QUERY = groq`
+  *[
+    _type == "businessIdea"
+    && defined(slug.current)
+    && defined(published_at)
+    && ($industry == "" || industry == $industry)
+    && ($budget   == "" || budget_range == $budget)
+    && ($difficulty == "" || difficulty_level == $difficulty)
+  ] | order(featured desc, published_at desc)[0...24] {
+    ${IDEA_CARD_FIELDS}
+  }
+`
+
+export const RELATED_IDEAS_QUERY = groq`
+  *[
+    _type == "businessIdea"
+    && defined(slug.current)
+    && slug.current != $slug
+    && (industry == $industry || count(tags[@ in $tags]) > 0)
+  ] | order(featured desc, published_at desc)[0...3] {
+    ${IDEA_CARD_FIELDS}
+  }
+`
+
+export const RELATED_IDEAS_FOR_POST_QUERY = groq`
+  *[
+    _type == "businessIdea"
+    && defined(slug.current)
+    && (count(tags[@ in $tags]) > 0)
+  ] | order(featured desc, published_at desc)[0...3] {
+    ${IDEA_CARD_FIELDS}
+  }
+`
+
+export const RELATED_POSTS_FOR_IDEA_QUERY = groq`
+  *[
+    _type == "post"
+    && defined(slug.current)
+    && count(tags[@ in $tags]) > 0
+  ] | order(published_at desc)[0...3] {
+    ${POST_CARD_FIELDS}
+  }
+`
+
 export const FEATURED_IDEAS_QUERY = groq`
   *[_type == "businessIdea" && featured == true && defined(published_at)]
   | order(published_at desc)[0...6] {
