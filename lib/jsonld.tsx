@@ -1,10 +1,10 @@
 const BASE = 'https://businessideas.live'
 
 export function articleSchema({
-  title, description, url, imageUrl, datePublished, author,
+  title, description, url, imageUrl, datePublished, dateModified, author,
 }: {
   title: string; description: string; url: string
-  imageUrl?: string; datePublished?: string; author?: string
+  imageUrl?: string; datePublished?: string; dateModified?: string; author?: string
 }) {
   return {
     '@context': 'https://schema.org',
@@ -14,6 +14,7 @@ export function articleSchema({
     url,
     ...(imageUrl && { image: imageUrl }),
     ...(datePublished && { datePublished }),
+    ...(dateModified && { dateModified }),
     author: { '@type': 'Person', name: author || 'BusinessIdeas.live' },
     publisher: {
       '@type': 'Organization',

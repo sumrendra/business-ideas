@@ -6,7 +6,14 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "seed:cs": "node scripts/seed-casestudy-proofpoints.mjs",
+    "seed:cs2": "node scripts/seed-casestudy-proofpoints-2.mjs",
+    "seed:cs3": "node scripts/seed-casestudy-proofpoints-3.mjs",
+    "seed:cs4": "node scripts/seed-casestudy-proofpoints-4.mjs",
+    "seed:cs5": "node scripts/seed-casestudy-proofpoints-5.mjs",
+    "list:missing-cs": "node scripts/list-missing-cs.mjs",
+    "seed:cs6": "node scripts/seed-casestudy-proofpoints-6.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.92.0",

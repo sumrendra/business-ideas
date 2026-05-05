@@ -19,6 +19,7 @@ export interface Idea {
   featured: boolean
   published_at: string
   cover_image: CoverImage | null
+  _updatedAt?: string
   // detail-only fields
   introduction?: unknown[]
   target_audience?: unknown[]
@@ -94,6 +95,7 @@ export interface Post {
   featured: boolean
   published_at: string
   cover_image: CoverImage | null
+  _updatedAt?: string
   author?: string
   reading_time?: number
   // detail-only fields

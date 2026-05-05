@@ -1,5 +1,7 @@
 import type { Metadata } from 'next'
+import Link from 'next/link'
 import SchemesFinder from '@/components/SchemesFinder'
+import Disclaimer from '@/components/Disclaimer'
 
 const BASE = 'https://businessideas.live'
 
@@ -116,6 +118,23 @@ export default function GetFundedPage() {
 
       {/* Scheme Finder Tool */}
       <SchemesFinder />
+
+      {/* Funding Calculators CTA */}
+      <Link
+        href="/funding-calculators"
+        className="mt-10 block rounded-2xl border border-indigo-100 bg-gradient-to-br from-indigo-50 to-white p-6 hover:border-indigo-300 hover:shadow-md transition-all"
+      >
+        <div className="flex items-center justify-between gap-4">
+          <div>
+            <p className="text-xs font-bold uppercase tracking-widest text-indigo-600 mb-1">Calculators</p>
+            <p className="text-lg font-bold text-slate-900">Check what you qualify for in seconds</p>
+            <p className="mt-1 text-sm text-slate-500">MUDRA · CGTMSE · PMEGP · EMI — instant estimates</p>
+          </div>
+          <span className="text-2xl text-indigo-500">→</span>
+        </div>
+      </Link>
+
+      <Disclaimer variant="finance" className="mt-8" />
     </div>
   )
 }

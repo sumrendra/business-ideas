@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { client } from '@/lib/sanity/client'
 import {
   IDEA_BY_SLUG_QUERY, IDEA_SLUGS_QUERY, CATEGORY_IDEAS_QUERY,
-  RELATED_POSTS_FOR_IDEA_QUERY,
+  RELATED_POSTS_FOR_IDEA_QUERY, PEOPLE_ALSO_VIEWED_QUERY,
 } from '@/lib/sanity/queries'
 import { urlFor } from '@/lib/sanity/image'
 import type { Idea, Post } from '@/lib/sanity/types'
@@ -16,6 +16,8 @@ import { PortableText } from '@portabletext/react'
 import DownloadReportButton from '@/components/DownloadReportButtonWrapper'
 import IdeaCard from '@/components/IdeaCard'
 import TrendsChart from '@/components/TrendsChart'
+import TableOfContents, { type TocHeading } from '@/components/TableOfContents'
+import Disclaimer from '@/components/Disclaimer'
 import { Ld, breadcrumbSchema, collectionPageSchema, faqSchema } from '@/lib/jsonld'
 
 const BASE = 'https://businessideas.live'
@@ -363,13 +365,79 @@ export default async function IdeaPage({ params }: PageProps) {
 
   if (!idea) notFound()
 
-  const [relatedPosts] = await Promise.all([
+  const [relatedPosts, peopleAlsoViewed] = await Promise.all([
     client.fetch<Post[]>(
       RELATED_POSTS_FOR_IDEA_QUERY,
       { tags: idea.tags ?? [] },
       { next: { tags: ['posts'] } }
     ),
+    client.fetch<Idea[]>(
+      PEOPLE_ALSO_VIEWED_QUERY,
+      { slug, industry: idea.industry ?? '', tags: idea.tags ?? [] },
+      { next: { tags: ['business-ideas'] } }
+    ),
   ])
+
+  // ── Reading time + ToC headings ────────────────────────────────────────────
+  const wordCount = countIdeaWords(idea)
+  const readingMinutes = Math.max(1, Math.round(wordCount / 230))
+
+  const tocHeadings: TocHeading[] = [
+    idea.target_audience && { id: 'who-is-it-for', text: 'Who Is It For?', level: 2 },
+    idea.why_it_works && { id: 'what-works', text: 'What Works & Why', level: 2 },
+    idea.scope_in_india && { id: 'scope-in-india', text: 'Scope in India', level: 2 },
+    idea.things_to_note?.length && { id: 'things-to-note', text: 'Things to Be Mindful Of', level: 2 },
+    idea.current_landscape && { id: 'current-landscape', text: 'Current Landscape', level: 2 },
+    idea.unit_economics && Object.values(idea.unit_economics).some(Boolean) && { id: 'unit-economics', text: 'Unit Economics', level: 2 },
+    idea.google_trends_keyword && { id: 'search-demand', text: 'Search Demand Trend', level: 2 },
+    idea.competitors?.length && { id: 'competitors', text: 'Indian Competitors', level: 2 },
+    idea.regulatory_table?.length && { id: 'regulatory', text: 'Licenses & Regulations', level: 2 },
+    idea.case_study?.founder_name && { id: 'founder-story', text: 'Real Founder Story', level: 2 },
+    ((idea.pros?.length ?? 0) > 0 || (idea.cons?.length ?? 0) > 0) && { id: 'pros-cons', text: 'Pros & Cons', level: 2 },
+    idea.proof_points?.length && { id: 'proof', text: 'Real-World Proof', level: 2 },
+  ].filter(Boolean) as TocHeading[]
+
+  // ── HowTo schema (only when we have an actionable first step + steps) ─────
+  const howToSteps: { name: string; text: string }[] = []
+  if (idea.first_step) howToSteps.push({ name: 'Validate the idea', text: idea.first_step })
+  if (idea.execution_plan?.month_1?.length) {
+    idea.execution_plan.month_1.slice(0, 3).forEach((s, i) =>
+      howToSteps.push({ name: `Month 1 — Step ${i + 1}`, text: s })
+    )
+  }
+  if (idea.execution_plan?.month_2?.length) {
+    idea.execution_plan.month_2.slice(0, 2).forEach((s, i) =>
+      howToSteps.push({ name: `Month 2 — Step ${i + 1}`, text: s })
+    )
+  }
+  if (idea.execution_plan?.month_3?.length) {
+    idea.execution_plan.month_3.slice(0, 2).forEach((s, i) =>
+      howToSteps.push({ name: `Month 3 — Step ${i + 1}`, text: s })
+    )
+  }
+
+  const howToLd = howToSteps.length >= 2 ? {
+    '@context': 'https://schema.org',
+    '@type': 'HowTo',
+    name: `How to start ${idea.title} in India`,
+    description: idea.description,
+    ...(idea.setup_cost_range && {
+      estimatedCost: { '@type': 'MonetaryAmount', currency: 'INR', value: idea.setup_cost_range },
+    }),
+    step: howToSteps.map((s, i) => ({
+      '@type': 'HowToStep',
+      position: i + 1,
+      name: s.name,
+      text: s.text,
+    })),
+  } : null
+
+  const updatedDate = idea._updatedAt
+    ? new Date(idea._updatedAt).toLocaleDateString('en-IN', { year: 'numeric', month: 'long', day: 'numeric' })
+    : null
+  const publishedDate = idea.published_at
+    ? new Date(idea.published_at).toLocaleDateString('en-IN', { year: 'numeric', month: 'long', day: 'numeric' })
+    : null
 
   const coverUrl = idea.cover_image
     ? urlFor(idea.cover_image).width(1200).height(600).url()
@@ -396,6 +464,7 @@ export default async function IdeaPage({ params }: PageProps) {
     url: `${BASE}/business-ideas/${slug}`,
     ...(coverUrl && { image: coverUrl }),
     ...(idea.published_at && { datePublished: idea.published_at }),
+    ...(idea._updatedAt && { dateModified: idea._updatedAt }),
     author: { '@type': 'Organization', name: 'BusinessIdeas.live', url: BASE },
     publisher: { '@type': 'Organization', name: 'BusinessIdeas.live', url: BASE, logo: { '@type': 'ImageObject', url: `${BASE}/logo.png` } },
   }
@@ -404,7 +473,8 @@ export default async function IdeaPage({ params }: PageProps) {
     <>
       <Ld data={breadcrumb} />
       <Ld data={articleLd} />
-    <article className="mx-auto max-w-4xl px-4 py-10">
+      {howToLd && <Ld data={howToLd} />}
+    <article className="mx-auto max-w-7xl px-4 py-10">
       {/* Breadcrumb */}
       <nav className="mb-6 text-sm text-slate-500">
         <Link href="/" className="hover:text-indigo-600">Home</Link>
@@ -421,6 +491,7 @@ export default async function IdeaPage({ params }: PageProps) {
             src={coverUrl}
             alt={idea.cover_image?.alt || idea.title}
             fill
+            sizes="(min-width: 1280px) 1200px, 100vw"
             className="object-cover"
             priority
           />
@@ -428,7 +499,7 @@ export default async function IdeaPage({ params }: PageProps) {
       )}
 
       {/* Header */}
-      <header className="mb-8">
+      <header className="mb-8 max-w-4xl">
         <div className="mb-3 flex flex-wrap gap-2">
           {idea.featured && (
             <span className="badge bg-indigo-100 text-indigo-700">Featured</span>
@@ -442,7 +513,29 @@ export default async function IdeaPage({ params }: PageProps) {
         </div>
         <h1 className="text-3xl font-bold text-slate-900 sm:text-4xl">{idea.title}</h1>
         <p className="mt-3 text-lg text-slate-600">{idea.description}</p>
+
+        {/* Meta line: published / updated / reading time */}
+        <div className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-500">
+          {publishedDate && <time dateTime={idea.published_at}>Published {publishedDate}</time>}
+          {updatedDate && updatedDate !== publishedDate && (
+            <>
+              <span className="text-slate-300">·</span>
+              <time dateTime={idea._updatedAt}>Updated {updatedDate}</time>
+            </>
+          )}
+          <span className="text-slate-300">·</span>
+          <span>{readingMinutes} min read</span>
+        </div>
       </header>
+
+      {/* Body area: ToC sidebar + content */}
+      <div className="flex gap-10 items-start">
+        {tocHeadings.length > 0 && (
+          <aside className="hidden xl:block w-56 shrink-0 sticky top-24 self-start">
+            <TableOfContents headings={tocHeadings} />
+          </aside>
+        )}
+        <div className="min-w-0 flex-1 max-w-4xl">
 
       {/* ── At a Glance metrics ─────────────────────────────────────────────── */}
       {hasNewMetrics && (
@@ -508,14 +601,14 @@ export default async function IdeaPage({ params }: PageProps) {
 
       {/* Who Is It For */}
       {idea.target_audience && (
-        <Section title="Who Is It For?">
+        <Section id="who-is-it-for" title="Who Is It For?">
           <PortableText value={idea.target_audience as Parameters<typeof PortableText>[0]['value']} />
         </Section>
       )}
 
       {/* What Works & Why */}
       {idea.why_it_works && (
-        <Section title="What Works in This & Why?">
+        <Section id="what-works" title="What Works in This & Why?">
           <PortableText value={idea.why_it_works as Parameters<typeof PortableText>[0]['value']} />
         </Section>
       )}
@@ -536,14 +629,14 @@ export default async function IdeaPage({ params }: PageProps) {
 
       {/* Scope in India */}
       {idea.scope_in_india && (
-        <Section title="Scope in India">
+        <Section id="scope-in-india" title="Scope in India">
           <PortableText value={idea.scope_in_india as Parameters<typeof PortableText>[0]['value']} />
         </Section>
       )}
 
       {/* Things to Be Mindful Of */}
       {idea.things_to_note && idea.things_to_note.length > 0 && (
-        <Section title="Things to Be Mindful Of">
+        <Section id="things-to-note" title="Things to Be Mindful Of">
           <ul className="space-y-2">
             {idea.things_to_note.map((item, i) => (
               <li key={i} className="flex items-start gap-2 text-slate-700">
@@ -557,7 +650,7 @@ export default async function IdeaPage({ params }: PageProps) {
 
       {/* Current Landscape */}
       {idea.current_landscape && (
-        <Section title="Current Landscape in India">
+        <Section id="current-landscape" title="Current Landscape in India">
           <PortableText value={idea.current_landscape as Parameters<typeof PortableText>[0]['value']} />
         </Section>
       )}
@@ -565,7 +658,7 @@ export default async function IdeaPage({ params }: PageProps) {
       {/* ── Unit Economics ─────────────────────────────────────────────────────── */}
       {idea.unit_economics && Object.values(idea.unit_economics).some(Boolean) && (
         <section className="mb-10">
-          <h2 className="mb-1 text-xl font-bold text-slate-900">Unit Economics</h2>
+          <h2 id="unit-economics" className="mb-1 text-xl font-bold text-slate-900 scroll-mt-24">Unit Economics</h2>
           <p className="mb-4 text-sm text-slate-500">Real benchmarks from Indian operators in this space</p>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
             {[
@@ -591,7 +684,7 @@ export default async function IdeaPage({ params }: PageProps) {
       {/* ── Google Trends ──────────────────────────────────────────────────────── */}
       {idea.google_trends_keyword && (
         <section className="mb-10">
-          <h2 className="mb-1 text-xl font-bold text-slate-900">Search Demand Trend</h2>
+          <h2 id="search-demand" className="mb-1 text-xl font-bold text-slate-900 scroll-mt-24">Search Demand Trend</h2>
           <p className="mb-3 text-sm text-slate-500">Google Trends — India — past 5 years</p>
           <TrendsChart
             keyword={idea.google_trends_keyword}
@@ -604,7 +697,7 @@ export default async function IdeaPage({ params }: PageProps) {
       {/* ── Indian Competitors ─────────────────────────────────────────────────── */}
       {idea.competitors && idea.competitors.length > 0 && (
         <section className="mb-10">
-          <h2 className="mb-1 text-xl font-bold text-slate-900">Who's Already Doing This in India</h2>
+          <h2 id="competitors" className="mb-1 text-xl font-bold text-slate-900 scroll-mt-24">Who's Already Doing This in India</h2>
           <p className="mb-4 text-sm text-slate-500">Know your competition before you start</p>
           <div className="overflow-hidden rounded-xl border border-slate-200">
             <table className="w-full text-sm">
@@ -649,7 +742,7 @@ export default async function IdeaPage({ params }: PageProps) {
       {/* ── Regulatory Table ───────────────────────────────────────────────────── */}
       {idea.regulatory_table && idea.regulatory_table.length > 0 && (
         <section className="mb-10">
-          <h2 className="mb-1 text-xl font-bold text-slate-900">Licenses &amp; Regulatory Requirements</h2>
+          <h2 id="regulatory" className="mb-1 text-xl font-bold text-slate-900 scroll-mt-24">Licenses &amp; Regulatory Requirements</h2>
           <p className="mb-4 text-sm text-slate-500">Exact costs and timelines — not estimates</p>
           <div className="overflow-hidden rounded-xl border border-slate-200">
             <table className="w-full text-sm">
@@ -686,7 +779,7 @@ export default async function IdeaPage({ params }: PageProps) {
       {/* ── Case Study ─────────────────────────────────────────────────────────── */}
       {idea.case_study?.founder_name && (
         <section className="mb-10">
-          <h2 className="mb-4 text-xl font-bold text-slate-900">Real Founder Story</h2>
+          <h2 id="founder-story" className="mb-4 text-xl font-bold text-slate-900 scroll-mt-24">Real Founder Story</h2>
           <div className="rounded-2xl border border-indigo-100 bg-gradient-to-br from-indigo-50 to-white p-6">
             <div className="mb-4 flex flex-wrap items-start gap-4">
               <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-indigo-600 text-lg font-bold text-white">
@@ -763,7 +856,7 @@ export default async function IdeaPage({ params }: PageProps) {
       {/* Pros & Cons */}
       {((idea.pros && idea.pros.length > 0) || (idea.cons && idea.cons.length > 0)) && (
         <section className="mb-10">
-          <h2 className="mb-4 text-xl font-bold text-slate-900">Pros &amp; Cons</h2>
+          <h2 id="pros-cons" className="mb-4 text-xl font-bold text-slate-900 scroll-mt-24">Pros &amp; Cons</h2>
           <div className="grid gap-4 sm:grid-cols-2">
             {idea.pros && idea.pros.length > 0 && (
               <div className="rounded-xl border border-green-100 bg-green-50 p-4">
@@ -798,7 +891,7 @@ export default async function IdeaPage({ params }: PageProps) {
       {/* Proof Points */}
       {idea.proof_points && idea.proof_points.length > 0 && (
         <section className="mt-10 border-t border-slate-100 pt-8">
-          <h2 className="mb-6 text-xl font-bold text-slate-900">Real-World Proof</h2>
+          <h2 id="proof" className="mb-6 text-xl font-bold text-slate-900 scroll-mt-24">Real-World Proof</h2>
           <div className="space-y-4">
             {idea.proof_points.map((pp) => (
               <div
@@ -864,12 +957,28 @@ export default async function IdeaPage({ params }: PageProps) {
         </div>
       )}
 
+      {/* Disclaimer */}
+      <Disclaimer className="mt-12" />
+
       {/* Back CTA */}
-      <div className="mt-12 text-center">
+      <div className="mt-10 text-center">
         <Link href="/business-ideas" className="btn-outline">
           ← Browse More Ideas
         </Link>
       </div>
+        </div>
+      </div>
+
+      {/* People Also Viewed */}
+      {peopleAlsoViewed.length > 0 && (
+        <section className="mt-16 border-t border-slate-100 pt-12">
+          <h2 className="mb-2 text-xl font-bold text-slate-900">People Also Viewed</h2>
+          <p className="mb-6 text-sm text-slate-500">Similar ideas other founders are exploring</p>
+          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+            {peopleAlsoViewed.map(i => <IdeaCard key={i._id} idea={i} />)}
+          </div>
+        </section>
+      )}
     </article>
 
     {/* Related blog posts */}
@@ -926,13 +1035,46 @@ function GlanceCard({ label, value, accent }: { label: string; value: string; ac
   )
 }
 
-function Section({ title, children }: { title: string; children: React.ReactNode }) {
+function Section({ id, title, children }: { id?: string; title: string; children: React.ReactNode }) {
   return (
     <section className="mb-8">
-      <h2 className="mb-3 text-xl font-bold text-slate-900">{title}</h2>
+      <h2 id={id} className="mb-3 text-xl font-bold text-slate-900 scroll-mt-24">{title}</h2>
       <div className="prose-content">{children}</div>
     </section>
   )
+}
+
+// Extract plain text from a Portable Text array (or pass through plain string)
+function ptText(value: unknown): string {
+  if (!value) return ''
+  if (typeof value === 'string') return value
+  if (!Array.isArray(value)) return ''
+  return value
+    .map((block: { _type?: string; children?: { text?: string }[] }) => {
+      if (block?._type !== 'block') return ''
+      return (block.children ?? []).map(c => c?.text ?? '').join(' ')
+    })
+    .join(' ')
+}
+
+function countIdeaWords(idea: Idea): number {
+  const parts = [
+    idea.description,
+    ptText(idea.target_audience),
+    ptText(idea.why_it_works),
+    ptText(idea.scope_in_india),
+    ptText(idea.current_landscape),
+    ptText(idea.problem),
+    ptText(idea.solution),
+    (idea.pros ?? []).join(' '),
+    (idea.cons ?? []).join(' '),
+    (idea.things_to_note ?? []).join(' '),
+    idea.first_step,
+    idea.demand_signal,
+    idea.unit_economics?.context,
+  ].filter(Boolean) as string[]
+  const total = parts.join(' ')
+  return total ? total.split(/\s+/).filter(Boolean).length : 0
 }
 
 function TagGroup({ label, items, color }: { label: string; items: string[]; color: string }) {

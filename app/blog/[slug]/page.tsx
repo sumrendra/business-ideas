@@ -101,13 +101,10 @@ export default async function BlogPostPage({ params }: PageProps) {
     ? urlFor(post.cover_image).width(1200).height(600).url()
     : null
 
-  const publishedDate = post.published_at
-    ? new Date(post.published_at).toLocaleDateString('en-IN', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-      })
-    : null
+  const fmtDate = (d?: string | null) =>
+    d ? new Date(d).toLocaleDateString('en-IN', { year: 'numeric', month: 'long', day: 'numeric' }) : null
+  const publishedDate = fmtDate(post.published_at)
+  const updatedDate = fmtDate(post._updatedAt)
 
   const pageUrl = `https://businessideas.live/blog/${slug}`
   const author = post.author || 'BusinessIdeas.live'
@@ -119,6 +116,7 @@ export default async function BlogPostPage({ params }: PageProps) {
     url: pageUrl,
     imageUrl: coverUrl || undefined,
     datePublished: post.published_at,
+    dateModified: post._updatedAt,
     author,
   })
   const breadcrumb = breadcrumbSchema([
@@ -172,7 +170,13 @@ export default async function BlogPostPage({ params }: PageProps) {
             {/* Date · reading time */}
             <div className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-slate-500">
               {publishedDate && (
-                <time dateTime={post.published_at}>{publishedDate}</time>
+                <time dateTime={post.published_at}>Published {publishedDate}</time>
+              )}
+              {updatedDate && updatedDate !== publishedDate && (
+                <>
+                  <span className="text-slate-300">•</span>
+                  <time dateTime={post._updatedAt}>Updated {updatedDate}</time>
+                </>
               )}
               {post.reading_time && (
                 <>

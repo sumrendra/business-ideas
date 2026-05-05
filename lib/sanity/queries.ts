@@ -56,6 +56,7 @@ export const IDEAS_QUERY = groq`
 export const IDEA_BY_SLUG_QUERY = groq`
   *[_type == "businessIdea" && slug.current == $slug][0] {
     ${IDEA_CARD_FIELDS},
+    _updatedAt,
     introduction,
     target_audience,
     why_it_works,
@@ -90,6 +91,20 @@ export const IDEA_BY_SLUG_QUERY = groq`
     seo_title,
     seo_description
   }
+`
+
+export const PEOPLE_ALSO_VIEWED_QUERY = groq`
+  *[
+    _type == "businessIdea"
+    && defined(slug.current)
+    && defined(published_at)
+    && slug.current != $slug
+    && (industry == $industry || count(tags[@ in $tags]) > 0)
+  ] {
+    ${IDEA_CARD_FIELDS},
+    "_industryMatch": industry == $industry,
+    "_tagMatch": count(tags[@ in $tags])
+  } | order(_industryMatch desc, _tagMatch desc, featured desc, published_at desc)[0...4]
 `
 
 export const IDEA_SLUGS_QUERY = groq`
@@ -200,6 +215,7 @@ export const POSTS_QUERY = groq`
 export const POST_BY_SLUG_QUERY = groq`
   *[_type == "post" && slug.current == $slug][0] {
     ${POST_CARD_FIELDS},
+    _updatedAt,
     body,
     faqs,
     seo_title,
