@@ -4,7 +4,6 @@ import { client } from '@/lib/sanity/client'
 import { FEATURED_IDEAS_QUERY, RECENT_POSTS_QUERY, POLICY_PULSE_QUERY } from '@/lib/sanity/queries'
 import IdeaCard from '@/components/IdeaCard'
 import BlogCard from '@/components/BlogCard'
-import FeaturedBlogCard from '@/components/FeaturedBlogCard'
 import SearchBox from '@/components/SearchBox'
 import FilterChips from '@/components/FilterChips'
 import SponsoredBanner from '@/components/SponsoredBanner'
@@ -33,8 +32,6 @@ export default async function HomePage() {
     client.fetch<Post[]>(RECENT_POSTS_QUERY, {}, { next: { tags: ['posts'] } }),
     client.fetch<Post[]>(POLICY_PULSE_QUERY, {}, { next: { tags: ['posts'] } }),
   ])
-
-  const [featuredPost, ...otherPosts] = recentPosts
 
   return (
     <>
@@ -113,21 +110,11 @@ export default async function HomePage() {
             </Link>
           </div>
 
-          {/* Featured post — horizontal */}
-          {featuredPost && (
-            <div className="mb-6">
-              <FeaturedBlogCard post={featuredPost} />
-            </div>
-          )}
-
-          {/* Remaining posts — grid */}
-          {otherPosts.length > 0 && (
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {otherPosts.slice(0, 3).map((post) => (
-                <BlogCard key={post._id} post={post} />
-              ))}
-            </div>
-          )}
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {recentPosts.slice(0, 3).map((post) => (
+              <BlogCard key={post._id} post={post} />
+            ))}
+          </div>
         </section>
       )}
 

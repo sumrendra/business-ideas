@@ -61,8 +61,29 @@ export default function IdeaCard({ idea }: { idea: Idea }) {
           {idea.description}
         </p>
 
+        {/* Revenue highlight */}
+        {idea.monthly_revenue_range && (
+          <div className="mt-3 rounded-lg bg-green-50 px-3 py-2">
+            <div className="flex items-center gap-3">
+              <div>
+                <p className="text-xs text-green-600 font-semibold leading-none">Monthly Revenue</p>
+                <p className="text-xs font-bold text-green-800">{idea.monthly_revenue_range}</p>
+              </div>
+              {idea.time_to_first_revenue && (
+                <>
+                  <span className="text-green-200">|</span>
+                  <div>
+                    <p className="text-xs text-green-600 font-semibold leading-none">First Revenue</p>
+                    <p className="text-xs font-bold text-green-800">{idea.time_to_first_revenue}</p>
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+        )}
+
         {/* Meta badges */}
-        <div className="mt-4 flex flex-wrap gap-2">
+        <div className="mt-3 flex flex-wrap gap-2">
           {idea.budget_range && (
             <span className="badge bg-slate-100 text-slate-600 text-xs">
               {BUDGET_LABELS[idea.budget_range] || idea.budget_range}

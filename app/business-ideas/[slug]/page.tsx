@@ -12,6 +12,7 @@ import {
   DIFFICULTY_LABELS,
 } from '@/lib/sanity/types'
 import { PortableText } from '@portabletext/react'
+import DownloadReportButton from '@/components/DownloadReportButtonWrapper'
 
 interface PageProps {
   params: Promise<{ slug: string }>
@@ -67,6 +68,13 @@ export default async function IdeaPage({ params }: PageProps) {
     ? urlFor(idea.cover_image).width(1200).height(600).url()
     : null
 
+  const hasNewMetrics =
+    idea.monthly_revenue_range ||
+    idea.time_to_first_revenue ||
+    idea.breakeven_timeline ||
+    idea.setup_cost_range ||
+    idea.gross_margin
+
   return (
     <article className="mx-auto max-w-4xl px-4 py-10">
       {/* Breadcrumb */}
@@ -75,7 +83,7 @@ export default async function IdeaPage({ params }: PageProps) {
         <span className="mx-2">/</span>
         <Link href="/business-ideas" className="hover:text-indigo-600">Ideas</Link>
         <span className="mx-2">/</span>
-        <span className="text-slate-700">{idea.title}</span>
+        <span className="truncate text-slate-700">{idea.title}</span>
       </nav>
 
       {/* Cover Image */}
@@ -93,28 +101,72 @@ export default async function IdeaPage({ params }: PageProps) {
 
       {/* Header */}
       <header className="mb-8">
-        {idea.featured && (
-          <span className="badge bg-indigo-100 text-indigo-700 mb-3">Featured</span>
-        )}
+        <div className="mb-3 flex flex-wrap gap-2">
+          {idea.featured && (
+            <span className="badge bg-indigo-100 text-indigo-700">Featured</span>
+          )}
+          <span className="badge bg-slate-100 text-slate-600 text-xs">{idea.industry}</span>
+          {idea.market_saturation && (
+            <span className={`badge text-xs ${SATURATION_COLOR[idea.market_saturation]}`}>
+              {MARKET_SATURATION_LABELS[idea.market_saturation] || idea.market_saturation}
+            </span>
+          )}
+        </div>
         <h1 className="text-3xl font-bold text-slate-900 sm:text-4xl">{idea.title}</h1>
         <p className="mt-3 text-lg text-slate-600">{idea.description}</p>
       </header>
 
-      {/* Metadata grid */}
-      <div className="mb-10 grid grid-cols-2 gap-4 rounded-2xl border border-slate-100 bg-slate-50 p-6 sm:grid-cols-4">
-        <MetaItem label="Budget" value={BUDGET_LABELS[idea.budget_range] || idea.budget_range} />
-        <MetaItem label="Industry" value={idea.industry} />
-        <MetaItem
-          label="Difficulty"
-          value={DIFFICULTY_LABELS[idea.difficulty_level] || idea.difficulty_level}
-          valueClass={DIFFICULTY_COLOR[idea.difficulty_level]}
-        />
-        <MetaItem
-          label="Market"
-          value={MARKET_SATURATION_LABELS[idea.market_saturation] || idea.market_saturation}
-          valueClass={SATURATION_COLOR[idea.market_saturation]}
-        />
-      </div>
+      {/* ── At a Glance metrics ─────────────────────────────────────────────── */}
+      {hasNewMetrics && (
+        <section className="mb-10">
+          <h2 className="mb-4 text-sm font-bold uppercase tracking-widest text-slate-400">At a Glance</h2>
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+            {idea.monthly_revenue_range && (
+              <GlanceCard label="Monthly Revenue" value={idea.monthly_revenue_range} accent="green" />
+            )}
+            {idea.time_to_first_revenue && (
+              <GlanceCard label="Time to First Revenue" value={idea.time_to_first_revenue} accent="blue" />
+            )}
+            {idea.breakeven_timeline && (
+              <GlanceCard label="Break-even" value={idea.breakeven_timeline} accent="amber" />
+            )}
+            {idea.setup_cost_range && (
+              <GlanceCard label="Setup Cost" value={idea.setup_cost_range} accent="slate" />
+            )}
+            {idea.gross_margin && (
+              <GlanceCard label="Gross Margin" value={idea.gross_margin} accent="indigo" />
+            )}
+            {idea.difficulty_level && (
+              <GlanceCard
+                label="Difficulty"
+                value={DIFFICULTY_LABELS[idea.difficulty_level] || idea.difficulty_level}
+                accent={idea.difficulty_level === 'beginner' ? 'green' : idea.difficulty_level === 'intermediate' ? 'amber' : 'red'}
+              />
+            )}
+          </div>
+        </section>
+      )}
+
+      {/* ── Step 1 to Start ──────────────────────────────────────────────────── */}
+      {idea.first_step && (
+        <div className="mb-10 flex gap-4 rounded-2xl border border-green-200 bg-green-50 p-5">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-green-500 text-white text-xl font-bold">
+            1
+          </div>
+          <div>
+            <p className="text-xs font-bold uppercase tracking-widest text-green-700 mb-1">Start Here — This Week</p>
+            <p className="text-sm text-slate-700 leading-relaxed">{idea.first_step}</p>
+          </div>
+        </div>
+      )}
+
+      {/* Demand Signal */}
+      {idea.demand_signal && (
+        <div className="mb-10 rounded-xl border border-indigo-100 bg-indigo-50 px-5 py-3">
+          <span className="text-xs font-bold uppercase tracking-wide text-indigo-500">Market Demand Signal</span>
+          <p className="mt-0.5 text-sm font-medium text-slate-800">{idea.demand_signal}</p>
+        </div>
+      )}
 
       {/* Revenue model & resources */}
       <div className="mb-10 grid gap-6 sm:grid-cols-2">
@@ -125,13 +177,6 @@ export default async function IdeaPage({ params }: PageProps) {
           <TagGroup label="Resources Needed" items={idea.resources_needed} color="bg-amber-100 text-amber-700" />
         )}
       </div>
-
-      {/* Introduction */}
-      {idea.introduction && (
-        <Section title="Introduction">
-          <PortableText value={idea.introduction as Parameters<typeof PortableText>[0]['value']} />
-        </Section>
-      )}
 
       {/* Who Is It For */}
       {idea.target_audience && (
@@ -146,6 +191,20 @@ export default async function IdeaPage({ params }: PageProps) {
           <PortableText value={idea.why_it_works as Parameters<typeof PortableText>[0]['value']} />
         </Section>
       )}
+
+      {/* ── Download Report CTA (mid-page) ───────────────────────────────────── */}
+      <div className="my-12 overflow-hidden rounded-2xl bg-gradient-to-br from-indigo-600 to-indigo-800 p-8 text-white">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <p className="text-xs font-bold uppercase tracking-widest text-indigo-300 mb-1">Free Download</p>
+            <h3 className="text-xl font-bold">Get the Full Launch Kit for this Idea</h3>
+            <p className="mt-1 text-sm text-indigo-200">
+              Detailed financial model · Supplier &amp; vendor contacts · 90-day checklist · City-wise demand data
+            </p>
+          </div>
+          <DownloadReportButton idea={idea} />
+        </div>
+      </div>
 
       {/* Scope in India */}
       {idea.scope_in_india && (
@@ -175,35 +234,17 @@ export default async function IdeaPage({ params }: PageProps) {
         </Section>
       )}
 
-      {/* Business Key Metrics */}
-      {(idea.gross_margin || idea.setup_cost_range || idea.pivot_options || idea.financing_options) && (
+      {/* Licenses Required */}
+      {idea.licenses_required && idea.licenses_required.length > 0 && (
         <section className="mb-10">
-          <h2 className="mb-4 text-xl font-bold text-slate-900">Business Key Metrics</h2>
-          <div className="grid gap-4 rounded-2xl border border-slate-100 bg-slate-50 p-6 sm:grid-cols-2">
-            {idea.gross_margin && (
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">Gross Margin</p>
-                <p className="mt-1 text-sm font-medium text-slate-700">{idea.gross_margin}</p>
-              </div>
-            )}
-            {idea.setup_cost_range && (
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">Setup Cost</p>
-                <p className="mt-1 text-sm font-medium text-slate-700">{idea.setup_cost_range}</p>
-              </div>
-            )}
-            {idea.pivot_options && (
-              <div className="sm:col-span-2">
-                <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">Pivot Options</p>
-                <p className="mt-1 text-sm text-slate-700 whitespace-pre-line">{idea.pivot_options}</p>
-              </div>
-            )}
-            {idea.financing_options && (
-              <div className="sm:col-span-2">
-                <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">Financing Options</p>
-                <p className="mt-1 text-sm text-slate-700 whitespace-pre-line">{idea.financing_options}</p>
-              </div>
-            )}
+          <h2 className="mb-3 text-xl font-bold text-slate-900">Licenses &amp; Registrations</h2>
+          <div className="flex flex-wrap gap-2">
+            {idea.licenses_required.map((lic) => (
+              <span key={lic} className="flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-sm text-slate-700 shadow-sm">
+                <span className="text-green-500">✓</span>
+                {lic}
+              </span>
+            ))}
           </div>
         </section>
       )}
@@ -211,7 +252,7 @@ export default async function IdeaPage({ params }: PageProps) {
       {/* Pros & Cons */}
       {((idea.pros && idea.pros.length > 0) || (idea.cons && idea.cons.length > 0)) && (
         <section className="mb-10">
-          <h2 className="mb-4 text-xl font-bold text-slate-900">Pros & Cons</h2>
+          <h2 className="mb-4 text-xl font-bold text-slate-900">Pros &amp; Cons</h2>
           <div className="grid gap-4 sm:grid-cols-2">
             {idea.pros && idea.pros.length > 0 && (
               <div className="rounded-xl border border-green-100 bg-green-50 p-4">
@@ -243,18 +284,6 @@ export default async function IdeaPage({ params }: PageProps) {
         </section>
       )}
 
-      {/* Legacy: Problem / Solution */}
-      {idea.problem && (
-        <Section title="The Problem">
-          <PortableText value={idea.problem as Parameters<typeof PortableText>[0]['value']} />
-        </Section>
-      )}
-      {idea.solution && (
-        <Section title="The Solution">
-          <PortableText value={idea.solution as Parameters<typeof PortableText>[0]['value']} />
-        </Section>
-      )}
-
       {/* Proof Points */}
       {idea.proof_points && idea.proof_points.length > 0 && (
         <section className="mt-10 border-t border-slate-100 pt-8">
@@ -271,7 +300,6 @@ export default async function IdeaPage({ params }: PageProps) {
                     : 'border-amber-100 bg-amber-50'
                 }`}
               >
-                {/* Header row */}
                 <div className="mb-2 flex flex-wrap items-center gap-2">
                   <span className={`rounded-full px-2.5 py-0.5 text-xs font-bold uppercase tracking-wide ${
                     pp.type === 'Case Study'
@@ -283,33 +311,19 @@ export default async function IdeaPage({ params }: PageProps) {
                     {pp.type}
                   </span>
                   <span className="text-xs font-semibold text-slate-500">{pp.source}</span>
-                  {pp.founder && (
-                    <span className="text-xs text-slate-500">· {pp.founder}</span>
-                  )}
+                  {pp.founder && <span className="text-xs text-slate-500">· {pp.founder}</span>}
                 </div>
-
-                {/* Headline */}
                 {pp.url ? (
-                  <a
-                    href={pp.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="font-semibold text-slate-800 hover:text-indigo-700 hover:underline leading-snug"
-                  >
+                  <a href={pp.url} target="_blank" rel="noopener noreferrer"
+                    className="font-semibold text-slate-800 hover:text-indigo-700 hover:underline leading-snug">
                     {pp.headline} ↗
                   </a>
                 ) : (
                   <p className="font-semibold text-slate-800 leading-snug">{pp.headline}</p>
                 )}
-
-                {/* Key stat */}
                 {pp.key_stat && (
-                  <p className="mt-2 text-sm font-medium text-slate-700">
-                    📊 {pp.key_stat}
-                  </p>
+                  <p className="mt-2 text-sm font-medium text-slate-700">📊 {pp.key_stat}</p>
                 )}
-
-                {/* Quote */}
                 {pp.quote && (
                   <blockquote className="mt-2 border-l-2 border-slate-300 pl-3 text-sm italic text-slate-600">
                     "{pp.quote}"
@@ -349,6 +363,27 @@ export default async function IdeaPage({ params }: PageProps) {
   )
 }
 
+// ── Sub-components ────────────────────────────────────────────────────────────
+
+const ACCENT_STYLES: Record<string, { bg: string; border: string; label: string; value: string }> = {
+  green:  { bg: 'bg-green-50',  border: 'border-green-100',  label: 'text-green-600',  value: 'text-green-800' },
+  blue:   { bg: 'bg-blue-50',   border: 'border-blue-100',   label: 'text-blue-600',   value: 'text-blue-800' },
+  amber:  { bg: 'bg-amber-50',  border: 'border-amber-100',  label: 'text-amber-600',  value: 'text-amber-800' },
+  indigo: { bg: 'bg-indigo-50', border: 'border-indigo-100', label: 'text-indigo-600', value: 'text-indigo-800' },
+  red:    { bg: 'bg-red-50',    border: 'border-red-100',    label: 'text-red-600',    value: 'text-red-800' },
+  slate:  { bg: 'bg-slate-50',  border: 'border-slate-200',  label: 'text-slate-500',  value: 'text-slate-800' },
+}
+
+function GlanceCard({ label, value, accent }: { label: string; value: string; accent: string }) {
+  const s = ACCENT_STYLES[accent] || ACCENT_STYLES.slate
+  return (
+    <div className={`rounded-xl border ${s.border} ${s.bg} p-4`}>
+      <p className={`text-xs font-semibold uppercase tracking-wide ${s.label} mb-1`}>{label}</p>
+      <p className={`text-sm font-bold ${s.value}`}>{value}</p>
+    </div>
+  )
+}
+
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <section className="mb-8">
@@ -358,34 +393,7 @@ function Section({ title, children }: { title: string; children: React.ReactNode
   )
 }
 
-function MetaItem({
-  label,
-  value,
-  valueClass,
-}: {
-  label: string
-  value: string
-  valueClass?: string
-}) {
-  return (
-    <div>
-      <p className="text-xs font-medium uppercase tracking-wide text-slate-400">{label}</p>
-      <p className={`mt-1 text-sm font-semibold rounded-full px-2 py-0.5 inline-block ${valueClass || 'text-slate-700'}`}>
-        {value}
-      </p>
-    </div>
-  )
-}
-
-function TagGroup({
-  label,
-  items,
-  color,
-}: {
-  label: string
-  items: string[]
-  color: string
-}) {
+function TagGroup({ label, items, color }: { label: string; items: string[]; color: string }) {
   return (
     <div className="rounded-xl border border-slate-100 p-4">
       <p className="mb-2 text-xs font-medium uppercase tracking-wide text-slate-400">{label}</p>

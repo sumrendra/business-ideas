@@ -16,6 +16,8 @@ const IDEA_CARD_FIELDS = groq`
   tags,
   featured,
   published_at,
+  monthly_revenue_range,
+  time_to_first_revenue,
   "cover_image": cover_image { asset->{ url }, alt }
 `
 
@@ -69,7 +71,16 @@ export const IDEA_BY_SLUG_QUERY = groq`
     problem,
     solution,
     resources_needed,
+    monthly_revenue_range,
+    time_to_first_revenue,
+    breakeven_timeline,
+    licenses_required,
+    demand_signal,
+    first_step,
     proof_points,
+    kpis,
+    risks_detailed,
+    execution_plan,
     seo_title,
     seo_description
   }

@@ -11,6 +11,7 @@
   "dependencies": {
     "@anthropic-ai/sdk": "^0.92.0",
     "@portabletext/react": "^3.1.0",
+    "@react-pdf/renderer": "^4.5.1",
     "@sanity/image-url": "^1.0.2",
     "@sanity/vision": "^3.62.3",
     "next": "^15.5.15",

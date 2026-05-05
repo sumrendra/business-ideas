@@ -155,6 +155,62 @@ export default defineType({
       of: [{ type: 'block' }],
     }),
 
+    // ── New Validation Metrics ───────────────────────────────────────────────
+    defineField({
+      name: 'monthly_revenue_range',
+      title: 'Monthly Revenue Range',
+      description: 'Realistic earnings range at 6 months. e.g. "₹40,000–₹1.2L/month"',
+      type: 'string',
+    }),
+    defineField({
+      name: 'time_to_first_revenue',
+      title: 'Time to First Revenue',
+      description: 'How quickly can a founder make their first rupee? e.g. "3–6 weeks"',
+      type: 'string',
+    }),
+    defineField({
+      name: 'breakeven_timeline',
+      title: 'Break-even Timeline',
+      description: 'Estimated months to recover setup cost. e.g. "4–7 months"',
+      type: 'string',
+    }),
+    defineField({
+      name: 'licenses_required',
+      title: 'Licenses / Registrations Required',
+      description: 'Mandatory legal registrations to operate this business.',
+      type: 'array',
+      of: [{ type: 'string' }],
+      options: {
+        list: [
+          'GST Registration',
+          'FSSAI License',
+          'Shop & Establishment Act',
+          'MSME / Udyam Registration',
+          'Trade License',
+          'Import Export Code (IEC)',
+          'Drug License',
+          'BIS Certification',
+          'RERA Registration',
+          'ISO Certification',
+          'No License Required',
+        ],
+        layout: 'tags',
+      },
+    }),
+    defineField({
+      name: 'demand_signal',
+      title: 'Demand Signal',
+      description: 'One real data point proving market demand. e.g. "Google Trends: 3× rise in 2 years" or "1.2L monthly searches"',
+      type: 'string',
+    }),
+    defineField({
+      name: 'first_step',
+      title: 'Step 1 to Start Today',
+      description: 'The single most concrete first action a founder can take this week.',
+      type: 'text',
+      rows: 2,
+    }),
+
     // ── Business Key Metrics ─────────────────────────────────────────────────
     defineField({
       name: 'gross_margin',
@@ -312,6 +368,53 @@ export default defineType({
         },
       ],
     }),
+    // ── Report-only Deep Content ─────────────────────────────────────────────
+    defineField({
+      name: 'kpis',
+      title: 'Key Performance Indicators',
+      description: 'Measurable KPIs a founder should track for this business.',
+      type: 'array',
+      of: [{
+        type: 'object',
+        fields: [
+          defineField({ name: 'metric', title: 'Metric Name', type: 'string' }),
+          defineField({ name: 'target', title: 'Target / Benchmark', type: 'string' }),
+          defineField({ name: 'timeframe', title: 'Timeframe', type: 'string' }),
+          defineField({ name: 'category', title: 'Category', type: 'string',
+            options: { list: ['Revenue', 'Operations', 'Customer', 'Marketing', 'Finance'], layout: 'radio' } }),
+        ],
+        preview: { select: { title: 'metric', subtitle: 'target' } },
+      }],
+    }),
+    defineField({
+      name: 'risks_detailed',
+      title: 'Risk Register',
+      description: 'Structured risk assessment with severity and mitigation.',
+      type: 'array',
+      of: [{
+        type: 'object',
+        fields: [
+          defineField({ name: 'title', title: 'Risk', type: 'string' }),
+          defineField({ name: 'severity', title: 'Severity', type: 'string',
+            options: { list: ['High', 'Medium', 'Low'], layout: 'radio' } }),
+          defineField({ name: 'impact', title: 'Business Impact', type: 'string' }),
+          defineField({ name: 'mitigation', title: 'Mitigation Strategy', type: 'string' }),
+        ],
+        preview: { select: { title: 'title', subtitle: 'severity' } },
+      }],
+    }),
+    defineField({
+      name: 'execution_plan',
+      title: '90-Day Execution Plan',
+      description: 'Month-by-month action plan for a founder starting this business.',
+      type: 'object',
+      fields: [
+        defineField({ name: 'month_1', title: 'Month 1 — Foundation', type: 'array', of: [{ type: 'string' }] }),
+        defineField({ name: 'month_2', title: 'Month 2 — Launch', type: 'array', of: [{ type: 'string' }] }),
+        defineField({ name: 'month_3', title: 'Month 3 — Scale', type: 'array', of: [{ type: 'string' }] }),
+      ],
+    }),
+
     defineField({
       name: 'featured',
       title: 'Featured on Homepage',

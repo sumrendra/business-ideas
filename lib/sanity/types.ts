@@ -26,6 +26,12 @@ export interface Idea {
   scope_in_india?: unknown[]
   things_to_note?: string[]
   current_landscape?: unknown[]
+  monthly_revenue_range?: string
+  time_to_first_revenue?: string
+  breakeven_timeline?: string
+  licenses_required?: string[]
+  demand_signal?: string
+  first_step?: string
   gross_margin?: string
   setup_cost_range?: string
   pivot_options?: string
@@ -35,6 +41,9 @@ export interface Idea {
   problem?: unknown[]
   solution?: unknown[]
   proof_points?: ProofPoint[]
+  kpis?: { _key: string; metric: string; target: string; timeframe: string; category: string }[]
+  risks_detailed?: { _key: string; title: string; severity: 'High' | 'Medium' | 'Low'; impact: string; mitigation: string }[]
+  execution_plan?: { month_1: string[]; month_2: string[]; month_3: string[] }
   seo_title?: string
   seo_description?: string
 }
