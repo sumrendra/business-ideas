@@ -10,6 +10,7 @@ import SponsoredBanner from '@/components/SponsoredBanner'
 import PartnersStrip from '@/components/PartnersStrip'
 import FaqAccordion from '@/components/FaqAccordion'
 import type { Idea, Post } from '@/lib/sanity/types'
+import { Ld, faqSchema } from '@/lib/jsonld'
 
 export const revalidate = 3600
 
@@ -35,6 +36,14 @@ export default async function HomePage() {
 
   return (
     <>
+      <Ld data={faqSchema([
+        { q: 'What are the best business ideas in India right now?', a: 'The best business ideas in India in 2026 depend on your budget and skills. Top sectors include SaaS, local services, EdTech, health & wellness, and e-commerce. Browse our curated collection filtered by investment and difficulty.' },
+        { q: 'Which business can I start with under ₹1 lakh in India?', a: 'Service businesses like home cleaning, tiffin service, online tutoring, social media management, and content writing can all be started for under ₹1 lakh and generate ₹30,000–₹80,000/month.' },
+        { q: 'What are the best business ideas for women in India?', a: 'Women-friendly business ideas in India include home-based tiffin service, online tutoring, beauty services, boutique fashion, digital marketing agency, and handcraft exports — all offering flexibility and profitability.' },
+        { q: 'What is the most profitable small business in India?', a: 'High-margin small businesses include digital services (70–85% margin), online education (60–80%), and food delivery/tiffin services (50–65%). The best choice depends on your skills and local market.' },
+        { q: 'How do I get funding for a business in India?', a: 'Options include MUDRA Loan (up to ₹10L, no collateral), PMEGP subsidy (15–35% of project cost), Stand-Up India (₹10L–₹1Cr for women/SC/ST), and bank loans backed by CGTMSE guarantee.' },
+      ])} />
+
       {/* Hero + Search */}
       <section className="bg-gradient-to-br from-indigo-600 to-indigo-800 text-white">
         <div className="mx-auto max-w-3xl px-4 py-20 text-center">

@@ -10,6 +10,10 @@ import type { Post } from '@/lib/sanity/types'
 import ShareButtons from '@/components/ShareButtons'
 import ContactUsButton from '@/components/ContactUsButton'
 import TableOfContents, { type TocHeading } from '@/components/TableOfContents'
+import IdeaCard from '@/components/IdeaCard'
+import { RELATED_IDEAS_FOR_POST_QUERY } from '@/lib/sanity/queries'
+import type { Idea } from '@/lib/sanity/types'
+import { Ld, articleSchema, breadcrumbSchema, faqSchema } from '@/lib/jsonld'
 
 interface PageProps {
   params: Promise<{ slug: string }>
@@ -65,13 +69,14 @@ export default async function BlogPostPage({ params }: PageProps) {
 
   if (!post) notFound()
 
-  const relatedPosts = post.category
-    ? await client.fetch<Post[]>(
-        RELATED_POSTS_QUERY,
-        { slug, category: post.category },
-        { next: { tags: ['posts'] } }
-      )
-    : []
+  const [relatedPosts, relatedIdeas] = await Promise.all([
+    post.category
+      ? client.fetch<Post[]>(RELATED_POSTS_QUERY, { slug, category: post.category }, { next: { tags: ['posts'] } })
+      : Promise.resolve([]),
+    post.tags?.length
+      ? client.fetch<Idea[]>(RELATED_IDEAS_FOR_POST_QUERY, { tags: post.tags }, { next: { tags: ['business-ideas'] } })
+      : Promise.resolve([]),
+  ])
 
   const coverUrl = post.cover_image
     ? urlFor(post.cover_image).width(1200).height(600).url()
@@ -89,6 +94,21 @@ export default async function BlogPostPage({ params }: PageProps) {
   const author = post.author || 'BusinessIdeas.live'
   const headings = post.body ? extractHeadings(post.body as unknown[]) : []
 
+  const articleLd = articleSchema({
+    title: post.seo_title || post.title,
+    description: post.seo_description || post.excerpt,
+    url: pageUrl,
+    imageUrl: coverUrl || undefined,
+    datePublished: post.published_at,
+    author,
+  })
+  const breadcrumb = breadcrumbSchema([
+    { name: 'Home', url: 'https://businessideas.live' },
+    { name: 'Blog', url: 'https://businessideas.live/blog' },
+    { name: post.title, url: pageUrl },
+  ])
+  const faqLd = post.faqs?.length ? faqSchema(post.faqs.map(f => ({ q: f.question, a: f.answer }))) : null
+
   // PortableText heading renderer with anchor IDs
   const headingComponent = (level: 2 | 3) =>
     function HeadingBlock({ children, value }: any) {
@@ -100,6 +120,9 @@ export default async function BlogPostPage({ params }: PageProps) {
 
   return (
     <>
+      <Ld data={articleLd} />
+      <Ld data={breadcrumb} />
+      {faqLd && <Ld data={faqLd} />}
       <div className="mx-auto max-w-7xl px-4 py-10">
         {/* Breadcrumb */}
         <nav className="mb-6 flex min-w-0 items-center gap-1 text-sm text-slate-500">
@@ -317,6 +340,17 @@ export default async function BlogPostPage({ params }: PageProps) {
                       </div>
                     )
                   })}
+                </div>
+              </section>
+            )}
+
+            {/* Related Business Ideas */}
+            {relatedIdeas.length > 0 && (
+              <section className="mt-16 border-t-2 border-slate-100 pt-10">
+                <h2 className="mb-2 text-xl font-bold text-slate-900">Related Business Ideas</h2>
+                <p className="mb-6 text-sm text-slate-500">Ideas you can start based on this article</p>
+                <div className="grid gap-5 sm:grid-cols-3">
+                  {relatedIdeas.map(idea => <IdeaCard key={idea._id} idea={idea} />)}
                 </div>
               </section>
             )}
