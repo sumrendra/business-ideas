@@ -15,6 +15,7 @@ import {
 import { PortableText } from '@portabletext/react'
 import DownloadReportButton from '@/components/DownloadReportButtonWrapper'
 import IdeaCard from '@/components/IdeaCard'
+import TrendsChart from '@/components/TrendsChart'
 import { Ld, breadcrumbSchema, collectionPageSchema, faqSchema } from '@/lib/jsonld'
 
 const BASE = 'https://businessideas.live'
@@ -559,6 +560,189 @@ export default async function IdeaPage({ params }: PageProps) {
         <Section title="Current Landscape in India">
           <PortableText value={idea.current_landscape as Parameters<typeof PortableText>[0]['value']} />
         </Section>
+      )}
+
+      {/* ── Unit Economics ─────────────────────────────────────────────────────── */}
+      {idea.unit_economics && Object.values(idea.unit_economics).some(Boolean) && (
+        <section className="mb-10">
+          <h2 className="mb-1 text-xl font-bold text-slate-900">Unit Economics</h2>
+          <p className="mb-4 text-sm text-slate-500">Real benchmarks from Indian operators in this space</p>
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+            {[
+              { label: 'Customer Acq. Cost', value: idea.unit_economics.cac },
+              { label: 'Lifetime Value', value: idea.unit_economics.ltv },
+              { label: 'LTV : CAC', value: idea.unit_economics.ltv_cac_ratio },
+              { label: 'Avg Order Value', value: idea.unit_economics.avg_order_value },
+              { label: 'Monthly Churn', value: idea.unit_economics.churn_rate },
+              { label: 'CAC Payback', value: idea.unit_economics.payback_period },
+            ].filter(r => r.value).map(row => (
+              <div key={row.label} className="rounded-xl border border-slate-200 bg-white p-4">
+                <p className="text-xs font-semibold uppercase tracking-wide text-slate-400 mb-1">{row.label}</p>
+                <p className="text-sm font-bold text-slate-800">{row.value}</p>
+              </div>
+            ))}
+          </div>
+          {idea.unit_economics.context && (
+            <p className="mt-3 text-xs text-slate-400 italic">{idea.unit_economics.context}</p>
+          )}
+        </section>
+      )}
+
+      {/* ── Google Trends ──────────────────────────────────────────────────────── */}
+      {idea.google_trends_keyword && (
+        <section className="mb-10">
+          <h2 className="mb-1 text-xl font-bold text-slate-900">Search Demand Trend</h2>
+          <p className="mb-3 text-sm text-slate-500">Google Trends — India — past 5 years</p>
+          <TrendsChart
+            keyword={idea.google_trends_keyword}
+            trendsUrl={`https://trends.google.com/trends/explore?q=${encodeURIComponent(idea.google_trends_keyword)}&geo=IN&date=today%205-y`}
+            trendData={idea.trend_data}
+          />
+        </section>
+      )}
+
+      {/* ── Indian Competitors ─────────────────────────────────────────────────── */}
+      {idea.competitors && idea.competitors.length > 0 && (
+        <section className="mb-10">
+          <h2 className="mb-1 text-xl font-bold text-slate-900">Who's Already Doing This in India</h2>
+          <p className="mb-4 text-sm text-slate-500">Know your competition before you start</p>
+          <div className="overflow-hidden rounded-xl border border-slate-200">
+            <table className="w-full text-sm">
+              <thead className="bg-slate-50 text-xs font-semibold uppercase tracking-wide text-slate-400">
+                <tr>
+                  <th className="px-4 py-3 text-left">Company</th>
+                  <th className="px-4 py-3 text-left hidden sm:table-cell">City</th>
+                  <th className="px-4 py-3 text-left hidden md:table-cell">Funding</th>
+                  <th className="px-4 py-3 text-left">Scale / Revenue Signal</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {idea.competitors.map((c) => (
+                  <tr key={c._key} className="hover:bg-slate-50 transition-colors">
+                    <td className="px-4 py-3">
+                      <div className="font-semibold text-slate-800">{c.name}</div>
+                      {c.type && (
+                        <span className={`mt-0.5 inline-block rounded-full px-2 py-0.5 text-xs font-medium ${
+                          c.type === 'Funded' ? 'bg-blue-100 text-blue-700' :
+                          c.type === 'Listed' ? 'bg-purple-100 text-purple-700' :
+                          c.type === 'MNC' ? 'bg-amber-100 text-amber-700' :
+                          'bg-green-100 text-green-700'
+                        }`}>{c.type}</span>
+                      )}
+                    </td>
+                    <td className="px-4 py-3 text-slate-500 hidden sm:table-cell">{c.city || '—'}</td>
+                    <td className="px-4 py-3 text-slate-600 hidden md:table-cell">{c.funding_raised || '—'}</td>
+                    <td className="px-4 py-3">
+                      <p className="text-slate-700">{c.revenue_signal || '—'}</p>
+                      {c.differentiator && (
+                        <p className="text-xs text-slate-400 mt-0.5">{c.differentiator}</p>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
+      )}
+
+      {/* ── Regulatory Table ───────────────────────────────────────────────────── */}
+      {idea.regulatory_table && idea.regulatory_table.length > 0 && (
+        <section className="mb-10">
+          <h2 className="mb-1 text-xl font-bold text-slate-900">Licenses &amp; Regulatory Requirements</h2>
+          <p className="mb-4 text-sm text-slate-500">Exact costs and timelines — not estimates</p>
+          <div className="overflow-hidden rounded-xl border border-slate-200">
+            <table className="w-full text-sm">
+              <thead className="bg-slate-50 text-xs font-semibold uppercase tracking-wide text-slate-400">
+                <tr>
+                  <th className="px-4 py-3 text-left">License / Registration</th>
+                  <th className="px-4 py-3 text-left hidden sm:table-cell">Authority</th>
+                  <th className="px-4 py-3 text-left">Cost (₹)</th>
+                  <th className="px-4 py-3 text-left hidden md:table-cell">Time</th>
+                  <th className="px-4 py-3 text-left hidden lg:table-cell">Portal</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {idea.regulatory_table.map((reg) => (
+                  <tr key={reg._key} className="hover:bg-slate-50 transition-colors">
+                    <td className="px-4 py-3">
+                      <div className="font-medium text-slate-800">{reg.name}</div>
+                      <span className={`text-xs font-medium ${reg.mandatory ? 'text-red-500' : 'text-slate-400'}`}>
+                        {reg.mandatory ? 'Mandatory' : 'Optional'}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3 text-slate-500 hidden sm:table-cell">{reg.authority || '—'}</td>
+                    <td className="px-4 py-3 font-semibold text-slate-800">{reg.cost || '—'}</td>
+                    <td className="px-4 py-3 text-slate-500 hidden md:table-cell">{reg.processing_time || '—'}</td>
+                    <td className="px-4 py-3 text-slate-500 hidden lg:table-cell">{reg.portal || '—'}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
+      )}
+
+      {/* ── Case Study ─────────────────────────────────────────────────────────── */}
+      {idea.case_study?.founder_name && (
+        <section className="mb-10">
+          <h2 className="mb-4 text-xl font-bold text-slate-900">Real Founder Story</h2>
+          <div className="rounded-2xl border border-indigo-100 bg-gradient-to-br from-indigo-50 to-white p-6">
+            <div className="mb-4 flex flex-wrap items-start gap-4">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-indigo-600 text-lg font-bold text-white">
+                {idea.case_study.founder_name.charAt(0)}
+              </div>
+              <div>
+                <p className="font-bold text-slate-900 text-base">{idea.case_study.founder_name}</p>
+                <p className="text-sm text-slate-500">
+                  {[idea.case_study.business_name, idea.case_study.city, idea.case_study.started_year]
+                    .filter(Boolean).join(' · ')}
+                </p>
+              </div>
+              {(idea.case_study.revenue_6m || idea.case_study.revenue_12m) && (
+                <div className="ml-auto flex gap-4">
+                  {idea.case_study.revenue_6m && (
+                    <div className="text-right">
+                      <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">Month 6</p>
+                      <p className="text-sm font-bold text-green-700">{idea.case_study.revenue_6m}</p>
+                    </div>
+                  )}
+                  {idea.case_study.revenue_12m && (
+                    <div className="text-right">
+                      <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">Month 12</p>
+                      <p className="text-sm font-bold text-green-700">{idea.case_study.revenue_12m}</p>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {idea.case_study.team_size && (
+              <p className="mb-4 text-xs text-slate-500">Team size: {idea.case_study.team_size}</p>
+            )}
+
+            {idea.case_study.key_insight && (
+              <div className="mb-4 rounded-xl border-l-4 border-indigo-400 bg-white p-4">
+                <p className="text-xs font-bold uppercase tracking-wide text-indigo-600 mb-1">What Worked</p>
+                <p className="text-sm text-slate-700 leading-relaxed">{idea.case_study.key_insight}</p>
+              </div>
+            )}
+
+            {idea.case_study.biggest_mistake && (
+              <div className="rounded-xl border-l-4 border-amber-400 bg-white p-4">
+                <p className="text-xs font-bold uppercase tracking-wide text-amber-600 mb-1">Biggest Mistake</p>
+                <p className="text-sm text-slate-700 leading-relaxed">{idea.case_study.biggest_mistake}</p>
+              </div>
+            )}
+
+            {idea.case_study.source_url && (
+              <a href={idea.case_study.source_url} target="_blank" rel="noopener noreferrer"
+                className="mt-4 inline-block text-xs font-medium text-indigo-600 hover:underline">
+                Read full story ↗
+              </a>
+            )}
+          </div>
+        </section>
       )}
 
       {/* Licenses Required */}

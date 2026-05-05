@@ -41,6 +41,30 @@ export interface Idea {
   problem?: unknown[]
   solution?: unknown[]
   proof_points?: ProofPoint[]
+  unit_economics?: {
+    cac?: string; ltv?: string; ltv_cac_ratio?: string
+    avg_order_value?: string; churn_rate?: string; payback_period?: string; context?: string
+  }
+  competitors?: {
+    _key: string; name: string; type?: string; city?: string
+    funding_raised?: string; revenue_signal?: string; differentiator?: string
+  }[]
+  google_trends_keyword?: string
+  trend_data?: {
+    monthly_values?: string
+    direction?: 'Growing' | 'Stable' | 'Declining' | 'Seasonal'
+    summary?: string
+    peak_month?: string
+  }
+  regulatory_table?: {
+    _key: string; name: string; authority?: string; cost?: string
+    processing_time?: string; mandatory?: boolean; portal?: string
+  }[]
+  case_study?: {
+    founder_name?: string; business_name?: string; city?: string; started_year?: string
+    revenue_6m?: string; revenue_12m?: string; team_size?: string
+    key_insight?: string; biggest_mistake?: string; source_url?: string
+  }
   kpis?: { _key: string; metric: string; target: string; timeframe: string; category: string }[]
   risks_detailed?: { _key: string; title: string; severity: 'High' | 'Medium' | 'Low'; impact: string; mitigation: string }[]
   execution_plan?: { month_1: string[]; month_2: string[]; month_3: string[] }
@@ -122,6 +146,14 @@ export const INDUSTRIES = [
   'Local Services',
   'Climate / Sustainability',
   'AI / ML',
+  'AgriTech & Food',
+  'Manufacturing',
+  'Travel & Hospitality',
+  'B2B Services',
+  'Real Estate & PropTech',
+  'Pet & Animal Care',
+  'Logistics & Supply Chain',
+  'Export & Trade',
   'Other',
 ]
 

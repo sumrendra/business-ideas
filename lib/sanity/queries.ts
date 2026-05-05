@@ -81,6 +81,12 @@ export const IDEA_BY_SLUG_QUERY = groq`
     kpis,
     risks_detailed,
     execution_plan,
+    unit_economics,
+    competitors,
+    google_trends_keyword,
+    trend_data,
+    regulatory_table,
+    case_study,
     seo_title,
     seo_description
   }
