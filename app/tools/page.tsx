@@ -39,7 +39,37 @@ const TOOLS = [
     href: '/hyperlocal-opportunity',
     label: 'Hyperlocal Opportunity Map',
     description: 'Interactive heatmap — demand vs. supply gap across any Indian city. See gap zones, supply clusters and Trends data on one map.',
-    badge: 'New',
+    badge: 'Maps',
+  },
+  {
+    href: '/funding-radar',
+    label: 'Startup Funding Radar',
+    description: '65+ real Indian startup deals FY2022–24 — filter by sector, stage, and city. See where capital is flowing.',
+    badge: 'Intelligence',
+  },
+  {
+    href: '/compliance-map',
+    label: 'License & Compliance Map',
+    description: 'Every license you need, what it costs, and how long it takes — for 9 common Indian business types.',
+    badge: 'Regulatory',
+  },
+  {
+    href: '/locality-roi',
+    label: 'Locality ROI Score',
+    description: 'Live gap score × commercial rent data. Find the best value zone — highest opportunity per rupee of rent.',
+    badge: 'Location',
+  },
+  {
+    href: '/competitor-intel',
+    label: 'Competitor Intelligence',
+    description: 'Scan all 15 business categories in any Indian city. See incumbent density, gap scores, and entry difficulty side by side.',
+    badge: 'Competitive',
+  },
+  {
+    href: '/export-finder',
+    label: 'Export Opportunity Finder',
+    description: '25 SME-accessible export categories with FY24 data — value, growth, top markets, certifications, and opportunity score.',
+    badge: 'Trade',
   },
 ]
 
