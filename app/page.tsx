@@ -228,9 +228,19 @@ export default async function HomePage() {
       )}
 
       {/* ── FAQ ────────────────────────────────────────────────────────────── */}
-      <section className="mx-auto max-w-3xl px-4 py-16">
-        <h2 className="mb-6 text-2xl sm:text-3xl font-bold text-slate-900 dark:text-slate-100">Frequently asked questions</h2>
-        <FaqAccordion />
+      <section className="border-t border-slate-200/60 dark:border-slate-800/60 mesh-bg">
+        <div className="mx-auto max-w-3xl px-4 py-20">
+          <div className="mb-8">
+            <p className="text-xs font-bold uppercase tracking-widest text-indigo-600 dark:text-indigo-400">FAQ</p>
+            <h2 className="mt-2 text-2xl sm:text-3xl font-bold text-slate-900 dark:text-slate-100">
+              Frequently asked questions
+            </h2>
+            <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
+              Quick answers on starting a business in India — budget, sectors and funding.
+            </p>
+          </div>
+          <FaqAccordion />
+        </div>
       </section>
     </>
   )

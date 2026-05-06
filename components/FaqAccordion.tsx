@@ -65,25 +65,59 @@ const FAQS = [
   },
 ]
 
+const VISIBLE_COUNT = 5
+
 export default function FaqAccordion() {
-  const [openIndex, setOpenIndex] = useState<number | null>(null)
+  const [openIndex, setOpenIndex] = useState<number | null>(0)
+  const [showAll, setShowAll] = useState(false)
+
+  const visibleFaqs = showAll ? FAQS : FAQS.slice(0, VISIBLE_COUNT)
+  const remaining = FAQS.length - VISIBLE_COUNT
 
   return (
-    <div className="divide-y divide-slate-100 rounded-xl border border-slate-100">
-      {FAQS.map((faq, i) => (
-        <div key={i}>
-          <button
-            onClick={() => setOpenIndex(openIndex === i ? null : i)}
-            className="flex w-full items-center justify-between gap-4 px-5 py-4 text-left text-sm font-medium text-slate-800 hover:bg-slate-50 transition-colors"
+    <div className="space-y-3">
+      {visibleFaqs.map((faq, i) => {
+        const isOpen = openIndex === i
+        return (
+          <div
+            key={i}
+            className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 backdrop-blur-md overflow-hidden transition-colors"
           >
-            <span>{faq.q}</span>
-            <span className="shrink-0 text-slate-400">{openIndex === i ? '▲' : '▼'}</span>
+            <button
+              onClick={() => setOpenIndex(isOpen ? null : i)}
+              aria-expanded={isOpen}
+              className="flex w-full items-center justify-between gap-4 px-5 py-4 text-left text-sm sm:text-base font-medium text-slate-800 dark:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors"
+            >
+              <span>{faq.q}</span>
+              <svg
+                className={`shrink-0 h-5 w-5 text-slate-400 dark:text-slate-500 transition-transform ${isOpen ? 'rotate-180' : ''}`}
+                fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
+            {isOpen && (
+              <div className="px-5 pb-5 text-sm text-slate-600 dark:text-slate-400 leading-relaxed border-t border-slate-100 dark:border-slate-800 pt-4">
+                {faq.a}
+              </div>
+            )}
+          </div>
+        )
+      })}
+
+      {remaining > 0 && (
+        <div className="pt-2">
+          <button
+            onClick={() => setShowAll(v => !v)}
+            className="inline-flex items-center gap-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-4 py-2 text-sm font-medium text-slate-700 dark:text-slate-200 hover:border-indigo-300 dark:hover:border-indigo-700 hover:text-indigo-700 dark:hover:text-indigo-300 transition-colors"
+          >
+            {showAll ? `Show less` : `Show ${remaining} more questions`}
+            <svg className={`h-4 w-4 transition-transform ${showAll ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+            </svg>
           </button>
-          {openIndex === i && (
-            <div className="px-5 pb-4 text-sm text-slate-600 leading-relaxed">{faq.a}</div>
-          )}
         </div>
-      ))}
+      )}
     </div>
   )
 }
