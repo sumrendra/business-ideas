@@ -71,6 +71,12 @@ const TOOLS = [
     description: '25 SME-accessible export categories with FY24 data — value, growth, top markets, certifications, and opportunity score.',
     badge: 'Trade',
   },
+  {
+    href: '/supply-chain',
+    label: 'Supply Chain Flow — Solar Maintenance',
+    description: 'Interactive supply chain map: click any node to reveal suppliers, real costs, margins, common pitfalls, and tools at each stage.',
+    badge: 'New',
+  },
 ]
 
 export default function ToolsPage() {
