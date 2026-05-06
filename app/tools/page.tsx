@@ -35,6 +35,12 @@ const TOOLS = [
     description: 'Filter 298 ideas by budget, sector, difficulty and tags to find what fits.',
     badge: 'Discovery',
   },
+  {
+    href: '/hyperlocal-opportunity',
+    label: 'Hyperlocal Opportunity Map',
+    description: 'Interactive heatmap — demand vs. supply gap across any Indian city. See gap zones, supply clusters and Trends data on one map.',
+    badge: 'New',
+  },
 ]
 
 export default function ToolsPage() {

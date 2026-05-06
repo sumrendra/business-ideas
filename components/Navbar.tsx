@@ -3,11 +3,12 @@ import Image from 'next/image'
 import ThemeToggle from './ThemeToggle'
 
 const NAV_LINKS = [
-  { href: '/business-ideas', label: 'Opportunities' },
-  { href: '/blog',           label: 'Insights' },
-  { href: '/sectors',        label: 'Sectors' },
-  { href: '/incentives',     label: 'State Incentives' },
-  { href: '/tools',          label: 'Tools' },
+  { href: '/business-ideas',          label: 'Opportunities' },
+  { href: '/blog',                    label: 'Insights' },
+  { href: '/sectors',                 label: 'Sectors' },
+  { href: '/incentives',              label: 'State Incentives' },
+  { href: '/hyperlocal-opportunity',  label: 'Opportunity Map' },
+  { href: '/tools',                   label: 'Tools' },
 ]
 
 export default function Navbar() {
