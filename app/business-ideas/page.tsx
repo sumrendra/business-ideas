@@ -7,8 +7,9 @@ import FilterSidebar from '@/components/FilterSidebar'
 import SearchBox from '@/components/SearchBox'
 import SponsoredBanner from '@/components/SponsoredBanner'
 import Pagination from '@/components/Pagination'
+import SortDropdown from '@/components/SortDropdown'
 
-const IDEAS_PER_PAGE = 10
+const IDEAS_PER_PAGE = 5
 
 export const metadata: Metadata = {
   title: 'Browse Business Ideas in India – Filter by Budget, Sector & Difficulty',
@@ -46,11 +47,14 @@ const breadcrumbSchema = {
 }
 
 const SORT_OPTIONS = [
-  { value: 'popularity', label: 'Popularity' },
-  { value: 'budget_asc', label: 'Budget ↑' },
-  { value: 'budget_desc', label: 'Budget ↓' },
-  { value: 'saturation', label: 'Market Stage' },
+  { value: 'featured',    label: 'Featured' },
+  { value: 'newest',      label: 'Newest' },
+  { value: 'budget_asc',  label: 'Lowest Budget' },
+  { value: 'budget_desc', label: 'Highest Budget' },
+  { value: 'easiest',     label: 'Easiest first' },
 ]
+const DEFAULT_SORT = 'featured'
+const VALID_SORTS = new Set(SORT_OPTIONS.map((o) => o.value))
 
 interface PageProps {
   searchParams: Promise<{
@@ -86,8 +90,15 @@ export default async function IdeasPage({ searchParams }: PageProps) {
     search:     sp.search     ?? '',
   }
 
+  const requestedSort = sp.sort ?? DEFAULT_SORT
+  const currentSort = VALID_SORTS.has(requestedSort) ? requestedSort : DEFAULT_SORT
+
   const [ideas, count, allTags] = await Promise.all([
-    client.fetch<Idea[]>(IDEAS_PAGE_QUERY, { ...filterParams, from, to }, { next: { tags: ['business-ideas'] } }),
+    client.fetch<Idea[]>(
+      IDEAS_PAGE_QUERY,
+      { ...filterParams, from, to, sort: currentSort },
+      { next: { tags: ['business-ideas'] } },
+    ),
     client.fetch<number>(IDEAS_COUNT_QUERY, filterParams, { next: { tags: ['business-ideas'] } }),
     client.fetch<string[]>(IDEA_TAGS_QUERY, {}, { next: { tags: ['business-ideas'] } }),
   ])
@@ -103,8 +114,6 @@ export default async function IdeasPage({ searchParams }: PageProps) {
     search:     sp.search     ?? '',
   }
 
-  const currentSort = sp.sort ?? 'popularity'
-
   function buildParams(overrides: Record<string, string | null> = {}) {
     const params = new URLSearchParams()
     if (activeFilters.industry)   params.set('industry',   activeFilters.industry)
@@ -113,16 +122,17 @@ export default async function IdeasPage({ searchParams }: PageProps) {
     if (activeFilters.difficulty) params.set('difficulty', activeFilters.difficulty)
     if (activeFilters.search)     params.set('search',     activeFilters.search)
     activeFilters.tags.forEach((t) => params.append('tags', t))
-    params.set('sort', currentSort)
+    if (currentSort !== DEFAULT_SORT) params.set('sort', currentSort)
     Object.entries(overrides).forEach(([k, v]) => {
-      if (v === null) params.delete(k)
+      if (v === null || v === '') params.delete(k)
       else params.set(k, v)
     })
-    return `/business-ideas?${params.toString()}`
+    const qs = params.toString()
+    return qs ? `/business-ideas?${qs}` : '/business-ideas'
   }
 
   function sortUrl(value: string) {
-    return buildParams({ sort: value, page: '1' })
+    return buildParams({ sort: value === DEFAULT_SORT ? null : value, page: '1' })
   }
 
   function pageUrl(page: number) {
@@ -162,22 +172,10 @@ export default async function IdeasPage({ searchParams }: PageProps) {
           <p className="text-sm text-slate-500 dark:text-slate-400">
             Showing <span className="font-semibold text-slate-800 dark:text-slate-100">{count}</span> ideas matching your filters
           </p>
-          <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-xs text-slate-400 dark:text-slate-500 font-medium">Sort by:</span>
-            {SORT_OPTIONS.map(({ value, label }) => (
-              <a
-                key={value}
-                href={sortUrl(value)}
-                className={`rounded-full border px-3 py-1 text-xs font-medium transition-colors ${
-                  currentSort === value
-                    ? 'border-indigo-600 bg-indigo-600 text-white'
-                    : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 hover:border-indigo-300 hover:text-indigo-700 dark:hover:border-indigo-700 dark:hover:text-indigo-300'
-                }`}
-              >
-                {label}
-              </a>
-            ))}
-          </div>
+          <SortDropdown
+            current={currentSort}
+            options={SORT_OPTIONS.map((o) => ({ ...o, url: sortUrl(o.value) }))}
+          />
         </div>
 
         <div className="flex flex-col gap-8 lg:flex-row">

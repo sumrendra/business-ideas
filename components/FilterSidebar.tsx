@@ -71,8 +71,8 @@ export default function FilterSidebar({ allTags, activeFilters }: FilterSidebarP
     activeFilters.tags.length > 0
 
   return (
-    <div className="space-y-6 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-5 shadow-sm">
-      <div className="flex items-center justify-between">
+    <div className="space-y-3 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-5 shadow-sm">
+      <div className="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-slate-800">
         <h2 className="font-semibold text-slate-900 dark:text-slate-100">Filters</h2>
         {hasActiveFilters && (
           <button
@@ -84,7 +84,7 @@ export default function FilterSidebar({ allTags, activeFilters }: FilterSidebarP
         )}
       </div>
 
-      <FilterGroup title="Industry">
+      <FilterGroup title="Industry" defaultOpen={!!activeFilters.industry}>
         {INDUSTRIES.map((ind) => (
           <FilterButton
             key={ind}
@@ -95,7 +95,7 @@ export default function FilterSidebar({ allTags, activeFilters }: FilterSidebarP
         ))}
       </FilterGroup>
 
-      <FilterGroup title="Budget Range">
+      <FilterGroup title="Budget Range" defaultOpen={!!activeFilters.budget}>
         {BUDGET_OPTIONS.map(({ value, label }) => (
           <FilterButton
             key={value}
@@ -106,7 +106,7 @@ export default function FilterSidebar({ allTags, activeFilters }: FilterSidebarP
         ))}
       </FilterGroup>
 
-      <FilterGroup title="Market Saturation">
+      <FilterGroup title="Market Saturation" defaultOpen={!!activeFilters.saturation}>
         {MARKET_SATURATION_OPTIONS.map(({ value, label }) => (
           <FilterButton
             key={value}
@@ -117,7 +117,7 @@ export default function FilterSidebar({ allTags, activeFilters }: FilterSidebarP
         ))}
       </FilterGroup>
 
-      <FilterGroup title="Complexity">
+      <FilterGroup title="Complexity" defaultOpen={!!activeFilters.difficulty}>
         {DIFFICULTY_OPTIONS.map(({ value, label }) => (
           <FilterButton
             key={value}
@@ -129,7 +129,7 @@ export default function FilterSidebar({ allTags, activeFilters }: FilterSidebarP
       </FilterGroup>
 
       {sortedTags.length > 0 && (
-        <FilterGroup title="Tags">
+        <FilterGroup title="Tags" defaultOpen={activeFilters.tags.length > 0}>
           <div className="flex flex-wrap gap-1.5">
             {visibleTags.map((tag) => (
               <button
@@ -161,12 +161,33 @@ export default function FilterSidebar({ allTags, activeFilters }: FilterSidebarP
   )
 }
 
-function FilterGroup({ title, children }: { title: string; children: React.ReactNode }) {
+function FilterGroup({
+  title,
+  defaultOpen = false,
+  children,
+}: {
+  title: string
+  defaultOpen?: boolean
+  children: React.ReactNode
+}) {
   return (
-    <div>
-      <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">{title}</p>
+    <details open={defaultOpen} className="group border-b border-slate-100 dark:border-slate-800 pb-3 last:border-b-0 last:pb-0">
+      <summary className="flex cursor-pointer items-center justify-between list-none mb-2 select-none">
+        <span className="text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500 group-hover:text-slate-600 dark:group-hover:text-slate-300 transition-colors">
+          {title}
+        </span>
+        <svg
+          className="h-4 w-4 text-slate-400 transition-transform duration-200 group-open:rotate-180"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          strokeWidth={2}
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+        </svg>
+      </summary>
       <div className="space-y-1">{children}</div>
-    </div>
+    </details>
   )
 }
 
