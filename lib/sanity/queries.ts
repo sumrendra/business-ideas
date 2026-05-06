@@ -181,7 +181,7 @@ export const IDEA_TAGS_QUERY = groq`
   array::unique(*[_type == "businessIdea" && defined(tags)].tags[])
 `
 
-/** Paginated version — pass $from (0-based) and $to (inclusive) */
+/** Paginated version — pass $from (0-based), $to (inclusive), and $sort */
 export const IDEAS_PAGE_QUERY = groq`
   *[
     _type == "businessIdea"
@@ -193,7 +193,47 @@ export const IDEAS_PAGE_QUERY = groq`
     && ($difficulty  == "" || difficulty_level   == $difficulty)
     && (count($tags) == 0  || count(tags[@ in $tags]) > 0)
     && ($search      == "" || [title, description, industry, tags[]] match $search)
-  ] | order(featured desc, published_at desc) [$from..$to] {
+  ] | order(
+    select($sort == "featured" => featured, false) desc,
+    select($sort == "newest" => published_at, "") desc,
+    select(
+      $sort == "budget_asc" =>
+        select(
+          budget_range == "under_1l"  => 1,
+          budget_range == "1l_10l"    => 2,
+          budget_range == "10l_50l"   => 3,
+          budget_range == "50l_2cr"   => 4,
+          budget_range == "2cr_plus"  => 5,
+          99
+        ),
+      99
+    ) asc,
+    select(
+      $sort == "budget_desc" =>
+        select(
+          budget_range == "under_1l"  => 1,
+          budget_range == "1l_10l"    => 2,
+          budget_range == "10l_50l"   => 3,
+          budget_range == "50l_2cr"   => 4,
+          budget_range == "2cr_plus"  => 5,
+          0
+        ),
+      0
+    ) desc,
+    select(
+      $sort == "easiest" =>
+        select(
+          difficulty_level == "beginner"     => 1,
+          difficulty_level == "intermediate" => 2,
+          difficulty_level == "advanced"     => 3,
+          difficulty_level == "expert"       => 4,
+          99
+        ),
+      99
+    ) asc,
+    featured desc,
+    published_at desc
+  ) [$from..$to] {
     ${IDEA_CARD_FIELDS}
   }
 `

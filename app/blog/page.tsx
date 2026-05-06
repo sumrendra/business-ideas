@@ -7,7 +7,7 @@ import { BLOG_CATEGORIES } from '@/lib/sanity/types'
 import BlogCard from '@/components/BlogCard'
 import Pagination from '@/components/Pagination'
 
-const POSTS_PER_PAGE = 9
+const POSTS_PER_PAGE = 5
 const BASE = 'https://businessideas.live'
 
 export const metadata: Metadata = {
@@ -96,8 +96,8 @@ export default async function BlogPage({ searchParams }: PageProps) {
       <div className="flex flex-col gap-8 lg:flex-row">
         {/* Sidebar */}
         <aside className="w-full lg:w-64 shrink-0">
-          <div className="space-y-6 rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
-            <div className="flex items-center justify-between">
+          <div className="space-y-3 rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
+            <div className="flex items-center justify-between pb-2 border-b border-slate-100">
               <h2 className="font-semibold text-slate-900">Filters</h2>
               {hasFilters && (
                 <Link href="/blog" className="text-xs text-red-500 hover:text-red-700 font-medium transition-colors">
@@ -107,8 +107,13 @@ export default async function BlogPage({ searchParams }: PageProps) {
             </div>
 
             {/* Category filter */}
-            <div>
-              <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-400">Category</p>
+            <details open={!!sp.category} className="group border-b border-slate-100 pb-3 last:border-b-0 last:pb-0">
+              <summary className="flex cursor-pointer items-center justify-between list-none mb-2 select-none">
+                <span className="text-xs font-semibold uppercase tracking-wide text-slate-400 group-hover:text-slate-600 transition-colors">Category</span>
+                <svg className="h-4 w-4 text-slate-400 transition-transform duration-200 group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                </svg>
+              </summary>
               <div className="space-y-1">
                 {BLOG_CATEGORIES.map((cat) => (
                   <Link
@@ -125,12 +130,17 @@ export default async function BlogPage({ searchParams }: PageProps) {
                   </Link>
                 ))}
               </div>
-            </div>
+            </details>
 
             {/* Tag filter */}
             {allTags.length > 0 && (
-              <div>
-                <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-400">Tags</p>
+              <details open={!!sp.tag} className="group border-b border-slate-100 pb-3 last:border-b-0 last:pb-0">
+                <summary className="flex cursor-pointer items-center justify-between list-none mb-2 select-none">
+                  <span className="text-xs font-semibold uppercase tracking-wide text-slate-400 group-hover:text-slate-600 transition-colors">Tags</span>
+                  <svg className="h-4 w-4 text-slate-400 transition-transform duration-200 group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                  </svg>
+                </summary>
                 <div className="flex flex-wrap gap-1.5">
                   {allTags.sort().map((tag) => (
                     <Link
@@ -146,7 +156,7 @@ export default async function BlogPage({ searchParams }: PageProps) {
                     </Link>
                   ))}
                 </div>
-              </div>
+              </details>
             )}
           </div>
         </aside>
