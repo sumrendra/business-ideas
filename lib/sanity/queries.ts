@@ -124,6 +124,27 @@ export const CATEGORY_IDEAS_QUERY = groq`
   }
 `
 
+export const SECTOR_HEROES_QUERY = groq`
+  *[_type == "businessIdea" && defined(published_at)]
+  | order(featured desc, _updatedAt desc) {
+    industry,
+    "cover": cover_image { asset->{ url }, alt }
+  }
+`
+
+export const SECTOR_COUNTS_QUERY = groq`
+  {
+    "saas":          count(*[_type == "businessIdea" && industry == "SaaS"                     && defined(published_at)]),
+    "ecommerce":     count(*[_type == "businessIdea" && industry == "E-commerce"               && defined(published_at)]),
+    "localServices": count(*[_type == "businessIdea" && industry == "Local Services"           && defined(published_at)]),
+    "health":        count(*[_type == "businessIdea" && industry == "Health & Wellness"        && defined(published_at)]),
+    "edtech":        count(*[_type == "businessIdea" && industry == "EdTech"                   && defined(published_at)]),
+    "aiml":          count(*[_type == "businessIdea" && industry == "AI / ML"                  && defined(published_at)]),
+    "climate":       count(*[_type == "businessIdea" && industry == "Climate / Sustainability" && defined(published_at)]),
+    "fintech":       count(*[_type == "businessIdea" && industry == "FinTech"                  && defined(published_at)])
+  }
+`
+
 export const RELATED_IDEAS_QUERY = groq`
   *[
     _type == "businessIdea"

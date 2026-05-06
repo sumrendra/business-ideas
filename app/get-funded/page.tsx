@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import SchemesFinder from '@/components/SchemesFinder'
 import Disclaimer from '@/components/Disclaimer'
+import { INCENTIVES, ALL_STATES } from '@/lib/incentives'
 
 const BASE = 'https://businessideas.live'
 
@@ -86,6 +87,21 @@ export default function GetFundedPage() {
           Government schemes, bank loans, and startup programs to help you launch your business idea in India.
         </p>
       </div>
+
+      {/* State Incentives CTA */}
+      <Link
+        href="/incentives"
+        className="mb-8 flex items-center justify-between gap-4 rounded-2xl border border-indigo-200 dark:border-indigo-800 bg-gradient-to-r from-indigo-50 to-violet-50 dark:from-indigo-950/40 dark:to-violet-950/40 p-5 hover:border-indigo-400 hover:shadow-md transition-all"
+      >
+        <div>
+          <p className="text-xs font-bold uppercase tracking-widest text-indigo-600 dark:text-indigo-400 mb-1">New</p>
+          <p className="text-lg font-bold text-slate-900 dark:text-slate-100">State-wise Business Incentive Database</p>
+          <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+            {INCENTIVES.length} incentives across {ALL_STATES.length} states — capital subsidies, GST reimbursements, stamp duty waivers & more
+          </p>
+        </div>
+        <span className="shrink-0 text-2xl text-indigo-400">→</span>
+      </Link>
 
       {/* Quick Links */}
       <div className="mb-2">

@@ -1,11 +1,11 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { client } from '@/lib/sanity/client'
-import { FEATURED_IDEAS_QUERY, RECENT_POSTS_QUERY, POLICY_PULSE_QUERY } from '@/lib/sanity/queries'
+import { FEATURED_IDEAS_QUERY, RECENT_POSTS_QUERY, POLICY_PULSE_QUERY, SECTOR_COUNTS_QUERY } from '@/lib/sanity/queries'
 import IdeaCard from '@/components/IdeaCard'
 import BlogCard from '@/components/BlogCard'
 import SearchBox from '@/components/SearchBox'
-import FilterChips from '@/components/FilterChips'
+import TrendingSectors from '@/components/TrendingSectors'
 import SponsoredBanner from '@/components/SponsoredBanner'
 import PartnersStrip from '@/components/PartnersStrip'
 import FaqAccordion from '@/components/FaqAccordion'
@@ -27,11 +27,17 @@ export const metadata: Metadata = {
   },
 }
 
+interface SectorCounts {
+  saas: number; ecommerce: number; localServices: number; health: number
+  edtech: number; aiml: number; climate: number; fintech: number
+}
+
 export default async function HomePage() {
-  const [featuredIdeas, recentPosts, policyPosts] = await Promise.all([
+  const [featuredIdeas, recentPosts, policyPosts, sectorCounts] = await Promise.all([
     client.fetch<Idea[]>(FEATURED_IDEAS_QUERY, {}, { next: { tags: ['business-ideas'] } }),
     client.fetch<Post[]>(RECENT_POSTS_QUERY, {}, { next: { tags: ['posts'] } }),
     client.fetch<Post[]>(POLICY_PULSE_QUERY, {}, { next: { tags: ['posts'] } }),
+    client.fetch<SectorCounts>(SECTOR_COUNTS_QUERY, {}, { next: { tags: ['business-ideas'] } }),
   ])
 
   return (
@@ -94,12 +100,8 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* ── Filter chip bar ────────────────────────────────────────────────── */}
-      <section className="border-y border-slate-200/60 dark:border-slate-800/60 bg-white/40 dark:bg-slate-950/40 backdrop-blur-md">
-        <div className="mx-auto max-w-7xl px-4 py-4">
-          <FilterChips />
-        </div>
-      </section>
+      {/* ── Trending sectors ───────────────────────────────────────────────── */}
+      <TrendingSectors counts={sectorCounts} />
 
       {/* ── Featured opportunities ─────────────────────────────────────────── */}
       {featuredIdeas.length > 0 && (
@@ -229,17 +231,19 @@ export default async function HomePage() {
 
       {/* ── FAQ ────────────────────────────────────────────────────────────── */}
       <section className="border-t border-slate-200/60 dark:border-slate-800/60 mesh-bg">
-        <div className="mx-auto max-w-3xl px-4 py-20">
-          <div className="mb-8">
-            <p className="text-xs font-bold uppercase tracking-widest text-indigo-600 dark:text-indigo-400">FAQ</p>
-            <h2 className="mt-2 text-2xl sm:text-3xl font-bold text-slate-900 dark:text-slate-100">
-              Frequently asked questions
-            </h2>
-            <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
-              Quick answers on starting a business in India — budget, sectors and funding.
-            </p>
+        <div className="mx-auto max-w-7xl px-4 py-20">
+          <div className="max-w-3xl">
+            <div className="mb-8">
+              <p className="text-xs font-bold uppercase tracking-widest text-indigo-600 dark:text-indigo-400">FAQ</p>
+              <h2 className="mt-2 text-2xl sm:text-3xl font-bold text-slate-900 dark:text-slate-100">
+                Frequently asked questions
+              </h2>
+              <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
+                Quick answers on starting a business in India — budget, sectors and funding.
+              </p>
+            </div>
+            <FaqAccordion />
           </div>
-          <FaqAccordion />
         </div>
       </section>
     </>

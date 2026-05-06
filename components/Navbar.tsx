@@ -5,8 +5,9 @@ import ThemeToggle from './ThemeToggle'
 const NAV_LINKS = [
   { href: '/business-ideas', label: 'Opportunities' },
   { href: '/blog',           label: 'Insights' },
-  { href: '/tools',          label: 'Tools' },
   { href: '/sectors',        label: 'Sectors' },
+  { href: '/incentives',     label: 'State Incentives' },
+  { href: '/tools',          label: 'Tools' },
 ]
 
 export default function Navbar() {

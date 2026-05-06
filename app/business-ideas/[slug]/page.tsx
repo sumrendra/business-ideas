@@ -291,19 +291,19 @@ export default async function IdeaPage({ params }: PageProps) {
 
         <div className="mx-auto max-w-6xl px-4 py-12">
           {/* Breadcrumb */}
-          <nav className="mb-6 text-sm text-slate-500">
-            <Link href="/" className="hover:text-indigo-600">Home</Link>
+          <nav className="mb-6 text-sm text-slate-500 dark:text-slate-400">
+            <Link href="/" className="hover:text-indigo-600 dark:hover:text-indigo-400">Home</Link>
             <span className="mx-2">/</span>
-            <Link href="/business-ideas" className="hover:text-indigo-600">Business Ideas</Link>
+            <Link href="/business-ideas" className="hover:text-indigo-600 dark:hover:text-indigo-400">Business Ideas</Link>
             <span className="mx-2">/</span>
-            <span className="text-slate-700">{cat.h1}</span>
+            <span className="text-slate-700 dark:text-slate-300">{cat.h1}</span>
           </nav>
 
           {/* Header */}
           <header className="mb-10 max-w-3xl">
-            <h1 className="text-3xl font-bold text-slate-900 sm:text-4xl">{cat.h1}</h1>
-            <p className="mt-4 text-lg text-slate-600 leading-relaxed">{cat.intro}</p>
-            <p className="mt-3 text-sm text-slate-400">{ideas.length} validated ideas</p>
+            <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100 sm:text-4xl">{cat.h1}</h1>
+            <p className="mt-4 text-lg text-slate-600 dark:text-slate-300 leading-relaxed">{cat.intro}</p>
+            <p className="mt-3 text-sm text-slate-400 dark:text-slate-500">{ideas.length} validated ideas</p>
           </header>
 
           {/* Ideas grid */}
@@ -317,19 +317,25 @@ export default async function IdeaPage({ params }: PageProps) {
 
           {/* Cross-links to other categories */}
           {cat.related.length > 0 && (
-            <div className="mt-16 border-t border-slate-100 pt-10">
-              <p className="mb-4 text-sm font-semibold uppercase tracking-widest text-slate-400">Browse More Categories</p>
+            <div className="mt-16 border-t border-slate-200 dark:border-slate-800 pt-10">
+              <p className="mb-4 text-sm font-semibold uppercase tracking-widest text-slate-500 dark:text-slate-400">Browse More Categories</p>
               <div className="flex flex-wrap gap-3">
                 {cat.related.map(r => {
                   const rc = SEO_CATEGORIES[r]
                   return rc ? (
-                    <Link key={r} href={`/business-ideas/${r}`}
-                      className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm text-slate-700 hover:border-indigo-300 hover:text-indigo-700 transition-colors">
+                    <Link
+                      key={r}
+                      href={`/business-ideas/${r}`}
+                      className="rounded-full border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-4 py-2 text-sm text-slate-700 dark:text-slate-300 hover:border-indigo-300 hover:text-indigo-700 dark:hover:border-indigo-700 dark:hover:text-indigo-300 transition-colors"
+                    >
                       {rc.h1.replace(' (2026)', '')}
                     </Link>
                   ) : null
                 })}
-                <Link href="/business-ideas" className="rounded-full border border-indigo-200 bg-indigo-50 px-4 py-2 text-sm font-medium text-indigo-700 hover:bg-indigo-100 transition-colors">
+                <Link
+                  href="/business-ideas"
+                  className="rounded-full border border-indigo-200 dark:border-indigo-800 bg-indigo-50 dark:bg-indigo-950/40 px-4 py-2 text-sm font-medium text-indigo-700 dark:text-indigo-300 hover:bg-indigo-100 dark:hover:bg-indigo-900/40 transition-colors"
+                >
                   View All Ideas →
                 </Link>
               </div>
@@ -338,15 +344,25 @@ export default async function IdeaPage({ params }: PageProps) {
 
           {/* FAQ */}
           <section className="mt-16 max-w-3xl">
-            <h2 className="mb-6 text-2xl font-bold text-slate-900">Frequently Asked Questions</h2>
-            <div className="divide-y divide-slate-100 rounded-xl border border-slate-100">
+            <h2 className="mb-6 text-2xl font-bold text-slate-900 dark:text-slate-100">Frequently Asked Questions</h2>
+            <div className="space-y-3">
               {cat.faqs.map((faq, i) => (
-                <details key={i} className="group px-5 py-4">
-                  <summary className="flex cursor-pointer items-center justify-between gap-4 text-sm font-medium text-slate-800 marker:content-none">
-                    {faq.q}
-                    <span className="shrink-0 text-slate-400">▼</span>
+                <details
+                  key={i}
+                  className="group rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 backdrop-blur-md overflow-hidden open:bg-white dark:open:bg-slate-900 transition-colors"
+                >
+                  <summary className="flex cursor-pointer items-center justify-between gap-4 px-5 py-4 text-sm sm:text-base font-medium text-slate-800 dark:text-slate-100 marker:content-none hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors">
+                    <span>{faq.q}</span>
+                    <svg
+                      className="shrink-0 h-5 w-5 text-slate-400 dark:text-slate-500 transition-transform group-open:rotate-180"
+                      fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
                   </summary>
-                  <p className="mt-3 text-sm text-slate-600 leading-relaxed">{faq.a}</p>
+                  <p className="px-5 pb-5 pt-4 text-sm text-slate-600 dark:text-slate-400 leading-relaxed border-t border-slate-100 dark:border-slate-800">
+                    {faq.a}
+                  </p>
                 </details>
               ))}
             </div>
