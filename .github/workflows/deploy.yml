@@ -57,7 +57,7 @@ jobs:
             --cpu 1 \
             --min-instances 0 \
             --max-instances 10 \
-            --set-secrets="SANITY_API_TOKEN=SANITY_API_TOKEN:latest,SANITY_WEBHOOK_SECRET=SANITY_WEBHOOK_SECRET:latest"
+            --set-secrets="SANITY_API_TOKEN=SANITY_API_TOKEN:latest,SANITY_WEBHOOK_SECRET=SANITY_WEBHOOK_SECRET:latest,DATA_GOV_IN_API_KEY=DATA_GOV_IN_API_KEY:latest"
 
       - name: Print deployed URL
         run: |
