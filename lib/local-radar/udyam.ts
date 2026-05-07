@@ -1,89 +1,44 @@
 // Udyam Registration data via data.gov.in API
-// Requires DATA_GOV_IN_API_KEY env var (free registration at data.gov.in)
-//
-// Dataset: MSME Enterprises Registered under Udyam Registration Portal
-// Resource IDs (try in order — data.gov.in occasionally changes IDs):
-//   Primary:   d0d3c65a-5e12-4dcf-b879-1be5da7e8bc3
-//   Fallback1: 5bf4fbe5-b44d-4dc2-a97b-f85e42f4a37b
-//
-// Fields expected: state_name, district_name, nic_2digit, year_of_registration, count
+// Dataset: "List of MSME Registered Units under UDYAM"
+// Resource ID: 8b68ae56-84cf-4728-a0a6-1be11028dea7
+// 39.4M+ records, updated daily. Required filters: State + District.
+// Activities field contains NIC5DigitId as JSON array.
 
 import type { YearCount } from './types'
 
-const RESOURCE_IDS = [
-  'd0d3c65a-5e12-4dcf-b879-1be5da7e8bc3',
-  '5bf4fbe5-b44d-4dc2-a97b-f85e42f4a37b',
-  'ec5be43c-41e4-4b4b-afc6-db96c33490a7',
-]
+const RESOURCE_ID = '8b68ae56-84cf-4728-a0a6-1be11028dea7'
 
 interface UdyamRecord {
-  state_name?: string
-  district_name?: string
-  district?: string
-  nic_2digit?: string
-  nic_code?: string
-  year_of_registration?: string
-  year?: string
-  count?: string
-  total?: string
-  [key: string]: string | undefined
+  State?: string
+  District?: string
+  RegistrationDate?: string   // DD/MM/YYYY
+  EnterpriseName?: string
+  Activities?: string          // JSON: [{NIC5DigitId, Description}]
+  [key: string]: string | number | undefined
 }
 
 interface ApiResponse {
   records?: UdyamRecord[]
   total?: number
-  message?: string
   status?: string
+  message?: string
 }
 
-async function queryUdyam(
-  resourceId: string,
-  state: string,
-  district: string,
-  nicCode: string,
-  apiKey: string
-): Promise<UdyamRecord[] | null> {
-  const params = new URLSearchParams({
-    'api-key': apiKey,
-    'format': 'json',
-    'limit': '100',
-    'filters[state_name]': state.toUpperCase(),
-  })
-  if (district) params.set('filters[district_name]', district.toUpperCase())
-  if (nicCode)  params.set('filters[nic_2digit]', nicCode.slice(0, 2))
+function parseYear(dateStr: string): number | null {
+  // Format: DD/MM/YYYY
+  const parts = dateStr.split('/')
+  if (parts.length !== 3) return null
+  const year = parseInt(parts[2])
+  return year >= 2019 && year <= new Date().getFullYear() ? year : null
+}
 
+function matchesNic(activitiesJson: string | undefined, nicCode: string): boolean {
+  if (!activitiesJson) return true  // no filter if Activities missing
   try {
-    const res = await fetch(
-      `https://api.data.gov.in/resource/${resourceId}?${params}`,
-      { next: { revalidate: 86400 }, headers: { 'User-Agent': 'BusinessIdeasBot/1.0' } }
-    )
-    if (!res.ok) return null
-    const data: ApiResponse = await res.json()
-    if (!data.records?.length) return null
-    return data.records
-  } catch { return null }
-}
-
-function parseRecords(records: UdyamRecord[], district: string): {
-  byYear: Record<number, number>
-  totalCount: number
-} {
-  const byYear: Record<number, number> = {}
-
-  for (const r of records) {
-    const yearStr = r.year_of_registration ?? r.year ?? ''
-    const year = parseInt(yearStr)
-    const count = parseInt(r.count ?? r.total ?? '1') || 1
-
-    if (year >= 2019 && year <= new Date().getFullYear()) {
-      byYear[year] = (byYear[year] ?? 0) + count
-    }
-  }
-
-  return {
-    byYear,
-    totalCount: Object.values(byYear).reduce((a, b) => a + b, 0),
-  }
+    const activities: { NIC5DigitId: string }[] = JSON.parse(activitiesJson)
+    const prefix = nicCode.slice(0, 2)
+    return activities.some(a => a.NIC5DigitId?.startsWith(prefix))
+  } catch { return false }
 }
 
 export interface UdyamResult {
@@ -92,7 +47,7 @@ export interface UdyamResult {
   byYear: Record<number, number>
   totalCount: number
   trajectory: YearCount[]
-  source: 'api' | 'unavailable'
+  source: 'api' | 'estimated' | 'unavailable'
   note?: string
 }
 
@@ -113,24 +68,78 @@ export async function fetchUdyamData(
     }
   }
 
-  // Try each resource ID
-  for (const rid of RESOURCE_IDS) {
-    const records = await queryUdyam(rid, state, district, nicCode, apiKey)
-    if (records) {
-      const { byYear, totalCount } = parseRecords(records, district)
+  const nicPrefix = nicCode.slice(0, 2)
+
+  // Fetch up to 500 records filtered by State + District (required by API).
+  // We then client-side filter by NIC prefix from the Activities JSON field.
+  // The API doesn't support filtering on nested JSON fields directly.
+  const params = new URLSearchParams({
+    'api-key': apiKey,
+    'format': 'json',
+    'limit': '500',
+    'filters[State]': state.toUpperCase(),
+    'filters[District]': district.toUpperCase(),
+  })
+
+  try {
+    const res = await fetch(
+      `https://api.data.gov.in/resource/${RESOURCE_ID}?${params}`,
+      { next: { revalidate: 86400 }, headers: { 'User-Agent': 'BusinessIdeasBot/1.0' } }
+    )
+    if (!res.ok) {
+      return { district, nicCode, byYear: {}, totalCount: 0, trajectory: [], source: 'unavailable', note: `API error: ${res.status}` }
+    }
+
+    const data: ApiResponse = await res.json()
+    const records = data.records ?? []
+
+    // Filter by NIC prefix and group by registration year
+    const byYear: Record<number, number> = {}
+    let matchedCount = 0
+
+    for (const r of records) {
+      if (!matchesNic(r.Activities, nicPrefix)) continue
+      const year = r.RegistrationDate ? parseYear(r.RegistrationDate) : null
+      if (!year) continue
+      byYear[year] = (byYear[year] ?? 0) + 1
+      matchedCount++
+    }
+
+    // If no NIC matches in 500 records, return total district count (no NIC filter)
+    // as a fallback with a note
+    if (matchedCount === 0 && records.length > 0) {
+      for (const r of records) {
+        const year = r.RegistrationDate ? parseYear(r.RegistrationDate) : null
+        if (!year) continue
+        byYear[year] = (byYear[year] ?? 0) + 1
+      }
+      const totalCount = Object.values(byYear).reduce((a, b) => a + b, 0)
       const trajectory: YearCount[] = Object.entries(byYear)
         .map(([y, c]) => ({ year: parseInt(y), count: c, source: 'udyam' as const }))
         .sort((a, b) => a.year - b.year)
 
-      return { district, nicCode, byYear, totalCount, trajectory, source: 'api' }
+      return {
+        district, nicCode, byYear, totalCount, trajectory, source: 'api',
+        note: `NIC ${nicPrefix} not found in sample — showing all district MSMEs (${data.total?.toLocaleString()} total in ${district})`,
+      }
     }
-  }
 
-  return {
-    district, nicCode,
-    byYear: {}, totalCount: 0,
-    trajectory: [],
-    source: 'unavailable',
-    note: 'Udyam API returned no data for this district/NIC combination. Try state-level search.',
+    const totalCount = Object.values(byYear).reduce((a, b) => a + b, 0)
+    const trajectory: YearCount[] = Object.entries(byYear)
+      .map(([y, c]) => ({ year: parseInt(y), count: c, source: 'udyam' as const }))
+      .sort((a, b) => a.year - b.year)
+
+    return {
+      district, nicCode, byYear, totalCount, trajectory, source: 'api',
+      note: `${matchedCount} NIC-${nicPrefix} MSMEs in ${district} (from ${data.total?.toLocaleString()} total district registrations)`,
+    }
+  } catch (e) {
+    return {
+      district, nicCode,
+      byYear: {}, totalCount: 0,
+      trajectory: [],
+      source: 'unavailable',
+      note: `Request failed: ${e instanceof Error ? e.message : 'unknown error'}`,
+    }
   }
 }
