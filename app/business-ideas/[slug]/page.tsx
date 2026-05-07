@@ -18,6 +18,7 @@ import IdeaCard from '@/components/IdeaCard'
 import TrendsChart from '@/components/TrendsChart'
 import TableOfContents, { type TocHeading } from '@/components/TableOfContents'
 import Disclaimer from '@/components/Disclaimer'
+import DPIITLookup from '@/components/DPIITLookup'
 import { Ld, breadcrumbSchema, collectionPageSchema, faqSchema } from '@/lib/jsonld'
 
 const BASE = 'https://businessideas.live'
@@ -752,6 +753,13 @@ export default async function IdeaPage({ params }: PageProps) {
               </tbody>
             </table>
           </div>
+        </section>
+      )}
+
+      {/* ── DPIIT Startup Lookup ──────────────────────────────────────────────── */}
+      {idea.industry && (
+        <section className="mb-10">
+          <DPIITLookup industry={idea.industry} ideaTitle={idea.title} />
         </section>
       )}
 
