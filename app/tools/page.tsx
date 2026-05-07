@@ -75,7 +75,25 @@ const TOOLS = [
     href: '/supply-chain',
     label: 'Supply Chain Flow — Solar Maintenance',
     description: 'Interactive supply chain map: click any node to reveal suppliers, real costs, margins, common pitfalls, and tools at each stage.',
-    badge: 'New',
+    badge: 'Visual',
+  },
+  {
+    href: '/signal-radar',
+    label: 'Signal Radar',
+    description: 'Live intelligence from 20+ sources — YourStory, Inc42, Reddit, HN and more — scored by velocity to surface what\'s heating up right now.',
+    badge: 'Live',
+  },
+  {
+    href: '/dpiit-lookup',
+    label: 'DPIIT Competitor Lookup',
+    description: '300+ DPIIT-recognized startups — filter by sector, state, and funding stage. See who\'s already in any space before you start.',
+    badge: 'Intelligence',
+  },
+  {
+    href: '/local-radar',
+    label: 'Local Market Radar',
+    description: 'City-level market intelligence: how many businesses exist in your area, historical trajectory (1yr/2yr/3yr), survival rates, and entry velocity — powered by Google Places, MCA21, Udyam, and GSTIN.',
+    badge: 'Live',
   },
 ]
 
