@@ -95,6 +95,12 @@ const TOOLS = [
     description: 'City-level market intelligence: how many businesses exist in your area, historical trajectory (1yr/2yr/3yr), survival rates, and entry velocity — powered by Google Places, MCA21, Udyam, and GSTIN.',
     badge: 'Live',
   },
+  {
+    href: '/sector-pulse',
+    label: 'India Sector Pulse',
+    description: 'McKinsey-style 8-signal economic vitality index for 30 sectors — formation velocity, survival rates, credit momentum, trade exposure, employment absorption, policy tailwind and more. Updated from MCA21, Udyam, RBI, DGFT, and EPFO data.',
+    badge: 'New',
+  },
 ]
 
 export default function ToolsPage() {
