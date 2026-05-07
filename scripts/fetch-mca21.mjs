@@ -178,16 +178,22 @@ function extractCity(address, stateFallback) {
 // ── API fetch with retry ─────────────────────────────────────────────────────
 async function fetchPage(resourceId, offset, limit = 500) {
   const url = `https://api.data.gov.in/resource/${resourceId}?api-key=${API_KEY}&format=json&limit=${limit}&offset=${offset}`
-  for (let attempt = 0; attempt < 3; attempt++) {
+  for (let attempt = 0; attempt < 5; attempt++) {
     try {
       const res = await fetch(url, { headers: { 'User-Agent': 'BusinessIdeasBot/1.0' } })
+      if (res.status === 429) {
+        const wait = 30000 * (attempt + 1) // 30s, 60s, 90s...
+        console.log(`\n    Rate limited — waiting ${wait/1000}s before retry...`)
+        await new Promise(r => setTimeout(r, wait))
+        continue
+      }
       if (!res.ok) throw new Error(`HTTP ${res.status}`)
       const data = await res.json()
-      if (data.status === 'error') throw new Error(data.message || 'API error')
+      if (data.status === 'error') throw new Error(JSON.stringify(data.error ?? data.message))
       return data
     } catch (e) {
-      if (attempt === 2) throw e
-      await new Promise(r => setTimeout(r, 1000 * (attempt + 1)))
+      if (attempt === 4) throw e
+      await new Promise(r => setTimeout(r, 2000 * (attempt + 1)))
     }
   }
 }
