@@ -58,18 +58,9 @@
     @apply bg-slate-50 dark:bg-slate-900/60 border border-slate-100 dark:border-slate-800;
   }
 
-  /* Decorative gradient mesh — used on hero/footer backgrounds */
+  /* Subtle section background — used on hero/footer areas */
   .mesh-bg {
-    background-image:
-      radial-gradient(at 8% 12%,  rgba(99,102,241,0.16) 0px, transparent 50%),
-      radial-gradient(at 92% 18%, rgba(168,85,247,0.10) 0px, transparent 45%),
-      radial-gradient(at 50% 90%, rgba(56,189,248,0.10) 0px, transparent 50%);
-  }
-  html.dark .mesh-bg {
-    background-image:
-      radial-gradient(at 8% 12%,  rgba(99,102,241,0.18) 0px, transparent 50%),
-      radial-gradient(at 92% 18%, rgba(168,85,247,0.12) 0px, transparent 45%),
-      radial-gradient(at 50% 90%, rgba(56,189,248,0.10) 0px, transparent 50%);
+    background-color: transparent;
   }
 
   /* Portable text / blog body styles — dark mode aware */

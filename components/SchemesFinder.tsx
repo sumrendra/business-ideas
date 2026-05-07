@@ -411,19 +411,19 @@ const TYPE_META: Record<SchemeType, { label: string; color: string }> = {
   incubation: { label: 'Incubation', color: 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300' },
 }
 
-const SECTOR_META: { value: SchemeSector; label: string; icon: string }[] = [
-  { value: 'all',           label: 'Any / General',       icon: '🏢' },
-  { value: 'food',          label: 'Food & Beverage',     icon: '🍽️' },
-  { value: 'agriculture',   label: 'Agriculture / Agri',  icon: '🌾' },
-  { value: 'manufacturing', label: 'Manufacturing',       icon: '🏭' },
-  { value: 'technology',    label: 'Tech / SaaS / AI',    icon: '💻' },
-  { value: 'retail',        label: 'Retail / E-commerce', icon: '🛒' },
-  { value: 'services',      label: 'Services / B2B',      icon: '🤝' },
-  { value: 'textile',       label: 'Textile / Garments',  icon: '🧵' },
-  { value: 'healthcare',    label: 'Healthcare',          icon: '🏥' },
-  { value: 'education',     label: 'Education / EdTech',  icon: '📚' },
-  { value: 'energy',        label: 'Energy / EV / Solar', icon: '⚡' },
-  { value: 'rural',         label: 'Rural / Handicrafts', icon: '🌿' },
+const SECTOR_META: { value: SchemeSector; label: string }[] = [
+  { value: 'all',           label: 'Any / General'       },
+  { value: 'food',          label: 'Food & Beverage'     },
+  { value: 'agriculture',   label: 'Agriculture / Agri'  },
+  { value: 'manufacturing', label: 'Manufacturing'       },
+  { value: 'technology',    label: 'Tech / SaaS / AI'    },
+  { value: 'retail',        label: 'Retail / E-commerce' },
+  { value: 'services',      label: 'Services / B2B'      },
+  { value: 'textile',       label: 'Textile / Garments'  },
+  { value: 'healthcare',    label: 'Healthcare'          },
+  { value: 'education',     label: 'Education / EdTech'  },
+  { value: 'energy',        label: 'Energy / EV / Solar' },
+  { value: 'rural',         label: 'Rural / Handicrafts' },
 ]
 
 // ─── Wizard Steps ─────────────────────────────────────────────────────────────
@@ -550,15 +550,15 @@ export default function SchemesFinder() {
               ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300'
               : 'bg-rose-100 text-rose-700 dark:bg-rose-900/40 dark:text-rose-300'
           }`}>
-            {s.level === 'national' ? '🇮🇳 National' : `🗺️ ${s.state}`}
+            {s.level === 'national' ? 'National' : s.state ?? 'State'}
           </span>
           {s.newOnly && (
             <span className="inline-flex items-center rounded-full bg-yellow-100 px-2.5 py-0.5 text-xs font-medium text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-300">
               New business only
             </span>
           )}
-          {s.forWomen    && <span className="rounded-full bg-pink-100 px-2.5 py-0.5 text-xs font-medium text-pink-700 dark:bg-pink-900/40 dark:text-pink-300">👩 Women</span>}
-          {s.forDisabled && <span className="rounded-full bg-orange-100 px-2.5 py-0.5 text-xs font-medium text-orange-700 dark:bg-orange-900/40 dark:text-orange-300">♿ Divyang</span>}
+          {s.forWomen    && <span className="rounded-full bg-pink-100 px-2.5 py-0.5 text-xs font-medium text-pink-700 dark:bg-pink-900/40 dark:text-pink-300">Women</span>}
+          {s.forDisabled && <span className="rounded-full bg-orange-100 px-2.5 py-0.5 text-xs font-medium text-orange-700 dark:bg-orange-900/40 dark:text-orange-300">Divyang</span>}
           {s.forScSt     && <span className="rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-medium text-blue-700 dark:bg-blue-900/40 dark:text-blue-300">SC/ST</span>}
           {s.forYouth    && <span className="rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-medium text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300">Youth</span>}
         </div>
@@ -616,7 +616,6 @@ export default function SchemesFinder() {
                   : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:border-indigo-300'
                 }`}
             >
-              <span className="text-lg">{s.icon}</span>
               <span>{s.label}</span>
             </button>
           ))}
@@ -626,9 +625,9 @@ export default function SchemesFinder() {
 
     if (currentStep.id === 'stage') {
       const opts = [
-        { value: 'new',      label: 'Starting fresh',     sub: 'New / greenfield business', icon: '🌱' },
-        { value: 'existing', label: 'Already running',    sub: 'Existing business', icon: '🏪' },
-        { value: 'any',      label: 'Not sure yet',       sub: 'Show me everything', icon: '🤷' },
+        { value: 'new',      label: 'Starting fresh',  sub: 'New / greenfield business' },
+        { value: 'existing', label: 'Already running', sub: 'Existing business' },
+        { value: 'any',      label: 'Not sure yet',    sub: 'Show me everything' },
       ] as const
       return (
         <div className="grid gap-3 sm:grid-cols-3">
@@ -642,7 +641,6 @@ export default function SchemesFinder() {
                   : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:border-indigo-300'
                 }`}
             >
-              <span className="text-3xl">{o.icon}</span>
               <span className="font-semibold text-slate-900 dark:text-slate-100 text-sm">{o.label}</span>
               <span className="text-xs text-slate-500 dark:text-slate-400">{o.sub}</span>
             </button>
@@ -653,10 +651,10 @@ export default function SchemesFinder() {
 
     if (currentStep.id === 'amount') {
       const opts = [
-        { value: 'under50',  label: 'Up to ₹50L',     icon: '💰' },
-        { value: '50to100',  label: '₹50L – ₹1Cr',   icon: '💰💰' },
-        { value: 'above100', label: 'Above ₹1Cr',     icon: '💰💰💰' },
-        { value: 'any',      label: 'Any amount',     icon: '∞' },
+        { value: 'under50',  label: 'Up to ₹50L'   },
+        { value: '50to100',  label: '₹50L – ₹1Cr'  },
+        { value: 'above100', label: 'Above ₹1Cr'   },
+        { value: 'any',      label: 'Any amount'   },
       ] as const
       return (
         <div className="grid gap-3 grid-cols-2 sm:grid-cols-4">
@@ -666,11 +664,10 @@ export default function SchemesFinder() {
               onClick={() => { setWAmount(o.value); setWizardStep(3) }}
               className={`flex flex-col items-center gap-2 rounded-xl border px-4 py-5 text-center transition-all
                 ${wAmount === o.value
-                  ? 'border-green-400 bg-green-50 dark:bg-green-900/30'
-                  : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:border-green-300'
+                  ? 'border-indigo-400 bg-indigo-50 dark:bg-indigo-900/30'
+                  : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:border-indigo-300'
                 }`}
             >
-              <span className="text-2xl">{o.icon}</span>
               <span className="font-semibold text-slate-900 dark:text-slate-100 text-sm">{o.label}</span>
             </button>
           ))}
@@ -683,10 +680,10 @@ export default function SchemesFinder() {
         <div className="space-y-4">
           <div className="grid gap-3 sm:grid-cols-2">
             {[
-              { label: '👩 I am a woman entrepreneur', state: wWomen, setter: setWWomen },
-              { label: '♿ I am a person with disability (Divyang)', state: wDisabled, setter: setWDisabled },
-              { label: '🔵 I belong to SC or ST community', state: wScSt, setter: setWScSt },
-              { label: '🎓 I am a youth entrepreneur (18–35 years)', state: wYouth, setter: setWYouth },
+              { label: 'I am a woman entrepreneur', state: wWomen, setter: setWWomen },
+              { label: 'I am a person with disability (Divyang)', state: wDisabled, setter: setWDisabled },
+              { label: 'I belong to SC or ST community', state: wScSt, setter: setWScSt },
+              { label: 'I am a youth entrepreneur (18–35 years)', state: wYouth, setter: setWYouth },
             ].map(({ label, state, setter }) => (
               <label key={label} className={`flex cursor-pointer items-center gap-3 rounded-xl border p-4 transition-all
                 ${state
@@ -726,7 +723,7 @@ export default function SchemesFinder() {
                     : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:border-indigo-300'
                   }`}
               >
-                {st || '🇮🇳 All India / Any State'}
+                {st || 'All India / Any State'}
               </button>
             ))}
           </div>
@@ -768,7 +765,7 @@ export default function SchemesFinder() {
                   : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700'
               }`}
             >
-              {m === 'wizard' ? '✦ Guided' : '⊞ Browse All'}
+              {m === 'wizard' ? 'Guided' : 'Browse All'}
             </button>
           ))}
         </div>
@@ -937,7 +934,7 @@ export default function SchemesFinder() {
                         : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:border-indigo-300'
                     }`}
                   >
-                    {v === 'all' ? 'All' : v === 'national' ? '🇮🇳 National' : '🗺️ State-specific'}
+                    {v === 'all' ? 'All' : v === 'national' ? 'National' : 'State-specific'}
                   </button>
                 ))}
                 {bLevel === 'state' && (
@@ -976,9 +973,9 @@ export default function SchemesFinder() {
               <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Special Category</p>
               <div className="flex flex-wrap gap-4">
                 {[
-                  { label: '👩 Women', state: bWomen, setter: setBWomen },
-                  { label: '♿ Divyang', state: bDisabled, setter: setBDisabled },
-                  { label: '🔵 SC/ST', state: bScSt, setter: setBScSt },
+                  { label: 'Women', state: bWomen, setter: setBWomen },
+                  { label: 'Divyang', state: bDisabled, setter: setBDisabled },
+                  { label: 'SC/ST', state: bScSt, setter: setBScSt },
                 ].map(({ label, state, setter }) => (
                   <label key={label} className="flex cursor-pointer items-center gap-2">
                     <input type="checkbox" checked={state} onChange={e => setter(e.target.checked)}

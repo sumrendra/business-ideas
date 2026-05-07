@@ -146,7 +146,7 @@ export default async function HomePage() {
       {/* ── Newsletter strip ───────────────────────────────────────────────── */}
       <section className="bg-indigo-50 dark:bg-indigo-950/40 border-b border-indigo-100/60 dark:border-indigo-900/40">
         <div className="mx-auto max-w-7xl px-4 py-4 text-center text-sm text-slate-700 dark:text-slate-300">
-          🤖 Get 3 new business ideas every week —{' '}
+          Get 3 new business ideas every week —{' '}
           <Link href="/subscribe" className="font-semibold text-indigo-600 dark:text-indigo-400 hover:underline">
             Subscribe free
           </Link>
