@@ -194,7 +194,7 @@ export async function GET(req: NextRequest) {
   }
 
   const gt       = (await import('google-trends-api')).default
-  const variants = geo === 'IN' ? expandKeywords(keyword) : [keyword.trim()]
+  const variants = geo.startsWith('IN') ? expandKeywords(keyword) : [keyword.trim()]
 
   // Try variants, pick best
   const results: { keyword: string; values: number[] }[] = []
@@ -223,7 +223,7 @@ export async function GET(req: NextRequest) {
   const resolution = geo === 'IN' ? 'REGION' : 'CITY'
   const cities = await fetchByRegion(gt, best.keyword, geo, resolution)
 
-  const seasonalInsight = geo === 'IN' ? analyseSeasonality(best.values, labels) : null
+  const seasonalInsight = geo.startsWith('IN') ? analyseSeasonality(best.values, labels) : null
 
   const entry: CacheEntry = {
     bestKeyword: best.keyword,
