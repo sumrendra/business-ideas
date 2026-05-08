@@ -1,5 +1,8 @@
 import { NextResponse } from 'next/server'
-import { searchMSMEs, matchMSMESector, ALL_MSME_SECTORS, ALL_MSME_STATES } from '@/lib/msme/companies'
+import { searchMSMEs, matchMSMESector, COMPANIES, MSME_SECTOR_MAP } from '@/lib/msme/companies'
+
+const ALL_MSME_SECTORS = Object.keys(MSME_SECTOR_MAP)
+const ALL_MSME_STATES  = [...new Set(COMPANIES.map(c => c.state))].sort()
 
 export const runtime = 'nodejs'
 export const revalidate = 86400
@@ -21,6 +24,6 @@ export async function GET(req: Request) {
     companies:  results.slice(0, limit),
     sectors:    ALL_MSME_SECTORS,
     states:     ALL_MSME_STATES,
-    dataSource: 'IndiaMART supplier directory · NSIC vendor database · Udyam portal · TradeIndia (2024)',
+    dataSource: 'MCA21 Company Master Data — data.gov.in (active registered companies)',
   })
 }
