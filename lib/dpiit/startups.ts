@@ -246,5 +246,52 @@ export function searchStartups(query: string, sector?: string, state?: string): 
   })
 }
 
+// Stop words to strip before keyword extraction
+const STOP_WORDS = new Set([
+  'manufacturing', 'services', 'service', 'platform', 'india', 'indian', 'for',
+  'and', 'the', 'of', 'in', 'a', 'an', 'to', 'with', 'by', 'at', 'on',
+  'solutions', 'technology', 'technologies', 'company', 'pvt', 'ltd', 'limited',
+  'startup', 'based', 'lab', 'laboratory', 'production', 'making',
+])
+
+export function extractKeywords(title: string): string[] {
+  return title
+    .toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, ' ')
+    .split(/\s+/)
+    .filter(w => w.length > 2 && !STOP_WORDS.has(w))
+}
+
+export interface ScoredStartup extends DPIITStartup {
+  relevanceScore: number
+}
+
+// Score each startup by keyword overlap with an idea title.
+// Returns startups sorted by score desc; score=0 entries are sector-level fallbacks.
+export function scoreStartupsByIdea(
+  ideaTitle: string,
+  sector: string,
+  state?: string
+): { exact: ScoredStartup[]; sector: ScoredStartup[] } {
+  const keywords = extractKeywords(ideaTitle)
+  const sectorCandidates = STARTUPS.filter(s =>
+    s.sector === sector && (!state || s.state === state)
+  )
+
+  const score = (s: DPIITStartup): number => {
+    const haystack = `${s.name} ${s.subSector}`.toLowerCase()
+    return keywords.reduce((acc, kw) => acc + (haystack.includes(kw) ? 1 : 0), 0)
+  }
+
+  const scored: ScoredStartup[] = sectorCandidates
+    .map(s => ({ ...s, relevanceScore: score(s) }))
+    .sort((a, b) => b.relevanceScore - a.relevanceScore)
+
+  return {
+    exact:  scored.filter(s => s.relevanceScore > 0),
+    sector: scored.filter(s => s.relevanceScore === 0),
+  }
+}
+
 export const ALL_SECTORS = [...new Set(STARTUPS.map(s => s.sector))].sort()
 export const ALL_STATES  = [...new Set(STARTUPS.map(s => s.state))].sort()
