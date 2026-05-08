@@ -187,6 +187,8 @@ export default function TrendsChart({ keyword, trendsUrl }: Props) {
 
   const geoLabel = geo === 'IN' ? 'India' : (INDIA_STATES.find(s => s.code === geo)?.name ?? geo)
   const locationLabel = geo === 'IN' ? 'India' : `${geoLabel} · 5 yrs`
+  const cleanKeyword = keyword.replace(/\s+india\s*$/i, '').trim()
+  const fallbackTrendsUrl = `https://trends.google.com/trends/explore?q=${encodeURIComponent(cleanKeyword)}&geo=${geo}&date=today%205-y`
 
   // ── Loading skeleton ─────────────────────────────────────────────────────
   if (loading) {
@@ -231,7 +233,7 @@ export default function TrendsChart({ keyword, trendsUrl }: Props) {
             >
               Retry
             </button>
-            <Link href={trendsUrl} target="_blank" rel="noopener noreferrer"
+            <Link href={fallbackTrendsUrl} target="_blank" rel="noopener noreferrer"
               className="text-xs text-indigo-600 dark:text-indigo-400 font-medium hover:underline">
               View on Google Trends →
             </Link>

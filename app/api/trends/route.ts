@@ -146,9 +146,11 @@ async function fetchOverTime(
       CALL_TIMEOUT, null
     )
     if (raw === null) return { values: [], timedOut: true }
+    // Google returns an HTML page when rate-limiting
+    if (typeof raw === 'string' && (raw as string).trimStart().startsWith('<')) return { values: [], timedOut: true }
     const parsed = JSON.parse(raw)
     return { values: (parsed?.default?.timelineData ?? []).map((p: any) => p.value[0] as number), timedOut: false }
-  } catch { return { values: [], timedOut: false } }
+  } catch { return { values: [], timedOut: true } }
 }
 
 async function fetchByRegion(
@@ -213,9 +215,9 @@ export async function GET(req: NextRequest) {
   }
   const best = results.reduce((a, b) => score(a) >= score(b) ? a : b)
 
-  // If all timed out, signal rate limit — don't cache so retry works
-  if (anyTimedOut && !best.values.length) {
-    return NextResponse.json({ rateLimited: true, values: [], labels: [], cities: [], bestKeyword: keyword, allTried: variants, seasonalInsight: null })
+  // No data at all — return rateLimited if any call timed out, never cache so retry works
+  if (!best.values.length) {
+    return NextResponse.json({ rateLimited: anyTimedOut, values: [], labels: [], cities: [], bestKeyword: keyword, allTried: variants, seasonalInsight: null })
   }
 
   // Build labels
