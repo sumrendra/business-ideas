@@ -1,7 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { readFileSync, writeFileSync } from 'fs'
+import { join } from 'path'
 
-const CACHE_TTL      = 6 * 60 * 60 * 1000
-const CALL_TIMEOUT   = 12000
+const CACHE_TTL        = 6 * 60 * 60 * 1000
+const SNAPSHOT_TTL_MS  = 30 * 24 * 60 * 60 * 1000  // 30 days
+const CALL_TIMEOUT     = 12000
+const SNAPSHOT_PATH    = join(process.cwd(), 'lib/trends/snapshot.json')
 
 interface CacheEntry {
   bestKeyword: string
@@ -13,6 +17,23 @@ interface CacheEntry {
   ts: number
 }
 const cache = new Map<string, CacheEntry>()
+
+// ── Snapshot (persistent file-based store) ────────────────────────────────────
+type Snapshot = Record<string, CacheEntry>
+let _snapshot: Snapshot | null = null
+
+function loadSnapshot(): Snapshot {
+  if (_snapshot) return _snapshot
+  try { _snapshot = JSON.parse(readFileSync(SNAPSHOT_PATH, 'utf8')) }
+  catch { _snapshot = {} }
+  return _snapshot!
+}
+
+function saveSnapshot(key: string, entry: CacheEntry) {
+  const snap = loadSnapshot()
+  snap[key] = entry
+  try { writeFileSync(SNAPSHOT_PATH, JSON.stringify(snap, null, 2)) } catch {}
+}
 
 // ── Keyword expansion ─────────────────────────────────────────────────────────
 const TRAILING_NOISE = [
@@ -189,12 +210,23 @@ export async function GET(req: NextRequest) {
   const months   = period === '1y' ? 12 : period === '2y' ? 24 : 60
   const cacheKey = `${keyword.toLowerCase().trim()}|${geo}|${period}`
 
+  // 1. In-memory cache (hot)
   const cached = cache.get(cacheKey)
   if (cached && Date.now() - cached.ts < CACHE_TTL) {
     const { ts, ...rest } = cached
     return NextResponse.json(rest)
   }
 
+  // 2. Persistent snapshot (survives restarts; refreshed every 30 days)
+  const snap = loadSnapshot()
+  const snapped = snap[cacheKey]
+  if (snapped && Date.now() - snapped.ts < SNAPSHOT_TTL_MS) {
+    cache.set(cacheKey, snapped)        // warm in-memory cache
+    const { ts, ...rest } = snapped
+    return NextResponse.json(rest)
+  }
+
+  // 3. Live fetch from Google Trends
   const gt       = (await import('google-trends-api')).default
   const variants = geo.startsWith('IN') ? expandKeywords(keyword) : [keyword.trim()]
 
@@ -244,6 +276,7 @@ export async function GET(req: NextRequest) {
     ts: Date.now(),
   }
   cache.set(cacheKey, entry)
+  saveSnapshot(cacheKey, entry)   // persist so restarts don't re-fetch
 
   const { ts, ...rest } = entry
   return NextResponse.json(rest)
