@@ -100,14 +100,26 @@ function expandKeywords(seed: string): string[] {
 }
 
 // ── Fetch helpers ────────────────────────────────────────────────────────────
+const CALL_TIMEOUT_MS = 6000
+
+function withTimeout<T>(promise: Promise<T>, ms: number, fallback: T): Promise<T> {
+  return Promise.race([
+    promise,
+    new Promise<T>(resolve => setTimeout(() => resolve(fallback), ms)),
+  ])
+}
+
 async function fetchOverTime(googleTrends: any, keyword: string): Promise<number[]> {
   try {
-    const raw = await googleTrends.interestOverTime({
-      keyword,
-      geo: 'IN',
-      startTime: new Date(Date.now() - 5 * 365 * 24 * 60 * 60 * 1000),
-      granularTime: false,
-    })
+    const raw = await withTimeout(
+      googleTrends.interestOverTime({
+        keyword, geo: 'IN',
+        startTime: new Date(Date.now() - 5 * 365 * 24 * 60 * 60 * 1000),
+        granularTime: false,
+      }),
+      CALL_TIMEOUT_MS, null
+    )
+    if (!raw) return []
     const parsed = JSON.parse(raw)
     return (parsed?.default?.timelineData ?? []).map((p: any) => p.value[0] as number)
   } catch {
@@ -117,12 +129,14 @@ async function fetchOverTime(googleTrends: any, keyword: string): Promise<number
 
 async function fetchByRegion(googleTrends: any, keyword: string): Promise<{ name: string; value: number }[]> {
   try {
-    const raw = await googleTrends.interestByRegion({
-      keyword,
-      geo: 'IN',
-      resolution: 'REGION',
-      startTime: new Date(Date.now() - 12 * 30 * 24 * 60 * 60 * 1000),
-    })
+    const raw = await withTimeout(
+      googleTrends.interestByRegion({
+        keyword, geo: 'IN', resolution: 'REGION',
+        startTime: new Date(Date.now() - 12 * 30 * 24 * 60 * 60 * 1000),
+      }),
+      CALL_TIMEOUT_MS, null
+    )
+    if (!raw) return []
     const parsed = JSON.parse(raw)
     const regions: { geoName: string; value: number[] }[] = parsed?.default?.geoMapData ?? []
     return regions
@@ -160,7 +174,7 @@ export async function GET(req: NextRequest) {
   // so category synonyms always get a chance.
   const results: { keyword: string; values: number[] }[] = []
   for (let i = 0; i < variants.length; i++) {
-    if (i > 0) await new Promise(r => setTimeout(r, 1500))
+    if (i > 0) await new Promise(r => setTimeout(r, 500))
     const values = await fetchOverTime(googleTrends, variants[i])
     results.push({ keyword: variants[i], values })
     // Stop early if good signal found, but try at least 3 variants so synonyms run

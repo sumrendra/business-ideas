@@ -54,10 +54,16 @@ export default function TrendsChart({ keyword, trendsUrl }: Props) {
   useEffect(() => {
     setLoading(true)
     setError(false)
-    fetch(`/api/trends?keyword=${encodeURIComponent(keyword)}`)
+    const controller = new AbortController()
+    const timer = setTimeout(() => controller.abort(), 30000) // 30s hard limit
+
+    fetch(`/api/trends?keyword=${encodeURIComponent(keyword)}`, { signal: controller.signal })
       .then(r => r.ok ? r.json() : Promise.reject())
       .then(d => { setData(d); setLoading(false) })
       .catch(() => { setError(true); setLoading(false) })
+      .finally(() => clearTimeout(timer))
+
+    return () => { controller.abort(); clearTimeout(timer) }
   }, [keyword])
 
   // ── Loading skeleton ─────────────────────────────────────────────────────
