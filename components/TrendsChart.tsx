@@ -15,6 +15,7 @@ interface TrendsData {
   labels: string[]
   cities: { name: string; value: number }[]
   seasonalInsight: string | null
+  rateLimited?: boolean
 }
 
 type Period = '1y' | '2y' | '5y'
@@ -208,7 +209,7 @@ export default function TrendsChart({ keyword, trendsUrl }: Props) {
   }
 
   // ── Error / no data state ────────────────────────────────────────────────
-  if (error || !data || !data.values.length) {
+  if (error || !data || !data.values.length || data.rateLimited) {
     return (
       <div className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 overflow-hidden">
         <div className="flex items-center gap-2 px-5 pt-4 pb-3 flex-wrap">
@@ -219,17 +220,17 @@ export default function TrendsChart({ keyword, trendsUrl }: Props) {
         </div>
         <div className="px-5 pb-6 text-center space-y-3">
           <p className="text-sm text-slate-500 dark:text-slate-400">
-            {error ? 'Google Trends is temporarily rate-limited.' : `Not enough search data for ${geoLabel}.`}
+            {(error || data?.rateLimited)
+              ? 'Google Trends is temporarily rate-limited.'
+              : `Not enough search data for ${geoLabel}.`}
           </p>
           <div className="flex items-center justify-center gap-3">
-            {error && (
-              <button
-                onClick={() => setRetryKey(k => k + 1)}
-                className="rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-medium px-3 py-1.5 transition-colors"
-              >
-                Retry
-              </button>
-            )}
+            <button
+              onClick={() => setRetryKey(k => k + 1)}
+              className="rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-medium px-3 py-1.5 transition-colors"
+            >
+              Retry
+            </button>
             <Link href={trendsUrl} target="_blank" rel="noopener noreferrer"
               className="text-xs text-indigo-600 dark:text-indigo-400 font-medium hover:underline">
               View on Google Trends →

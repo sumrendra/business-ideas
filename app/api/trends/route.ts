@@ -135,7 +135,7 @@ function withTimeout<T>(p: Promise<T>, ms: number, fallback: T): Promise<T> {
 
 async function fetchOverTime(
   gt: any, keyword: string, geo: string, months: number
-): Promise<number[]> {
+): Promise<{ values: number[]; timedOut: boolean }> {
   try {
     const raw = await withTimeout(
       gt.interestOverTime({
@@ -145,10 +145,10 @@ async function fetchOverTime(
       }),
       CALL_TIMEOUT, null
     )
-    if (!raw) return []
+    if (raw === null) return { values: [], timedOut: true }
     const parsed = JSON.parse(raw)
-    return (parsed?.default?.timelineData ?? []).map((p: any) => p.value[0] as number)
-  } catch { return [] }
+    return { values: (parsed?.default?.timelineData ?? []).map((p: any) => p.value[0] as number), timedOut: false }
+  } catch { return { values: [], timedOut: false } }
 }
 
 async function fetchByRegion(
@@ -198,9 +198,11 @@ export async function GET(req: NextRequest) {
 
   // Try variants, pick best
   const results: { keyword: string; values: number[] }[] = []
+  let anyTimedOut = false
   for (let i = 0; i < variants.length; i++) {
     if (i > 0) await new Promise(r => setTimeout(r, 1500))
-    const values = await fetchOverTime(gt, variants[i], geo, months)
+    const { values, timedOut } = await fetchOverTime(gt, variants[i], geo, months)
+    if (timedOut) anyTimedOut = true
     results.push({ keyword: variants[i], values })
     if (i >= 2 && avgSignal(values) > 20) break
   }
@@ -210,6 +212,11 @@ export async function GET(req: NextRequest) {
     return avgSignal(r.values) * (wc >= 3 ? 1.2 : 1.0)
   }
   const best = results.reduce((a, b) => score(a) >= score(b) ? a : b)
+
+  // If all timed out, signal rate limit — don't cache so retry works
+  if (anyTimedOut && !best.values.length) {
+    return NextResponse.json({ rateLimited: true, values: [], labels: [], cities: [], bestKeyword: keyword, allTried: variants, seasonalInsight: null })
+  }
 
   // Build labels
   const now = new Date()
