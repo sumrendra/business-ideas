@@ -245,7 +245,7 @@ export const CATEGORIES: Category[] = [
     id: 'cold-storage',
     label: 'Cold Storage & Logistics',
     icon: '🧊',
-    placesTypes: ['storage', 'moving_company'],
+    placesTypes: ['storage'],
     umbrellaTypes: ['establishment'],
     textSearchKeywords: [
       'cold storage',
@@ -376,7 +376,7 @@ export const CATEGORIES: Category[] = [
     id: 'organic-store',
     label: 'Organic / Health Stores',
     icon: '🥦',
-    placesTypes: ['health', 'grocery_or_supermarket'],
+    placesTypes: ['grocery_or_supermarket', 'health_food_store'],
     umbrellaTypes: ['store', 'grocery_or_supermarket'],
     textSearchKeywords: [
       'organic store',
@@ -442,7 +442,7 @@ export const CATEGORIES: Category[] = [
     id: 'solar-installer',
     label: 'Solar Panel Installers',
     icon: '☀️',
-    placesTypes: ['electrician', 'general_contractor'],
+    placesTypes: ['electrician'],
     umbrellaTypes: ['establishment'],
     textSearchKeywords: [
       'solar panel installation',

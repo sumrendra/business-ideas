@@ -1,5 +1,26 @@
 import type { Category } from './categories'
 
+// Types precise enough that any result from nearbysearch can be trusted
+// without further name filtering. Broad types (health, store, establishment, etc.)
+// are NOT in this list — those results must match nameKeywords to be included.
+const TRUSTED_PLACE_TYPES = new Set([
+  'pharmacy',
+  'gym',
+  'atm',
+  'bank',
+  'laundry',
+  'beauty_salon',
+  'hair_care',
+  'veterinary_care',
+  'pet_store',
+  'tutoring_center',
+  'electric_vehicle_charging_station',
+  'meal_delivery',
+  'coworking_space',
+  'hospital',
+  'doctor',
+])
+
 export interface PlaceFeature {
   lat: number
   lng: number
@@ -207,6 +228,10 @@ export async function fetchSupplyFromGoogle(
   for (const p of raw) {
     if (p.placeType.startsWith('umbrella:')) continue
     if (!dedup(p, seenIds, seenNames)) continue
+    // For broad place types, require name keyword match to avoid false positives
+    // (e.g. type=health returns car workshops, type=store returns unrelated shops)
+    const isBroadType = p.placeType !== 'text_search' && !TRUSTED_PLACE_TYPES.has(p.placeType)
+    if (isBroadType && !matchesCategoryMultilingual(p.name, category.nameKeywords)) continue
     if (p.placeType === 'text_search' && !matchesCategoryMultilingual(p.name, category.nameKeywords)) continue
     confirmed.push(p)
   }
@@ -246,6 +271,8 @@ export async function fetchSupplyQuick(
   for (const p of raw) {
     if (p.placeType.startsWith('umbrella:')) continue
     if (!dedup(p, seenIds, seenNames)) continue
+    const isBroadType = p.placeType !== 'text_search' && !TRUSTED_PLACE_TYPES.has(p.placeType)
+    if (isBroadType && !matchesCategoryMultilingual(p.name, category.nameKeywords)) continue
     if (p.placeType === 'text_search' && !matchesCategoryMultilingual(p.name, category.nameKeywords)) continue
     confirmed.push(p)
   }
