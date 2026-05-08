@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback, useRef } from 'react'
+import { useState, useCallback, useRef, useEffect } from 'react'
 import Map, {
   Source,
   Layer,
@@ -273,21 +273,34 @@ export default function HyperlocalMap() {
     }
   }, [cityId, radius, searchCenter])
 
-  // Click handler — empty map = move search centre; hexes/supply = show popup
+  // Auto re-analyse when searchCenter moves (only if a result is already loaded)
+  const isFirstCenter = useRef(true)
+  useEffect(() => {
+    if (!searchCenter) return
+    if (isFirstCenter.current) { isFirstCenter.current = false; return }
+    if (!hexGeo) return   // no initial analysis yet — wait for manual Analyse click
+    analyse()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchCenter])
+
+  // Click handler: clicking a hex moves the pin AND shows popup; empty space moves pin only
   const onClick = useCallback((e: MapLayerMouseEvent) => {
-    if (!e.features?.length) {
-      // Only allow repositioning if a city is already selected
-      if (cityId) setSearchCenter({ lat: e.lngLat.lat, lng: e.lngLat.lng })
-      setPopup(null)
-      return
-    }
+    if (!cityId) return
+
+    // Always move search centre to click location when a city is selected
+    setSearchCenter({ lat: e.lngLat.lat, lng: e.lngLat.lng })
+    setPopup(null)
+
+    if (!e.features?.length) return
+
     const f = e.features[0]
     const id = f.layer?.id
-    const [lng, lat] = (f.geometry as GeoJSON.Point | GeoJSON.Polygon).type === 'Polygon'
-      ? e.lngLat.toArray()
-      : (f.geometry as GeoJSON.Point).coordinates
-    const clickLat = f.geometry.type === 'Polygon' ? lat : (f.geometry as GeoJSON.Point).coordinates[1]
-    const clickLng = f.geometry.type === 'Polygon' ? lng : (f.geometry as GeoJSON.Point).coordinates[0]
+    const clickLat = f.geometry.type === 'Polygon'
+      ? e.lngLat.lat
+      : (f.geometry as GeoJSON.Point).coordinates[1]
+    const clickLng = f.geometry.type === 'Polygon'
+      ? e.lngLat.lng
+      : (f.geometry as GeoJSON.Point).coordinates[0]
 
     if (id === 'hex-fill' || id === 'hex-outline') {
       setPopup({ kind: 'hex', lat: e.lngLat.lat, lng: e.lngLat.lng, props: f.properties as HexProperties })
