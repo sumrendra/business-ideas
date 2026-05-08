@@ -16,6 +16,7 @@ interface TrendsData {
   cities: { name: string; value: number }[]
   seasonalInsight: string | null
   rateLimited?: boolean
+  stale?: boolean
 }
 
 type Period = '1y' | '2y' | '5y'
@@ -243,7 +244,7 @@ export default function TrendsChart({ keyword, trendsUrl }: Props) {
     )
   }
 
-  const { bestKeyword, allTried, values, labels, cities, seasonalInsight } = data
+  const { bestKeyword, allTried, values, labels, cities, seasonalInsight, stale } = data
   const max        = Math.max(...values, 1)
   const last12     = values.slice(-12)
   const current    = last12[last12.length - 1] ?? 0
@@ -320,11 +321,16 @@ export default function TrendsChart({ keyword, trendsUrl }: Props) {
             {changePct >= 0 ? '+' : ''}{changePct}%
           </span>
         </div>
-        {allTried.length > 1 && allTried[0] !== bestKeyword && (
-          <div className="ml-auto">
+        <div className="ml-auto flex items-center gap-2">
+          {stale && (
+            <span className="text-[10px] text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/40 rounded-full px-2 py-0.5">
+              cached · live unavailable
+            </span>
+          )}
+          {allTried.length > 1 && allTried[0] !== bestKeyword && (
             <span className="text-[10px] text-slate-400">Best of {allTried.length} variants</span>
-          </div>
-        )}
+          )}
+        </div>
       </div>
 
       {/* Regional breakdown */}

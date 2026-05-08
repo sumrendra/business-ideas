@@ -14,7 +14,6 @@ const TRUSTED_PLACE_TYPES = new Set([
   'veterinary_care',
   'pet_store',
   'tutoring_center',
-  'electric_vehicle_charging_station',
   'meal_delivery',
   'coworking_space',
   'hospital',

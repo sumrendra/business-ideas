@@ -64,7 +64,8 @@ const TITLE_SECTOR_OVERRIDES: Array<[RegExp, string]> = [
   [/pvc|plastic|polypropylene|polyethylene|hdpe|ldpe|vinyl|acrylic|resin|foam|rubber|silicone/i, 'Plastics & Rubber'],
   [/steel|iron|alumin|copper|brass|zinc|alloy|metal|casting|forging|welding|sheet metal/i,       'Metal & Engineering'],
   [/textile|fabric|yarn|garment|apparel|cloth|knit|weav|stitch|embroid/i,                        'Textile & Apparel'],
-  [/electronic|pcb|circuit|sensor|semiconductor|led|display|battery|solar panel/i,               'Electronics & Electrical'],
+  [/electronic|pcb|circuit|sensor|semiconductor|led|display|battery/i,                           'Electronics & Electrical'],
+  [/solar|ev charging|electric vehicle charging|wind energy|biogas|biomass|vermicompost/i,        'Clean Energy & Environment'],
   [/paper|cardboard|carton|corrugat|print|packag|label|pouch|box|bag/i,                          'Paper & Print'],
   [/chemical|coating|paint|adhesive|sealant|lubricant|solvent|dye|pigment|fertilizer|pesticide/i,'Specialty Chemicals'],
   [/tile|cement|concrete|brick|ceramic|glass|stone|marble|granite|construction/i,               'Construction Materials'],
@@ -73,6 +74,34 @@ const TITLE_SECTOR_OVERRIDES: Array<[RegExp, string]> = [
   [/agri|seed|fertiliz|pesticide|irrigation|greenhouse|farm equipment/i,                         'Agricultural Inputs'],
 ]
 
+// Title-keyword → sub-sector overrides to narrow noisy broad sectors
+const TITLE_SUBSECTOR_OVERRIDES: Array<[RegExp, string]> = [
+  [/solar|rooftop solar|solar panel|solar install|photovoltaic/i, 'Electricity & renewable energy'],
+  [/ev charging|electric vehicle charg/i,                         'Electricity & renewable energy'],
+  [/wind energy|wind farm/i,                                      'Electricity & renewable energy'],
+  [/waste manag|recycl|scrap|e-waste/i,                          'Waste management & recycling'],
+  [/water treat|water supply|effluent/i,                         'Water treatment & supply'],
+]
+
+// Title-keyword → name-must-match filter (guards against bad tagging in the dataset)
+const TITLE_NAME_FILTERS: Array<[RegExp, RegExp]> = [
+  [/solar|rooftop solar|solar panel|photovoltaic/i,
+    /solar|energy|power|renew|electric|photovolt|green|watt|grid|susten/i],
+  [/ev charging|electric vehicle charg/i,
+    /electric|ev |energy|power|charg|renew|green/i],
+  [/wind energy|wind farm/i,
+    /wind|energy|power|renew|green/i],
+  [/waste manag|recycl|scrap|e-waste/i,
+    /waste|recycl|scrap|environ|green|clean/i],
+]
+
+export function nameFilterByTitle(title: string): RegExp | undefined {
+  for (const [pattern, nameFilter] of TITLE_NAME_FILTERS) {
+    if (pattern.test(title)) return nameFilter
+  }
+  return undefined
+}
+
 export function refineSectorByTitle(title: string, fallback: string): string {
   for (const [pattern, sector] of TITLE_SECTOR_OVERRIDES) {
     if (pattern.test(title)) return sector
@@ -80,15 +109,26 @@ export function refineSectorByTitle(title: string, fallback: string): string {
   return fallback
 }
 
+export function refineSubSectorByTitle(title: string): string | undefined {
+  for (const [pattern, subSector] of TITLE_SUBSECTOR_OVERRIDES) {
+    if (pattern.test(title)) return subSector
+  }
+  return undefined
+}
+
 export function searchMSMEs(
   sector: string | undefined,
   query?: string,
   state?: string,
   limit = 50,
+  subSector?: string,
+  nameFilter?: RegExp,
 ): MSMECompany[] {
   let results = sector ? COMPANIES.filter(c => c.sector === sector) : COMPANIES
-  if (state)  results = results.filter(c => c.state === state)
-  if (query)  results = results.filter(c =>
+  if (subSector)   results = results.filter(c => c.subSector === subSector)
+  if (nameFilter)  results = results.filter(c => nameFilter.test(c.name))
+  if (state)       results = results.filter(c => c.state === state)
+  if (query)       results = results.filter(c =>
     c.name.toLowerCase().includes(query.toLowerCase()) ||
     c.subSector.toLowerCase().includes(query.toLowerCase()) ||
     c.city.toLowerCase().includes(query.toLowerCase())

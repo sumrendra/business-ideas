@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback, useRef, useEffect } from 'react'
+import { useState, useCallback, useRef, useEffect, useMemo } from 'react'
 import Map, {
   Source,
   Layer,
@@ -14,6 +14,8 @@ import Map, {
 import 'maplibre-gl/dist/maplibre-gl.css'
 import { CITIES, TIER_LABELS, type PopulationTier } from '@/lib/gap-engine/cities'
 import { CATEGORIES } from '@/lib/gap-engine/categories'
+import { CITY_RENT_PROFILES, computeLocalityROI } from '@/lib/tools/rent-data'
+import HyperlocalTrendsPanel from '@/components/HyperlocalTrendsPanel'
 
 // ─── CARTO free tile styles ────────────────────────────────────────────────────
 const STYLE_LIGHT = 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json'
@@ -90,6 +92,27 @@ const pointLayer: LayerProps = {
     'circle-stroke-color': '#fff',
     'circle-opacity': 0.9,
   },
+}
+
+// ─── Zone marker colours (Prime → Secondary → Suburban → Peripheral) ──────────
+const ZONE_COLORS = [
+  { dot: 'bg-rose-500',    marker: 'bg-rose-600',    border: 'border-rose-700'    },
+  { dot: 'bg-amber-500',   marker: 'bg-amber-500',   border: 'border-amber-600'   },
+  { dot: 'bg-sky-500',     marker: 'bg-sky-600',     border: 'border-sky-700'     },
+  { dot: 'bg-emerald-500', marker: 'bg-emerald-600', border: 'border-emerald-700' },
+]
+
+const ROI_BAND = (roi: number) => {
+  if (roi >= 20) return { label: 'Exceptional', cls: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300' }
+  if (roi >= 10) return { label: 'Strong',      cls: 'bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300' }
+  if (roi >= 5)  return { label: 'Moderate',    cls: 'bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300' }
+  return           { label: 'Low',          cls: 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400' }
+}
+
+function fmtINR(n: number) {
+  if (n >= 100000) return `₹${(n / 100000).toFixed(1)}L`
+  if (n >= 1000)   return `₹${(n / 1000).toFixed(0)}K`
+  return `₹${n}`
 }
 
 // ─── Types ─────────────────────────────────────────────────────────────────────
@@ -221,10 +244,28 @@ export default function HyperlocalMap() {
 
   const [showHex,    setShowHex]    = useState(true)
   const [showSupply, setShowSupply] = useState(true)
+  const [showZones,  setShowZones]  = useState(true)
   const [sidebarOpen, setSidebarOpen] = useState(true)
   const [popup,      setPopup]      = useState<PopupData | null>(null)
+  const [hoveredZone, setHoveredZone] = useState<string | null>(null)
 
   const filteredCities = tierFilter === 'all' ? CITIES : CITIES.filter(c => c.tier === tierFilter)
+
+  // Rent profile for selected city (only ~10 major cities have one)
+  const rentProfile = useMemo(
+    () => CITY_RENT_PROFILES.find(c => c.cityId === cityId) ?? null,
+    [cityId]
+  )
+
+  // Pre-compute ROI for each zone whenever stats or city changes
+  const zoneROIs = useMemo(() => {
+    if (!rentProfile) return null
+    return rentProfile.zones.map((zone, i) => {
+      const roi = stats ? computeLocalityROI(stats.gapScore, zone.rentMin, zone.rentMax, zone.typicalSqft) : null
+      const avgROI = roi ? (roi.roiMin + roi.roiMax) / 2 : null
+      return { ...zone, idx: i, roi, band: avgROI !== null ? ROI_BAND(avgROI) : null }
+    })
+  }, [rentProfile, stats])
 
   const analyse = useCallback(async () => {
     if (!cityId || !catId) return
@@ -326,7 +367,7 @@ export default function HyperlocalMap() {
 
           {/* Title */}
           <div>
-            <p className="text-[10px] font-bold uppercase tracking-widest text-indigo-600 dark:text-indigo-400">Hyperlocal Opportunity</p>
+            <p className="text-[10px] font-bold uppercase tracking-widest text-indigo-600 dark:text-indigo-400">Hyperlocal Opportunity + ROI</p>
             <p className="mt-0.5 text-sm font-bold text-slate-900 dark:text-slate-100">Configure analysis</p>
           </div>
 
@@ -356,16 +397,47 @@ export default function HyperlocalMap() {
           {/* Category */}
           <div className="space-y-1.5">
             <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Category</label>
-            <div className="grid grid-cols-3 gap-1.5">
-              {CATEGORIES.map(cat => (
-                <button key={cat.id} onClick={() => setCatId(cat.id)} title={cat.label}
-                  className={`flex flex-col items-center gap-1 rounded-xl border p-2 text-center text-[10px] font-medium transition-all ${catId === cat.id ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 shadow-sm' : 'border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 text-slate-600 dark:text-slate-400 hover:border-indigo-200'}`}>
-                  <span className="text-base">{cat.icon}</span>
-                  <span className="leading-tight line-clamp-2">{cat.label}</span>
-                </button>
-              ))}
+            <div className="space-y-0.5">
+              {CATEGORIES.map(cat => {
+                const selected = catId === cat.id
+                return (
+                  <button key={cat.id} onClick={() => setCatId(cat.id)}
+                    className={`w-full flex items-center gap-2.5 rounded-lg px-2.5 py-1.5 text-left text-xs font-medium transition-colors border ${
+                      selected
+                        ? 'border-indigo-400 bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300'
+                        : 'border-transparent text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/60 hover:text-slate-800 dark:hover:text-slate-200'
+                    }`}>
+                    <span className={`w-3.5 h-3.5 rounded shrink-0 border flex items-center justify-center transition-colors ${
+                      selected
+                        ? 'bg-indigo-600 border-indigo-600'
+                        : 'border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800'
+                    }`}>
+                      {selected && (
+                        <svg className="w-2.5 h-2.5 text-white" viewBox="0 0 10 10" fill="none">
+                          <path d="M1.5 5l2.5 2.5 4.5-4.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
+                      )}
+                    </span>
+                    {cat.label}
+                  </button>
+                )
+              })}
             </div>
           </div>
+
+          {/* Search demand trends — appears once a category is selected */}
+          {catId && cityId && (() => {
+            const city = CITIES.find(c => c.id === cityId)
+            const cat  = CATEGORIES.find(c => c.id === catId)
+            if (!city || !cat) return null
+            return (
+              <HyperlocalTrendsPanel
+                keywords={cat.trendsKeywords}
+                stateCode={city.stateCode}
+                stateName={city.state}
+              />
+            )
+          })()}
 
           {/* Radius */}
           <div className="space-y-1">
@@ -452,6 +524,7 @@ export default function HyperlocalMap() {
             {[
               { key: 'hex',    label: 'Opportunity hex grid', color: 'bg-gradient-to-r from-red-400 via-amber-400 to-green-500', state: showHex,    toggle: setShowHex },
               { key: 'supply', label: 'Supply businesses',    color: 'bg-indigo-500',                                            state: showSupply, toggle: setShowSupply },
+              { key: 'zones',  label: 'Rent zone markers',    color: 'bg-gradient-to-r from-rose-500 via-sky-500 to-emerald-500', state: showZones,  toggle: setShowZones },
             ].map(l => (
               <button key={l.key} onClick={() => l.toggle(p => !p)}
                 className={`flex items-center gap-2 w-full rounded-lg px-2.5 py-1.5 text-xs font-medium border transition-colors ${l.state ? 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200' : 'border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 text-slate-400 dark:text-slate-500'}`}>
@@ -541,6 +614,90 @@ export default function HyperlocalMap() {
               )}
             </div>
           )}
+
+          {/* ── Zone ROI Panel ─────────────────────────────────────────────────── */}
+          {zoneROIs && (
+            <div className="pt-2 border-t border-slate-100 dark:border-slate-800 space-y-2">
+              <div className="flex items-center justify-between">
+                <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Rent Zone ROI</p>
+                {!stats && <span className="text-[9px] text-slate-400 dark:text-slate-500">Run analysis to compute</span>}
+              </div>
+
+              {stats && (
+                <p className="text-[10px] text-slate-400 dark:text-slate-500">
+                  Click a zone to fly there · markers visible on map
+                </p>
+              )}
+
+              <div className="space-y-1">
+                {zoneROIs.map((zone) => (
+                  <button
+                    key={zone.zone}
+                    onClick={() => {
+                      mapRef.current?.flyTo({ center: [zone.anchorLng, zone.anchorLat], zoom: 14, duration: 1200, essential: true })
+                      setHoveredZone(zone.zone)
+                    }}
+                    onMouseEnter={() => setHoveredZone(zone.zone)}
+                    onMouseLeave={() => setHoveredZone(null)}
+                    className={`w-full flex items-center gap-2 rounded-lg px-2 py-1.5 text-left text-[11px] border transition-colors ${
+                      hoveredZone === zone.zone
+                        ? 'border-indigo-400 bg-indigo-50 dark:bg-indigo-950/60'
+                        : 'border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900/40 hover:border-indigo-200 dark:hover:border-indigo-700'
+                    }`}
+                  >
+                    <span className={`w-2.5 h-2.5 rounded-full shrink-0 ${ZONE_COLORS[zone.idx].dot}`} />
+                    <span className="flex-1 font-medium text-slate-700 dark:text-slate-300 leading-tight truncate">{zone.zone}</span>
+                    {zone.roi && zone.band ? (
+                      <div className="shrink-0 text-right space-y-0.5">
+                        <span className={`text-[10px] font-bold rounded-full px-1.5 py-0.5 ${zone.band.cls}`}>{zone.band.label}</span>
+                        <p className="text-[10px] text-slate-500 dark:text-slate-400">{zone.roi.roiMin.toFixed(1)}–{zone.roi.roiMax.toFixed(1)}</p>
+                      </div>
+                    ) : (
+                      <span className="text-[10px] text-slate-400 shrink-0">₹{zone.rentMin}–{zone.rentMax}/sqft</span>
+                    )}
+                  </button>
+                ))}
+              </div>
+
+              {stats && (
+                <p className="text-[9px] text-slate-400 dark:text-slate-600 leading-relaxed">
+                  ROI = gap ÷ (monthly rent / ₹10K). Higher = more opportunity per rupee of rent.
+                </p>
+              )}
+
+              {/* Rent reference table — shown before analysis */}
+              {!stats && (
+                <div className="rounded-lg border border-slate-100 dark:border-slate-800 overflow-hidden">
+                  <table className="w-full text-[10px]">
+                    <thead>
+                      <tr className="bg-slate-50 dark:bg-slate-800/50">
+                        <th className="text-left px-2 py-1.5 font-bold text-slate-400 uppercase tracking-wider">Zone</th>
+                        <th className="text-right px-2 py-1.5 font-bold text-slate-400 uppercase tracking-wider">₹/sqft</th>
+                        <th className="text-right px-2 py-1.5 font-bold text-slate-400 uppercase tracking-wider">~{zoneROIs[0]?.typicalSqft}sqft</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {zoneROIs.map(zone => (
+                        <tr key={zone.zone} className="border-t border-slate-100 dark:border-slate-800">
+                          <td className="px-2 py-1.5 flex items-center gap-1.5">
+                            <span className={`w-2 h-2 rounded-full shrink-0 ${ZONE_COLORS[zone.idx].dot}`} />
+                            <span className="font-medium text-slate-700 dark:text-slate-300 truncate max-w-[80px]">{zone.zone.split(' ')[0]}</span>
+                          </td>
+                          <td className="px-2 py-1.5 text-right text-slate-500 dark:text-slate-400">
+                            {zone.rentMin}–{zone.rentMax}
+                          </td>
+                          <td className="px-2 py-1.5 text-right text-slate-500 dark:text-slate-400">
+                            {fmtINR(zone.rentMin * zone.typicalSqft)}–{fmtINR(zone.rentMax * zone.typicalSqft)}/mo
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          )}
+
         </div>
       </aside>
 
@@ -595,6 +752,38 @@ export default function HyperlocalMap() {
             </Source>
           )}
 
+          {/* ── Zone rent markers ─────────────────────────────────────────────── */}
+          {showZones && zoneROIs && zoneROIs.map(zone => (
+            <Marker
+              key={zone.zone}
+              latitude={zone.anchorLat}
+              longitude={zone.anchorLng}
+              anchor="bottom"
+            >
+              <button
+                onClick={e => {
+                  e.stopPropagation()
+                  setHoveredZone(hoveredZone === zone.zone ? null : zone.zone)
+                }}
+                onMouseEnter={() => setHoveredZone(zone.zone)}
+                onMouseLeave={() => setHoveredZone(null)}
+                className={`flex items-center gap-1 rounded-full px-2 py-1 text-[10px] font-bold shadow-lg border-2 border-white transition-all select-none ${
+                  hoveredZone === zone.zone
+                    ? 'scale-110 shadow-xl ring-2 ring-white/60'
+                    : 'hover:scale-105'
+                } ${ZONE_COLORS[zone.idx].marker} text-white`}
+                title={`${zone.zone} — ₹${zone.rentMin}–${zone.rentMax}/sqft`}
+              >
+                {zone.zone.split(' ')[0]}
+                {zone.roi ? (
+                  <span className="ml-0.5 opacity-90">{zone.roi.roiMin.toFixed(0)}–{zone.roi.roiMax.toFixed(0)}</span>
+                ) : (
+                  <span className="ml-0.5 opacity-75">₹{zone.rentMin}+</span>
+                )}
+              </button>
+            </Marker>
+          ))}
+
           {/* ── Popup ────────────────────────────────────────────────────────── */}
           {popup && (
             <Popup longitude={popup.lng} latitude={popup.lat} closeButton onClose={() => setPopup(null)} anchor="bottom" offset={12}>
@@ -604,6 +793,13 @@ export default function HyperlocalMap() {
                   const p = popup.props
                   const score = p.opportunityScore
                   const label = score >= 70 ? '🟢 High Opportunity' : score >= 45 ? '🟡 Moderate' : score >= 20 ? '🟠 Low Gap' : '🔴 Saturated'
+                  // Find nearest zone by matching to rent profile if available
+                  const nearestZone = zoneROIs
+                    ? zoneROIs.reduce((best, z) => {
+                        const d = Math.hypot(z.anchorLat - popup.lat, z.anchorLng - popup.lng)
+                        return d < best.d ? { z, d } : best
+                      }, { z: zoneROIs[0], d: Infinity }).z
+                    : null
                   return (
                     <>
                       <p className="font-bold text-slate-900 dark:text-slate-100">{label}</p>
@@ -613,6 +809,28 @@ export default function HyperlocalMap() {
                         <ScoreRow label="Gap"     value={p.gapScore}          color="bg-green-500"  />
                         <ScoreRow label="Opp."    value={p.opportunityScore}  color="bg-teal-500"   />
                       </div>
+                      {nearestZone?.roi && (
+                        <div className="pt-1 border-t border-slate-100 dark:border-slate-800">
+                          <p className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">
+                            Nearest zone: {nearestZone.zone.split(' ')[0]}
+                          </p>
+                          <div className="flex items-center justify-between">
+                            <span className="text-slate-500 dark:text-slate-400">
+                              ₹{nearestZone.rentMin}–{nearestZone.rentMax}/sqft
+                            </span>
+                            {nearestZone.band && (
+                              <span className={`rounded-full px-1.5 py-0.5 text-[10px] font-bold ${nearestZone.band.cls}`}>
+                                {nearestZone.band.label}
+                              </span>
+                            )}
+                          </div>
+                          {nearestZone.roi && (
+                            <p className="text-[10px] text-slate-400 mt-0.5">
+                              ROI: {nearestZone.roi.roiMin.toFixed(1)}–{nearestZone.roi.roiMax.toFixed(1)} · {fmtINR(nearestZone.roi.monthlyRentMin)}–{fmtINR(nearestZone.roi.monthlyRentMax)}/mo
+                            </p>
+                          )}
+                        </div>
+                      )}
                       <div className="pt-1 border-t border-slate-100 dark:border-slate-800 space-y-0.5 text-slate-500 dark:text-slate-400">
                         <p>{p.supplyCount} business{p.supplyCount !== 1 ? 'es' : ''} in this hex{p.osmCount > 0 ? ` (${p.osmCount} OSM)` : ''}</p>
                         {p.avgRating > 0 && <p>Avg rating: {p.avgRating} ★ · {p.totalReviews} reviews</p>}
@@ -662,6 +880,7 @@ export default function HyperlocalMap() {
               <p className="text-sm font-semibold text-slate-700 dark:text-slate-300">Select a city and category</p>
               <p className="mt-1 text-xs text-slate-400 dark:text-slate-500">
                 The hex grid colours each ~460 m zone green (opportunity) to red (saturated) based on demand vs. real business supply.
+                Zone markers show rent cost — click to fly there.
               </p>
             </div>
           </div>
@@ -687,7 +906,7 @@ export default function HyperlocalMap() {
 
         {/* Attribution */}
         <div className="absolute bottom-1 right-2 text-[9px] text-slate-400/50 dark:text-slate-600/50 pointer-events-none select-none">
-          Map © CARTO · OSM · Data: Google Trends, Maps Places, OSM Overpass, Census 2011, Udyam MSME, MCA21, GSTN
+          Map © CARTO · OSM · Data: Google Trends, Maps Places, OSM Overpass, Census 2011, Udyam MSME, MCA21, GSTN · Rent: Anarock/JLL/Knight Frank 2024
         </div>
       </div>
     </div>

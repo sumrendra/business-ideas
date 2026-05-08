@@ -37,8 +37,8 @@ const TOOLS = [
   },
   {
     href: '/hyperlocal-opportunity',
-    label: 'Hyperlocal Opportunity Map',
-    description: 'Interactive heatmap — demand vs. supply gap across any Indian city. See gap zones, supply clusters and Trends data on one map.',
+    label: 'Hyperlocal Opportunity + ROI',
+    description: 'Demand vs. supply gap heatmap for any Indian city — with rent zone markers showing ROI per rupee. Drop a pin, see gap scores and break-even cost for Prime, Secondary, Suburban, and Peripheral zones.',
     badge: 'Maps',
   },
   {
@@ -52,12 +52,6 @@ const TOOLS = [
     label: 'License & Compliance Map',
     description: 'Every license you need, what it costs, and how long it takes — for 9 common Indian business types.',
     badge: 'Regulatory',
-  },
-  {
-    href: '/locality-roi',
-    label: 'Locality ROI Score',
-    description: 'Live gap score × commercial rent data. Find the best value zone — highest opportunity per rupee of rent.',
-    badge: 'Location',
   },
   {
     href: '/competitor-intel',

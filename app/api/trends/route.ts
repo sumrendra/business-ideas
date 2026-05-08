@@ -248,8 +248,12 @@ export async function GET(req: NextRequest) {
   }
   const best = results.reduce((a, b) => score(a) >= score(b) ? a : b)
 
-  // No data at all — return rateLimited if any call timed out, never cache so retry works
+  // No data — if rate-limited, fall back to any stale snapshot rather than showing an error
   if (!best.values.length) {
+    if (anyTimedOut && snapped?.values?.length) {
+      const { ts, ...staleRest } = snapped
+      return NextResponse.json({ ...staleRest, stale: true })
+    }
     return NextResponse.json({ rateLimited: anyTimedOut, values: [], labels: [], cities: [], bestKeyword: keyword, allTried: variants, seasonalInsight: null })
   }
 

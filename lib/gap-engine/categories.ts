@@ -39,6 +39,8 @@ export const CATEGORIES: Category[] = [
       'tata power ev', 'ather grid', 'statiq', 'magenta', 'fortum', 'jio-bp',
       // Hindi
       'vidyut vahana', 'vahan charging',
+      // short word-boundary match — catches any place simply named "EV Hub", "EV Point" etc.
+      'ev',
     ],
     trendsKeywords: ['ev charging station', 'electric vehicle charging', 'ev charger near me'],
     description: 'Electric vehicle charging infrastructure',
