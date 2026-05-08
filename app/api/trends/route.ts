@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 
 const CACHE_TTL      = 6 * 60 * 60 * 1000
-const CALL_TIMEOUT   = 7000
+const CALL_TIMEOUT   = 12000
 
 interface CacheEntry {
   bestKeyword: string
@@ -199,7 +199,7 @@ export async function GET(req: NextRequest) {
   // Try variants, pick best
   const results: { keyword: string; values: number[] }[] = []
   for (let i = 0; i < variants.length; i++) {
-    if (i > 0) await new Promise(r => setTimeout(r, 600))
+    if (i > 0) await new Promise(r => setTimeout(r, 1500))
     const values = await fetchOverTime(gt, variants[i], geo, months)
     results.push({ keyword: variants[i], values })
     if (i >= 2 && avgSignal(values) > 20) break

@@ -161,6 +161,7 @@ export default function TrendsChart({ keyword, trendsUrl }: Props) {
   const [data, setData]       = useState<TrendsData | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError]     = useState(false)
+  const [retryKey, setRetryKey] = useState(0)
   const [period, setPeriod]   = useState<Period>('5y')
   const [geo, setGeo]         = useState('IN')
 
@@ -177,7 +178,7 @@ export default function TrendsChart({ keyword, trendsUrl }: Props) {
       .catch(() => { setError(true); setLoading(false) })
       .finally(() => clearTimeout(timer))
     return () => { controller.abort(); clearTimeout(timer) }
-  }, [keyword, geo, period])
+  }, [keyword, geo, period, retryKey])
 
   useEffect(() => {
     return load()
@@ -210,18 +211,31 @@ export default function TrendsChart({ keyword, trendsUrl }: Props) {
   if (error || !data || !data.values.length) {
     return (
       <div className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 overflow-hidden">
-        {/* Controls still visible */}
         <div className="flex items-center gap-2 px-5 pt-4 pb-3 flex-wrap">
           <GeoSelector geo={geo} setGeo={setGeo} />
-          <PeriodSelector period={period} setPeriod={setPeriod} />
+          <div className="ml-auto">
+            <PeriodSelector period={period} setPeriod={setPeriod} />
+          </div>
         </div>
-        <Link href={trendsUrl} target="_blank" rel="noopener noreferrer"
-          className="block px-5 pb-6 text-center hover:opacity-80 transition-opacity">
+        <div className="px-5 pb-6 text-center space-y-3">
           <p className="text-sm text-slate-500 dark:text-slate-400">
-            Not enough search data for <strong>{geoLabel}</strong>.{' '}
-            <span className="text-indigo-600 dark:text-indigo-400 font-medium">View on Google Trends →</span>
+            {error ? 'Google Trends is temporarily rate-limited.' : `Not enough search data for ${geoLabel}.`}
           </p>
-        </Link>
+          <div className="flex items-center justify-center gap-3">
+            {error && (
+              <button
+                onClick={() => setRetryKey(k => k + 1)}
+                className="rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-medium px-3 py-1.5 transition-colors"
+              >
+                Retry
+              </button>
+            )}
+            <Link href={trendsUrl} target="_blank" rel="noopener noreferrer"
+              className="text-xs text-indigo-600 dark:text-indigo-400 font-medium hover:underline">
+              View on Google Trends →
+            </Link>
+          </div>
+        </div>
       </div>
     )
   }
