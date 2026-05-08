@@ -198,14 +198,21 @@ export default function LocalityROIPage() {
                         </span>
                       )}
                     </td>
-                    {scanResult && roi && band && (
+                    {scanResult && (
                       <td className="px-4 py-3 text-right">
-                        <div className="flex flex-col items-end gap-1">
-                          <span className="font-bold text-slate-900 dark:text-slate-100">
-                            {roi.roiMin.toFixed(1)}–{roi.roiMax.toFixed(1)}
-                          </span>
-                          <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${band.cls}`}>{band.label}</span>
-                        </div>
+                        {scanResult.gapScore === 0 ? (
+                          <div className="flex flex-col items-end gap-1">
+                            <span className="font-bold text-slate-400 dark:text-slate-600">—</span>
+                            <span className="rounded-full px-2 py-0.5 text-[10px] font-bold bg-rose-100 text-rose-700 dark:bg-rose-900/40 dark:text-rose-400">Saturated</span>
+                          </div>
+                        ) : roi && band ? (
+                          <div className="flex flex-col items-end gap-1">
+                            <span className="font-bold text-slate-900 dark:text-slate-100">
+                              {roi.roiMin.toFixed(1)}–{roi.roiMax.toFixed(1)}
+                            </span>
+                            <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${band.cls}`}>{band.label}</span>
+                          </div>
+                        ) : null}
                       </td>
                     )}
                   </tr>

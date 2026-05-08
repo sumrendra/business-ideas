@@ -54,7 +54,8 @@ export async function GET(req: NextRequest) {
 
       const { count: supplyCount, multilingualCount } = supplyResult
       const demandScore   = Math.round(trendsScore * 0.65 + purchasingPower * 0.35)
-      const supplyScore   = supplyCount <= 0 ? 0 : Math.min(100, Math.round((Math.log(supplyCount + 1) / Math.log(21)) * 100))
+      // log(51) ceiling — 50 businesses = fully saturated; 20 businesses ≈ 76
+      const supplyScore   = supplyCount <= 0 ? 0 : Math.min(100, Math.round((Math.log(supplyCount + 1) / Math.log(51)) * 100))
       const gapScore      = Math.max(0, demandScore - supplyScore)
 
       const rating: 'high' | 'medium' | 'low' | 'saturated' =
