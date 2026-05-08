@@ -61,10 +61,10 @@ export default function MSMELookup({ industry, ideaTitle }: Props) {
           <span className="text-lg">🏭</span>
           <div>
             <p className="font-semibold text-slate-900 dark:text-slate-100 text-sm sm:text-base">
-              MSME Manufacturers &amp; Suppliers
+              Manufacturers &amp; Suppliers in India
             </p>
             <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-              Registered MSMEs operating in this space across India
+              MSMEs and established players operating in this space
             </p>
           </div>
         </div>
