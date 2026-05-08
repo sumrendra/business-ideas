@@ -707,7 +707,6 @@ export default async function IdeaPage({ params }: PageProps) {
           <TrendsChart
             keyword={idea.google_trends_keyword}
             trendsUrl={`https://trends.google.com/trends/explore?q=${encodeURIComponent(idea.google_trends_keyword)}&geo=IN&date=today%205-y`}
-            trendData={idea.trend_data}
           />
         </section>
       )}
@@ -729,7 +728,7 @@ export default async function IdeaPage({ params }: PageProps) {
               </thead>
               <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
                 {idea.competitors.map((c) => (
-                  <tr key={c._key} className="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors">
+                  <tr key={c._key ?? c.name} className="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors">
                     <td className="px-4 py-3">
                       <div className="font-semibold text-slate-800 dark:text-slate-200">{c.name}</div>
                       {c.type && (
