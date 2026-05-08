@@ -134,10 +134,13 @@ async function fetchOverTime(keyword, geo, months) {
         startTime: new Date(Date.now() - months * 30 * 24 * 60 * 60 * 1000),
         granularTime: false,
       }), CALL_TIMEOUT)
-    if (!raw || (typeof raw === 'string' && raw.trimStart().startsWith('<'))) return { values: [], timedOut: true }
-    const parsed = JSON.parse(raw)
+    if (!raw) return { values: [], timedOut: true }
+    const s = typeof raw === 'string' ? raw : String(raw)
+    // Google returns HTML when rate-limiting (may be missing leading chars after JSONP strip)
+    if (!s.trimStart().startsWith('{') && !s.trimStart().startsWith('[')) return { values: [], timedOut: true }
+    const parsed = JSON.parse(s)
     return { values: (parsed?.default?.timelineData ?? []).map(p => p.value[0]), timedOut: false }
-  } catch { return { values: [], timedOut: false } }
+  } catch { return { values: [], timedOut: true } }
 }
 
 async function fetchByRegion(keyword, geo) {
@@ -147,95 +150,117 @@ async function fetchByRegion(keyword, geo) {
         keyword, geo, resolution: 'REGION',
         startTime: new Date(Date.now() - 12 * 30 * 24 * 60 * 60 * 1000),
       }), CALL_TIMEOUT)
-    if (!raw || (typeof raw === 'string' && raw.trimStart().startsWith('<'))) return []
-    const parsed = JSON.parse(raw)
+    if (!raw) return []
+    const s = typeof raw === 'string' ? raw : String(raw)
+    if (!s.trimStart().startsWith('{') && !s.trimStart().startsWith('[')) return []
+    const parsed = JSON.parse(s)
     return (parsed?.default?.geoMapData ?? [])
       .map(r => ({ name: r.geoName, value: r.value[0] ?? 0 }))
       .filter(r => r.value > 0).sort((a,b) => b.value - a.value).slice(0, 10)
   } catch { return [] }
 }
 
+const sleep = ms => new Promise(r => setTimeout(r, ms))
+
+// Back-off schedule when rate-limited: 3min → 5min → 10min → 15min → 15min …
+const BACKOFF_MS = [3*60e3, 5*60e3, 10*60e3, 15*60e3]
+
 // ── Main ──────────────────────────────────────────────────────────────────────
 async function main() {
-  // Load snapshot
   let snapshot = {}
   try { snapshot = JSON.parse(readFileSync(SNAPSHOT_PATH, 'utf8')) } catch {}
 
-  // Fetch all idea keywords from Sanity
   const ideas = await sanity.fetch(`*[_type == "businessIdea" && defined(google_trends_keyword)]{google_trends_keyword}`)
   const keywords = [...new Set(ideas.map(i => i.google_trends_keyword).filter(Boolean))]
   console.log(`Found ${keywords.length} unique keywords to process`)
 
-  let saved = 0, skipped = 0, failed = 0
+  let saved = 0, skipped = 0, noData = 0
   const months = 60 // 5y
+
+  // Consecutive rate-limit streak counter — triggers longer back-offs
+  let rateLimitStreak = 0
 
   for (let i = 0; i < keywords.length; i++) {
     const kw = keywords[i]
     const cacheKey = `${kw.toLowerCase().trim()}|IN|5y`
 
-    // Skip if fresh snapshot exists
     const existing = snapshot[cacheKey]
     if (existing && Date.now() - existing.ts < SNAPSHOT_TTL_MS) {
       skipped++
-      process.stdout.write(`\r[${i+1}/${keywords.length}] Skip (fresh): ${kw.slice(0,40)}          `)
+      process.stdout.write(`\r[${i+1}/${keywords.length}] Skip: ${kw.slice(0,45)}          `)
       continue
     }
 
-    process.stdout.write(`\r[${i+1}/${keywords.length}] Fetching: ${kw.slice(0,40)}          `)
+    process.stdout.write(`\r[${i+1}/${keywords.length}] Fetching: ${kw.slice(0,45)}          `)
 
     const variants = expandKeywords(kw)
-    const results = []
-    for (let j = 0; j < variants.length; j++) {
-      if (j > 0) await new Promise(r => setTimeout(r, 2000))
-      const { values, timedOut } = await fetchOverTime(variants[j], 'IN', months)
-      results.push({ keyword: variants[j], values })
-      if (timedOut) {
-        console.log(`\n  Rate limited on "${variants[j]}", waiting 30s...`)
-        await new Promise(r => setTimeout(r, 30000))
-        const retry = await fetchOverTime(variants[j], 'IN', months)
-        results[results.length - 1] = { keyword: variants[j], values: retry.values }
+    let gotData = false
+
+    // Retry the whole keyword with back-off if rate-limited
+    for (let attempt = 0; ; attempt++) {
+      const results = []
+      let anyTimedOut = false
+
+      for (let j = 0; j < variants.length; j++) {
+        if (j > 0) await sleep(2000)
+        const { values, timedOut } = await fetchOverTime(variants[j], 'IN', months)
+        if (timedOut) anyTimedOut = true
+        results.push({ keyword: variants[j], values })
+        const avg = vals => vals.length ? vals.reduce((s,v) => s+v,0)/vals.length : 0
+        if (j >= 2 && avg(values) > 20) break
       }
-      if (j >= 2 && results[j].values.reduce((s,v) => s+v, 0) / results[j].values.length > 20) break
+
+      const avgSig = vals => vals.length ? vals.reduce((s,v) => s+v,0)/vals.length : 0
+      const score  = r => avgSig(r.values) * (r.keyword.trim().split(/\s+/).length >= 3 ? 1.2 : 1.0)
+      const best   = results.reduce((a, b) => score(a) >= score(b) ? a : b)
+
+      if (best.values.length) {
+        // Success — build and save entry
+        rateLimitStreak = 0
+        const now = new Date()
+        const labels = best.values.map((_, idx) => {
+          const d = new Date(now.getFullYear(), now.getMonth() - (best.values.length - 1 - idx), 1)
+          return `${MONTH_NAMES[d.getMonth()]} ${d.getFullYear()}`
+        })
+        await sleep(1500)
+        const cities = await fetchByRegion(best.keyword, 'IN')
+        const seasonalInsight = analyseSeasonality(best.values, labels)
+
+        snapshot[cacheKey] = {
+          bestKeyword: best.keyword,
+          allTried: results.map(r => r.keyword),
+          values: best.values, labels, cities, seasonalInsight,
+          ts: Date.now(),
+        }
+        writeFileSync(SNAPSHOT_PATH, JSON.stringify(snapshot, null, 2))
+        saved++
+        gotData = true
+        break
+      }
+
+      if (!anyTimedOut) {
+        // Genuine no-data (not a rate limit) — move on
+        noData++
+        break
+      }
+
+      // Rate limited — back off and retry
+      rateLimitStreak++
+      const backoff = BACKOFF_MS[Math.min(rateLimitStreak - 1, BACKOFF_MS.length - 1)]
+      const mins = Math.round(backoff / 60000)
+      process.stdout.write(`\n  Rate limited (streak ${rateLimitStreak}). Waiting ${mins}min before retry…\n`)
+      await sleep(backoff)
     }
 
-    const avgSig = vals => vals.length ? vals.reduce((s,v) => s+v,0) / vals.length : 0
-    const score = r => avgSig(r.values) * (r.keyword.trim().split(/\s+/).length >= 3 ? 1.2 : 1.0)
-    const best = results.reduce((a, b) => score(a) >= score(b) ? a : b)
-
-    if (!best.values.length) {
-      failed++
-      console.log(`\n  No data for "${kw}"`)
-      await new Promise(r => setTimeout(r, 3000))
-      continue
+    if (!gotData && rateLimitStreak === 0) {
+      process.stdout.write(`\n  No Trends data for "${kw}"\n`)
     }
 
-    const now = new Date()
-    const labels = best.values.map((_, idx) => {
-      const d = new Date(now.getFullYear(), now.getMonth() - (best.values.length - 1 - idx), 1)
-      return `${MONTH_NAMES[d.getMonth()]} ${d.getFullYear()}`
-    })
-
-    await new Promise(r => setTimeout(r, 1500))
-    const cities = await fetchByRegion(best.keyword, 'IN')
-    const seasonalInsight = analyseSeasonality(best.values, labels)
-
-    snapshot[cacheKey] = {
-      bestKeyword: best.keyword,
-      allTried: results.map(r => r.keyword),
-      values: best.values,
-      labels,
-      cities,
-      seasonalInsight,
-      ts: Date.now(),
-    }
-    writeFileSync(SNAPSHOT_PATH, JSON.stringify(snapshot, null, 2))
-    saved++
-
-    // Polite delay between ideas to avoid rate limits
-    await new Promise(r => setTimeout(r, 3000))
+    // Normal inter-idea delay (3s when not rate-limited)
+    await sleep(3000)
   }
 
-  console.log(`\n\nDone. Saved: ${saved}, Skipped (fresh): ${skipped}, No data: ${failed}`)
+  console.log(`\n\nDone. Saved: ${saved}  Skipped (fresh): ${skipped}  No data: ${noData}`)
 }
 
 main().catch(console.error)

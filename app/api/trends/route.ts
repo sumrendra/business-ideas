@@ -167,8 +167,9 @@ async function fetchOverTime(
       CALL_TIMEOUT, null
     )
     if (raw === null) return { values: [], timedOut: true }
-    // Google returns an HTML page when rate-limiting
-    if (typeof raw === 'string' && (raw as string).trimStart().startsWith('<')) return { values: [], timedOut: true }
+    const s = raw as string
+    // Google returns HTML when rate-limiting (may be missing leading chars after JSONP strip)
+    if (!s.trimStart().startsWith('{') && !s.trimStart().startsWith('[')) return { values: [], timedOut: true }
     const parsed = JSON.parse(raw)
     return { values: (parsed?.default?.timelineData ?? []).map((p: any) => p.value[0] as number), timedOut: false }
   } catch { return { values: [], timedOut: true } }
