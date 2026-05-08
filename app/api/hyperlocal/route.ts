@@ -407,14 +407,15 @@ export async function GET(req: NextRequest) {
   const udyamDensity        = udyam?.densityIndex ?? 50
 
   const demandScore    = Math.round(cityScore * 0.65 + purchasingPower * 0.35)
-  const logNormSupply  = supplyCount <= 0 ? 0 : Math.min(100, Math.round((Math.log(supplyCount + 1) / Math.log(61)) * 100))
+  const logNormSupply  = supplyCount <= 0 ? 0 : Math.min(100, Math.round((Math.log(supplyCount + 1) / Math.log(51)) * 100))
   const supplyScore    = Math.round(logNormSupply * 0.55 + formalBusinessIndex * 0.25 + udyamDensity * 0.20)
-  const gapScore       = Math.max(0, demandScore - supplyScore)
+  // Multiplicative gap: rewards high demand AND low supply; avoids always-zero on subtraction
+  const gapScore       = Math.round(demandScore * (100 - supplyScore) / 50)
 
   let rating: 'high' | 'medium' | 'low' | 'saturated'
   if (gapScore >= 40)      rating = 'high'
   else if (gapScore >= 20) rating = 'medium'
-  else if (gapScore >= 0)  rating = 'low'
+  else if (gapScore >= 5)  rating = 'low'
   else                     rating = 'saturated'
 
   return NextResponse.json({
