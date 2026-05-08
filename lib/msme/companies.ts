@@ -58,6 +58,28 @@ export function matchMSMESector(industry: string): string | undefined {
   return undefined
 }
 
+// Title-keyword → sector overrides for manufacturing ideas where the industry tag
+// is generic ('manufacturing') but the product clearly belongs to a specific sector.
+const TITLE_SECTOR_OVERRIDES: Array<[RegExp, string]> = [
+  [/pvc|plastic|polypropylene|polyethylene|hdpe|ldpe|vinyl|acrylic|resin|foam|rubber|silicone/i, 'Plastics & Rubber'],
+  [/steel|iron|alumin|copper|brass|zinc|alloy|metal|casting|forging|welding|sheet metal/i,       'Metal & Engineering'],
+  [/textile|fabric|yarn|garment|apparel|cloth|knit|weav|stitch|embroid/i,                        'Textile & Apparel'],
+  [/electronic|pcb|circuit|sensor|semiconductor|led|display|battery|solar panel/i,               'Electronics & Electrical'],
+  [/paper|cardboard|carton|corrugat|print|packag|label|pouch|box|bag/i,                          'Paper & Print'],
+  [/chemical|coating|paint|adhesive|sealant|lubricant|solvent|dye|pigment|fertilizer|pesticide/i,'Specialty Chemicals'],
+  [/tile|cement|concrete|brick|ceramic|glass|stone|marble|granite|construction/i,               'Construction Materials'],
+  [/food|snack|biscuit|spice|masala|sauce|pickle|dairy|beverage|drink|juice|oil|flour/i,         'Food & Beverage'],
+  [/pharma|medicine|drug|capsule|tablet|ayurved|herbal|sanitizer|surgical/i,                     'Healthcare & Wellness'],
+  [/agri|seed|fertiliz|pesticide|irrigation|greenhouse|farm equipment/i,                         'Agricultural Inputs'],
+]
+
+export function refineSectorByTitle(title: string, fallback: string): string {
+  for (const [pattern, sector] of TITLE_SECTOR_OVERRIDES) {
+    if (pattern.test(title)) return sector
+  }
+  return fallback
+}
+
 export function searchMSMEs(
   sector: string | undefined,
   query?: string,

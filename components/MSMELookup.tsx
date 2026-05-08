@@ -32,11 +32,13 @@ export default function MSMELookup({ industry, ideaTitle }: Props) {
   useEffect(() => {
     if (!open || data) return
     setLoading(true)
-    fetch(`/api/msme-lookup?industry=${encodeURIComponent(industry)}&limit=50`)
+    const params = new URLSearchParams({ industry, limit: '50' })
+    if (ideaTitle) params.set('title', ideaTitle)
+    fetch(`/api/msme-lookup?${params}`)
       .then(r => r.json())
       .then(d => { setData(d); setLoading(false) })
       .catch(() => setLoading(false))
-  }, [open, industry, data])
+  }, [open, industry, ideaTitle, data])
 
   const filtered = data?.companies.filter(c => {
     const matchesState    = !stateFilter    || c.state === stateFilter
