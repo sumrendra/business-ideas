@@ -27,9 +27,9 @@ export default function Disclaimer({
     <aside
       role="note"
       aria-label="Disclaimer"
-      className={`rounded-xl border border-slate-200 bg-slate-50 p-4 text-xs leading-relaxed text-slate-500 ${className}`}
+      className={`rounded-xl border border-slate-200 dark:border-slate-700/60 bg-slate-50 dark:bg-slate-800/40 p-4 text-xs leading-relaxed text-slate-500 dark:text-slate-400 ${className}`}
     >
-      <p className="mb-1 text-[11px] font-bold uppercase tracking-widest text-slate-400">{c.title}</p>
+      <p className="mb-1 text-[11px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500">{c.title}</p>
       <p>{c.body}</p>
     </aside>
   )

@@ -21,6 +21,8 @@ interface LookupResult {
   dataSource: string
 }
 
+const DEFAULT_VISIBLE = 5
+
 export default function MSMELookup({ industry, ideaTitle }: Props) {
   const [open, setOpen] = useState(false)
   const [data, setData] = useState<LookupResult | null>(null)
@@ -28,6 +30,7 @@ export default function MSMELookup({ industry, ideaTitle }: Props) {
   const [stateFilter, setStateFilter] = useState('')
   const [categoryFilter, setCategoryFilter] = useState('')
   const [query, setQuery] = useState('')
+  const [showAll, setShowAll] = useState(false)
 
   useEffect(() => {
     if (!open || data) return
@@ -39,6 +42,9 @@ export default function MSMELookup({ industry, ideaTitle }: Props) {
       .then(d => { setData(d); setLoading(false) })
       .catch(() => setLoading(false))
   }, [open, industry, ideaTitle, data])
+
+  // Reset "show all" whenever filters change so the count stays meaningful
+  const resetShowAll = () => setShowAll(false)
 
   const filtered = data?.companies.filter(c => {
     const matchesState    = !stateFilter    || c.state === stateFilter
@@ -105,12 +111,12 @@ export default function MSMELookup({ industry, ideaTitle }: Props) {
                   type="text"
                   placeholder="Search companies…"
                   value={query}
-                  onChange={e => setQuery(e.target.value)}
+                  onChange={e => { setQuery(e.target.value); resetShowAll() }}
                   className="flex-1 min-w-[140px] rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-1.5 text-xs text-slate-800 dark:text-slate-200 placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-emerald-400"
                 />
                 <select
                   value={stateFilter}
-                  onChange={e => setStateFilter(e.target.value)}
+                  onChange={e => { setStateFilter(e.target.value); resetShowAll() }}
                   className="rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-2 py-1.5 text-xs text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-1 focus:ring-emerald-400"
                 >
                   <option value="">All States</option>
@@ -118,7 +124,7 @@ export default function MSMELookup({ industry, ideaTitle }: Props) {
                 </select>
                 <select
                   value={categoryFilter}
-                  onChange={e => setCategoryFilter(e.target.value)}
+                  onChange={e => { setCategoryFilter(e.target.value); resetShowAll() }}
                   className="rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-2 py-1.5 text-xs text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-1 focus:ring-emerald-400"
                 >
                   <option value="">All Categories</option>
@@ -141,58 +147,79 @@ export default function MSMELookup({ industry, ideaTitle }: Props) {
                 <p className="px-5 py-8 text-center text-sm text-slate-500 dark:text-slate-400">
                   No companies matched your filters.
                 </p>
-              ) : (
-                <div className="overflow-x-auto">
-                  <table className="w-full text-xs sm:text-sm">
-                    <thead>
-                      <tr className="border-b border-emerald-100 dark:border-emerald-900/40 bg-white/40 dark:bg-slate-900/30">
-                        <th className="px-5 py-2.5 text-left font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide text-[11px]">Company</th>
-                        <th className="px-3 py-2.5 text-left font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide text-[11px] hidden sm:table-cell">Location</th>
-                        <th className="px-3 py-2.5 text-left font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide text-[11px]">Category</th>
-                        <th className="px-3 py-2.5 text-left font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide text-[11px] hidden md:table-cell">Turnover</th>
-                        <th className="px-3 py-2.5 text-left font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide text-[11px] hidden lg:table-cell">Employees</th>
-                        <th className="px-3 py-2.5 text-left font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide text-[11px]">Est.</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-emerald-50 dark:divide-emerald-950/40">
-                      {filtered.map(c => (
-                        <tr key={c.id} className="hover:bg-white/60 dark:hover:bg-slate-900/40 transition-colors">
-                          <td className="px-5 py-3">
-                            <p className="font-semibold text-slate-800 dark:text-slate-200 leading-snug">{c.name}</p>
-                            <p className="text-[11px] text-slate-400 dark:text-slate-500 mt-0.5 leading-snug">{c.subSector}</p>
-                            {c.clusterNote && (
-                              <p className="text-[10px] text-emerald-600 dark:text-emerald-500 mt-0.5 leading-snug">{c.clusterNote}</p>
-                            )}
-                          </td>
-                          <td className="px-3 py-3 text-slate-500 dark:text-slate-400 hidden sm:table-cell whitespace-nowrap">
-                            <p>{c.city}</p>
-                            <p className="text-[11px] text-slate-400 dark:text-slate-500">{c.state}</p>
-                          </td>
-                          <td className="px-3 py-3">
-                            <span className={`rounded-full px-2 py-0.5 text-[11px] font-semibold whitespace-nowrap ${CATEGORY_COLORS[c.category]}`}>
-                              {c.category}
-                            </span>
-                          </td>
-                          <td className="px-3 py-3 text-slate-600 dark:text-slate-400 hidden md:table-cell whitespace-nowrap font-medium">
-                            {c.annualTurnover ?? '—'}
-                          </td>
-                          <td className="px-3 py-3 text-slate-500 dark:text-slate-400 hidden lg:table-cell whitespace-nowrap">
-                            {c.employeeRange ?? '—'}
-                          </td>
-                          <td className="px-3 py-3 text-slate-400 dark:text-slate-500 whitespace-nowrap">
-                            {c.registeredYear ?? '—'}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              )}
+              ) : (() => {
+                const visible = showAll ? filtered : filtered.slice(0, DEFAULT_VISIBLE)
+                const hidden  = filtered.length - DEFAULT_VISIBLE
+                return (
+                  <>
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-xs sm:text-sm">
+                        <thead>
+                          <tr className="border-b border-emerald-100 dark:border-emerald-900/40 bg-white/40 dark:bg-slate-900/30">
+                            <th className="px-5 py-2.5 text-left font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide text-[11px]">Company</th>
+                            <th className="px-3 py-2.5 text-left font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide text-[11px] hidden sm:table-cell">Location</th>
+                            <th className="px-3 py-2.5 text-left font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide text-[11px]">Size</th>
+                            <th className="px-3 py-2.5 text-left font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide text-[11px]">Est.</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-emerald-50 dark:divide-emerald-950/40">
+                          {visible.map(c => (
+                            <tr key={c.id} className="hover:bg-white/60 dark:hover:bg-slate-900/40 transition-colors">
+                              <td className="px-5 py-3">
+                                <a
+                                  href={`https://www.google.com/search?q=${encodeURIComponent(c.name + ' India official website')}`}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="group inline-flex items-center gap-1 font-semibold text-slate-800 dark:text-slate-200 leading-snug hover:text-emerald-700 dark:hover:text-emerald-400 transition-colors"
+                                >
+                                  {c.name}
+                                  <svg className="h-3 w-3 opacity-0 group-hover:opacity-100 transition-opacity shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                                  </svg>
+                                </a>
+                                <p className="text-[11px] text-slate-400 dark:text-slate-500 mt-0.5 leading-snug">{c.subSector}</p>
+                                {c.clusterNote && (
+                                  <p className="text-[10px] text-emerald-600 dark:text-emerald-500 mt-0.5 leading-snug">{c.clusterNote}</p>
+                                )}
+                              </td>
+                              <td className="px-3 py-3 text-slate-500 dark:text-slate-400 hidden sm:table-cell whitespace-nowrap">
+                                <p>{c.city}</p>
+                                <p className="text-[11px] text-slate-400 dark:text-slate-500">{c.state}</p>
+                              </td>
+                              <td className="px-3 py-3">
+                                <span className={`rounded-full px-2 py-0.5 text-[11px] font-semibold whitespace-nowrap ${CATEGORY_COLORS[c.category]}`}>
+                                  {c.category}
+                                </span>
+                              </td>
+                              <td className="px-3 py-3 text-slate-400 dark:text-slate-500 whitespace-nowrap">
+                                {c.registeredYear ?? '—'}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+
+                    {filtered.length > DEFAULT_VISIBLE && (
+                      <div className="border-t border-emerald-100 dark:border-emerald-900/40 px-5 py-3">
+                        <button
+                          onClick={() => setShowAll(v => !v)}
+                          className="text-xs font-medium text-emerald-700 dark:text-emerald-400 hover:underline"
+                        >
+                          {showAll
+                            ? 'Show less ↑'
+                            : `Show ${hidden} more companies ↓`}
+                        </button>
+                      </div>
+                    )}
+                  </>
+                )
+              })()}
 
               <div className="px-5 py-3 text-[11px] text-slate-400 dark:text-slate-500 border-t border-emerald-100 dark:border-emerald-900/40 flex flex-wrap items-center justify-between gap-2">
                 <span>Source: {data.dataSource}</span>
                 <span className="text-emerald-600 dark:text-emerald-500 font-medium">
-                  Micro: &lt;₹5Cr · Small: ₹5–50Cr · Medium: ₹50–250Cr turnover
+                  Size: Micro &lt;₹5Cr · Small ₹5–50Cr · Medium ₹50–250Cr annual turnover
                 </span>
               </div>
             </>

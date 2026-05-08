@@ -24,6 +24,10 @@ export default defineConfig({
               .title('Blog Posts')
               .schemaType('post')
               .child(S.documentTypeList('post').title('Blog Posts')),
+            S.listItem()
+              .title('User Feedback')
+              .schemaType('feedback')
+              .child(S.documentTypeList('feedback').title('User Feedback')),
           ]),
     }),
     visionTool(),

@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import type { Idea } from '@/lib/sanity/types'
 import { BUDGET_LABELS, DIFFICULTY_LABELS, MARKET_SATURATION_LABELS } from '@/lib/sanity/types'
+import FavouriteButton from './FavouriteButton'
 
 interface IdeaListCardProps {
   idea: Idea
@@ -39,12 +40,7 @@ export default function IdeaListCard({ idea, rank }: IdeaListCardProps) {
             {idea.title}
           </Link>
         </div>
-        <button
-          className="shrink-0 text-slate-300 dark:text-slate-600 hover:text-rose-400 transition-colors"
-          aria-label="Save idea"
-        >
-          ♡
-        </button>
+        <FavouriteButton slug={idea.slug} />
       </div>
 
       {/* Row 2: Tags */}

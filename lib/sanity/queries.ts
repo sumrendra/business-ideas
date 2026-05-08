@@ -340,3 +340,11 @@ export const RECENT_POSTS_QUERY = groq`
     ${POST_CARD_FIELDS}
   }
 `
+
+export const ALL_POSTS_FOR_LINKING_QUERY = groq`
+  *[_type == "post" && defined(slug.current) && defined(title)] {
+    "slug": slug.current,
+    title,
+    tags
+  }
+`

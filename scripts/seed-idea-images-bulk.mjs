@@ -3,6 +3,8 @@
 // Run: node scripts/seed-idea-images-bulk.mjs
 // Optional: node scripts/seed-idea-images-bulk.mjs --dry-run   (list only, no upload)
 // Optional: node scripts/seed-idea-images-bulk.mjs --industry "E-commerce"
+// Optional: node scripts/seed-idea-images-bulk.mjs --force      (overwrite existing images)
+// Optional: node scripts/seed-idea-images-bulk.mjs --slug pvc-traffic-cone-manufacturing
 
 import { createClient } from '@sanity/client'
 import { readFileSync, writeFileSync, mkdirSync } from 'fs'
@@ -11,8 +13,13 @@ import { join } from 'path'
 import { tmpdir, homedir } from 'os'
 
 const DRY_RUN = process.argv.includes('--dry-run')
+const FORCE = process.argv.includes('--force')
 const INDUSTRY_FILTER = (() => {
   const idx = process.argv.indexOf('--industry')
+  return idx !== -1 ? process.argv[idx + 1] : null
+})()
+const SLUG_FILTER = (() => {
+  const idx = process.argv.indexOf('--slug')
   return idx !== -1 ? process.argv[idx + 1] : null
 })()
 
@@ -42,7 +49,7 @@ const INDUSTRY_DEFAULTS = {
   'export':                   { id: 'photo-1494412574643-ff11b0a5c1c3', alt: 'Cargo containers at port ready for international export' },
   'food':                     { id: 'photo-1567620905732-2d1ec7ab7445', alt: 'Freshly prepared Indian meal in containers ready for delivery' },
   'logistics':                { id: 'photo-1586528116311-ad8dd3c8310d', alt: 'Warehouse with shelves of packages and logistics workers' },
-  'manufacturing':            { id: 'photo-1581091226825-a6a2a5aee158', alt: 'Modern factory floor with industrial machinery and workers' },
+  'manufacturing':            { id: 'photo-1565043589221-1a6fd9ae45c7', alt: 'Industrial machinery on modern factory production floor' },
   'petcare':                  { id: 'photo-1587300003388-59208cc962cb', alt: 'Happy dog being groomed by a professional pet care specialist' },
   'proptech':                 { id: 'photo-1560448204-e02f11c3d0e2', alt: 'Modern residential building representing real estate investment' },
   'travel':                   { id: 'photo-1436491865332-7a61a109cc05', alt: 'Scenic landscape with mountains representing travel and adventure' },
@@ -277,7 +284,7 @@ const SLUG_OVERRIDES = {
   'indian-animation-vfx-export-studio':     { id: 'photo-1611162616305-c69b3fa7fbe0', alt: 'VFX animation studio with artists creating digital content' },
   'indian-artisan-jewellery-export-platform':{ id: 'photo-1515562141207-7a88fb7ce338', alt: 'Traditional Indian jewellery crafted for global export market' },
   'indian-chemical-raw-material-export':    { id: 'photo-1565043589221-1a6fd9ae45c7', alt: 'Chemical industrial plant producing raw materials for export' },
-  'indian-engineering-goods-export-marketplace':{ id: 'photo-1581091226825-a6a2a5aee158', alt: 'Engineering goods machinery manufactured in India for export' },
+  'indian-engineering-goods-export-marketplace':{ id: 'photo-1565043589221-1a6fd9ae45c7', alt: 'Engineering goods machinery manufactured in India for export' },
   'indian-food-export-diaspora-commerce':   { id: 'photo-1596040033229-a9821ebd058d', alt: 'Indian food products packaged for diaspora export market' },
   'indian-handicraft-global-marketplace':   { id: 'photo-1558618666-fcd25c85cd64', alt: 'Indian handicrafts and artisan products for global marketplace' },
   'indian-organic-textiles-export-brand':   { id: 'photo-1558618666-fcd25c85cd64', alt: 'Organic Indian textiles and handloom fabrics for export' },
@@ -305,14 +312,14 @@ const SLUG_OVERRIDES = {
   'chemical-formulation-lab-industrial':    { id: 'photo-1582719471384-894fbb16e074', alt: 'Chemical laboratory formulating industrial compounds' },
   'contract-electronics-manufacturing-marketplace':{ id: 'photo-1518770660439-4636190af475', alt: 'Electronics manufacturing floor with PCB assembly process' },
   'custom-industrial-uniforms-workwear-brand':{ id: 'photo-1621905251189-08b45d6a269e', alt: 'Workers in custom industrial uniforms and safety workwear' },
-  'ev-battery-pack-assembly-2wheelers':     { id: 'photo-1581091226825-a6a2a5aee158', alt: 'EV battery pack assembly line for two-wheeler electric vehicles' },
+  'ev-battery-pack-assembly-2wheelers':     { id: 'photo-1558618666-fcd25c85cd64', alt: 'Electric vehicle charging station for two-wheeler EVs' },
   'handloom-artisan-fabric-b2b-marketplace':{ id: 'photo-1558618666-fcd25c85cd64', alt: 'Handloom weaver creating traditional fabric for B2B market' },
   'industrial-iot-retrofitting-legacy-machines':{ id: 'photo-1565043589221-1a6fd9ae45c7', alt: 'Industrial IoT sensor attached to legacy factory machine' },
   'medical-device-manufacturing-tier2-hospitals':{ id: 'photo-1582719471384-894fbb16e074', alt: 'Medical device manufacturing facility for hospital equipment' },
   'modular-furniture-manufacturing-brand':  { id: 'photo-1556909114-f6e7ad7d3136', alt: 'Modular furniture assembled in modern home interior setting' },
   'packaging-design-procurement-platform-smes':{ id: 'photo-1542601906990-b4d3fb778b09', alt: 'SME packaging design and procurement on digital platform' },
-  'quality-inspection-saas-export-manufacturers':{ id: 'photo-1581091226825-a6a2a5aee158', alt: 'Quality inspector checking exported goods using digital tool' },
-  'sme-factory-compliance-automation':      { id: 'photo-1581091226825-a6a2a5aee158', alt: 'Factory compliance officer using automation software for audits' },
+  'quality-inspection-saas-export-manufacturers':{ id: 'photo-1565043589221-1a6fd9ae45c7', alt: 'Quality inspector checking manufactured goods at export facility' },
+  'sme-factory-compliance-automation':      { id: 'photo-1621905251189-08b45d6a269e', alt: 'Factory compliance officer reviewing safety audit in facility' },
   'solar-panel-manufacturing-components':   { id: 'photo-1509391366360-2e959784a276', alt: 'Solar panel component manufacturing in production facility' },
   'steel-metal-scrap-trading-platform':     { id: 'photo-1565043589221-1a6fd9ae45c7', alt: 'Steel scrap yard with digital trading platform interface' },
   'textile-waste-upcycling-brand':          { id: 'photo-1558618666-fcd25c85cd64', alt: 'Textile waste being upcycled into new sustainable fashion pieces' },
@@ -361,20 +368,20 @@ const SLUG_OVERRIDES = {
   // manufacturing — niche batch 1
   'plastic-tile-spacer-manufacturing':      { id: 'photo-1504307651254-35680f356dfd', alt: 'Construction worker laying floor tiles with plastic spacers' },
   'rebar-cover-block-manufacturing':        { id: 'photo-1504307651254-35680f356dfd', alt: 'Concrete construction site with rebar cover blocks for spacing' },
-  'chemical-anchor-capsule-manufacturing':  { id: 'photo-1581091226825-a6a2a5aee158', alt: 'Industrial chemical anchor capsules for structural fastening' },
+  'chemical-anchor-capsule-manufacturing':  { id: 'photo-1504307651254-35680f356dfd', alt: 'Construction site with structural fastening and anchor installation' },
   'construction-floor-protection-film':     { id: 'photo-1504307651254-35680f356dfd', alt: 'Construction floor covered in protective film during renovation' },
-  'pvc-traffic-cone-manufacturing':         { id: 'photo-1581091226825-a6a2a5aee158', alt: 'Bright orange PVC traffic cones on road construction site' },
-  'thermoplastic-road-marking-paint':       { id: 'photo-1581091226825-a6a2a5aee158', alt: 'Road marking machine applying thermoplastic paint on highway' },
-  'modular-rubber-speed-hump-manufacturing':{ id: 'photo-1581091226825-a6a2a5aee158', alt: 'Rubber speed hump installed on road for traffic calming' },
+  'pvc-traffic-cone-manufacturing':         { id: 'photo-1504307651254-35680f356dfd', alt: 'Road construction site with safety equipment and barriers' },
+  'thermoplastic-road-marking-paint':       { id: 'photo-1504307651254-35680f356dfd', alt: 'Road construction and highway lane marking project' },
+  'modular-rubber-speed-hump-manufacturing':{ id: 'photo-1504307651254-35680f356dfd', alt: 'Road safety installation with traffic calming equipment' },
   'cut-resistant-glove-manufacturing-india':{ id: 'photo-1621905251189-08b45d6a269e', alt: 'Worker wearing cut-resistant safety gloves in factory' },
   'lockout-tagout-kit-manufacturing':       { id: 'photo-1621905251189-08b45d6a269e', alt: 'Industrial safety lockout-tagout kit on electrical panel' },
-  'bopp-self-adhesive-tape-manufacturing':  { id: 'photo-1581091226825-a6a2a5aee158', alt: 'BOPP packing tape rolls stacked in warehouse' },
-  'tamper-evident-security-seal-manufacturing':{ id: 'photo-1581091226825-a6a2a5aee158', alt: 'Tamper-evident security seals on logistics packaging' },
-  'paper-edge-protector-angle-board':       { id: 'photo-1581091226825-a6a2a5aee158', alt: 'Paper edge protectors on pallet of export cartons' },
+  'bopp-self-adhesive-tape-manufacturing':  { id: 'photo-1586528116311-ad8dd3c8310d', alt: 'Warehouse worker sealing boxes with packing tape for dispatch' },
+  'tamper-evident-security-seal-manufacturing':{ id: 'photo-1586528116311-ad8dd3c8310d', alt: 'Logistics packaging with security seals in warehouse facility' },
+  'paper-edge-protector-angle-board':       { id: 'photo-1542601906990-b4d3fb778b09', alt: 'Cardboard packaging materials stacked for export shipment' },
   'pheromone-trap-insect-lure-manufacturing':{ id: 'photo-1500937386664-56d1dfef3854', alt: 'Pheromone insect trap hanging in agricultural crop field' },
   'agricultural-mulch-film-manufacturing':  { id: 'photo-1500937386664-56d1dfef3854', alt: 'Black plastic mulch film covering vegetable crop rows' },
   'plug-tray-seedling-tray-nursery':        { id: 'photo-1500937386664-56d1dfef3854', alt: 'Seedling plug trays in nursery greenhouse with young plants' },
-  'ptfe-thread-seal-tape-manufacturing':    { id: 'photo-1581091226825-a6a2a5aee158', alt: 'PTFE thread seal tape roll used by plumber on pipe fitting' },
+  'ptfe-thread-seal-tape-manufacturing':    { id: 'photo-1565043589221-1a6fd9ae45c7', alt: 'Industrial pipe fitting installation with sealing materials' },
   'anaerobic-thread-locking-compound':      { id: 'photo-1582719471384-894fbb16e074', alt: 'Chemical thread locking compound applied to industrial bolt' },
   'nabl-instrument-calibration-laboratory': { id: 'photo-1582719471384-894fbb16e074', alt: 'Calibration technician measuring instruments in accredited lab' },
   'rope-access-industrial-services':        { id: 'photo-1621905251189-08b45d6a269e', alt: 'Rope access technician descending building facade for inspection' },
@@ -382,9 +389,9 @@ const SLUG_OVERRIDES = {
   'thermographic-thermal-imaging-inspection':{ id: 'photo-1565043589221-1a6fd9ae45c7', alt: 'Thermal camera image of electrical panel showing heat anomalies' },
   'black-soldier-fly-insect-farming':       { id: 'photo-1500937386664-56d1dfef3854', alt: 'Insect farming facility with black soldier fly larvae trays' },
   'cattle-ear-tag-livestock-id-manufacturing':{ id: 'photo-1500937386664-56d1dfef3854', alt: 'Cattle with colorful ear tags for livestock identification' },
-  'clay-pigeon-skeet-target-manufacturing': { id: 'photo-1581091226825-a6a2a5aee158', alt: 'Clay pigeon shooting targets stacked at sports shooting range' },
+  'clay-pigeon-skeet-target-manufacturing': { id: 'photo-1461896836934-ffe607ba8211', alt: 'Sports shooting range with clay pigeon targets' },
   'biodegradable-cremation-products':       { id: 'photo-1542601906990-b4d3fb778b09', alt: 'Eco-friendly biodegradable cremation products made from natural materials' },
-  'polyurethane-industrial-castor-wheel':   { id: 'photo-1581091226825-a6a2a5aee158', alt: 'Polyurethane castor wheels on industrial warehouse trolley' },
+  'polyurethane-industrial-castor-wheel':   { id: 'photo-1586528116311-ad8dd3c8310d', alt: 'Industrial warehouse with trolleys and heavy-duty castor wheels' },
 }
 
 // ─── Build a clean URL from Unsplash photo ID ─────────────────────────────────
@@ -407,21 +414,28 @@ async function seed() {
   const tmpDir = join(tmpdir(), 'sanity-idea-images-bulk')
   mkdirSync(tmpDir, { recursive: true })
 
-  // Fetch all ideas that still have no cover image
-  let missingImages = await client.fetch(
-    '*[_type == "businessIdea" && !defined(cover_image)]{ _id, "slug": slug.current, title, industry } | order(industry asc, title asc)'
+  // Fetch ideas based on --force or --slug flags
+  const groqFilter = FORCE
+    ? '*[_type == "businessIdea"]'
+    : '*[_type == "businessIdea" && !defined(cover_image)]'
+
+  let docs = await client.fetch(
+    `${groqFilter}{ _id, "slug": slug.current, title, industry } | order(industry asc, title asc)`
   )
 
-  if (INDUSTRY_FILTER) {
-    missingImages = missingImages.filter(d => d.industry === INDUSTRY_FILTER)
-    console.log(`Filtered to industry "${INDUSTRY_FILTER}": ${missingImages.length} ideas\n`)
+  if (SLUG_FILTER) {
+    docs = docs.filter(d => d.slug === SLUG_FILTER)
+    console.log(`Targeting slug "${SLUG_FILTER}": ${docs.length} idea(s)\n`)
+  } else if (INDUSTRY_FILTER) {
+    docs = docs.filter(d => d.industry === INDUSTRY_FILTER)
+    console.log(`Filtered to industry "${INDUSTRY_FILTER}": ${docs.length} ideas\n`)
   } else {
-    console.log(`Found ${missingImages.length} ideas without cover images\n`)
+    console.log(`Found ${docs.length} ideas ${FORCE ? '(all — force mode)' : 'without cover images'}\n`)
   }
 
   if (DRY_RUN) {
     console.log('DRY RUN — listing only, nothing will be uploaded:\n')
-    for (const doc of missingImages) {
+    for (const doc of docs) {
       const override = SLUG_OVERRIDES[doc.slug]
       const fallback = INDUSTRY_DEFAULTS[doc.industry]
       const entry = override || fallback
@@ -437,7 +451,7 @@ async function seed() {
 
   let done = 0, skipped = 0, failed = 0
 
-  for (const doc of missingImages) {
+  for (const doc of docs) {
     const override = SLUG_OVERRIDES[doc.slug]
     const fallback = INDUSTRY_DEFAULTS[doc.industry]
     const entry = override || fallback
@@ -448,9 +462,9 @@ async function seed() {
       continue
     }
 
-    const imageUrl = unsplashUrl(entry.id)
-    console.log(`Processing [${done + failed + skipped + 1}/${missingImages.length}]: ${doc.slug}`)
+    console.log(`Processing [${done + failed + skipped + 1}/${docs.length}]: ${doc.slug}`)
 
+    const imageUrl = unsplashUrl(entry.id)
     const tmpFile = join(tmpDir, `${doc.slug}.jpg`)
     try {
       await downloadImage(imageUrl, tmpFile)

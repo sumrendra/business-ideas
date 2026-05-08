@@ -85,13 +85,13 @@ export default function DPIITLookup({ industry, ideaTitle }: Props) {
         className="w-full flex items-center justify-between gap-3 px-5 py-4 text-left"
       >
         <div className="flex items-center gap-3">
-          <span className="text-lg">🏢</span>
+          <span className="text-lg">🏛</span>
           <div>
             <p className="font-semibold text-slate-900 dark:text-slate-100 text-sm sm:text-base">
-              Who&apos;s Already Doing This?
+              DPIIT-Recognised Startups
             </p>
             <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-              DPIIT-recognized startups in the {industry} space
+              Registered startups in the {industry} space — DPIIT recognition database
             </p>
           </div>
         </div>

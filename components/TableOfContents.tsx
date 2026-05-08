@@ -37,10 +37,10 @@ export default function TableOfContents({ headings }: { headings: TocHeading[] }
 
   return (
     <nav aria-label="Table of contents">
-      <p className="mb-3 text-sm font-bold uppercase tracking-wide text-slate-900">
+      <p className="mb-3 text-sm font-bold uppercase tracking-wide text-slate-900 dark:text-slate-100">
         In this article
       </p>
-      <hr className="mb-4 border-slate-200" />
+      <hr className="mb-4 border-slate-200 dark:border-slate-700" />
       <ol className="space-y-2">
         {headings.map(({ id, text, level }, i) => {
           const isActive = activeId === id
@@ -57,11 +57,11 @@ export default function TableOfContents({ headings }: { headings: TocHeading[] }
                   'flex items-start gap-1.5 text-sm leading-snug transition-colors',
                   level === 3 ? 'pl-3' : '',
                   isActive
-                    ? 'font-semibold text-slate-900 underline underline-offset-2 decoration-indigo-500'
-                    : 'text-slate-500 hover:text-slate-800',
+                    ? 'font-semibold text-slate-900 dark:text-slate-100 underline underline-offset-2 decoration-indigo-500'
+                    : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200',
                 ].join(' ')}
               >
-                <span className="shrink-0 tabular-nums text-slate-400 text-xs mt-0.5">
+                <span className="shrink-0 tabular-nums text-slate-400 dark:text-slate-600 text-xs mt-0.5">
                   {level === 2 ? `${i + 1}.` : '—'}
                 </span>
                 {text}

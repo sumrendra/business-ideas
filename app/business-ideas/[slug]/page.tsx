@@ -6,18 +6,22 @@ import { client } from '@/lib/sanity/client'
 import {
   IDEA_BY_SLUG_QUERY, IDEA_SLUGS_QUERY, CATEGORY_IDEAS_QUERY,
   RELATED_POSTS_FOR_IDEA_QUERY, PEOPLE_ALSO_VIEWED_QUERY,
+  ALL_POSTS_FOR_LINKING_QUERY,
 } from '@/lib/sanity/queries'
 import { urlFor } from '@/lib/sanity/image'
 import type { Idea, Post } from '@/lib/sanity/types'
 import {
   BUDGET_LABELS, MARKET_SATURATION_LABELS, DIFFICULTY_LABELS,
 } from '@/lib/sanity/types'
-import { PortableText } from '@portabletext/react'
+import { PortableText, type PortableTextComponents } from '@portabletext/react'
+import { injectAutoLinks, buildBlogAutoLinks, AUTO_LINKS } from '@/lib/auto-links'
 import DownloadReportButton from '@/components/DownloadReportButtonWrapper'
 import IdeaCard from '@/components/IdeaCard'
 import TrendsChart from '@/components/TrendsChart'
 import TableOfContents, { type TocHeading } from '@/components/TableOfContents'
 import Disclaimer from '@/components/Disclaimer'
+import ShareButtons from '@/components/ShareButtons'
+import FeedbackForm from '@/components/FeedbackForm'
 import DPIITLookup from '@/components/DPIITLookup'
 import MSMELookup from '@/components/MSMELookup'
 import { Ld, breadcrumbSchema, collectionPageSchema, faqSchema } from '@/lib/jsonld'
@@ -247,6 +251,18 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   }
 }
 
+const PT_COMPONENTS: PortableTextComponents = {
+  marks: {
+    link: ({ value, children }) => {
+      const href: string = value?.href ?? '#'
+      if (href.startsWith('/') || href.startsWith('#')) {
+        return <Link href={href} className="text-indigo-600 dark:text-indigo-400 hover:underline">{children}</Link>
+      }
+      return <a href={href} target="_blank" rel="noopener noreferrer" className="text-indigo-600 dark:text-indigo-400 hover:underline">{children}</a>
+    },
+  },
+}
+
 const DIFFICULTY_COLOR: Record<string, string> = {
   beginner:     'bg-green-100 text-green-700',
   intermediate: 'bg-yellow-100 text-yellow-700',
@@ -255,10 +271,10 @@ const DIFFICULTY_COLOR: Record<string, string> = {
 }
 
 const SATURATION_COLOR: Record<string, string> = {
-  concept:     'bg-blue-100 text-blue-700',
-  validated:   'bg-teal-100 text-teal-700',
-  competitive: 'bg-orange-100 text-orange-700',
-  proven:      'bg-green-100 text-green-700',
+  concept:     'border-slate-300 dark:border-slate-600 text-slate-500 dark:text-slate-400',
+  validated:   'border-slate-300 dark:border-slate-600 text-slate-500 dark:text-slate-400',
+  competitive: 'border-slate-300 dark:border-slate-600 text-slate-500 dark:text-slate-400',
+  proven:      'border-slate-300 dark:border-slate-600 text-slate-500 dark:text-slate-400',
 }
 
 export default async function IdeaPage({ params }: PageProps) {
@@ -383,7 +399,7 @@ export default async function IdeaPage({ params }: PageProps) {
 
   if (!idea) notFound()
 
-  const [relatedPosts, peopleAlsoViewed] = await Promise.all([
+  const [relatedPosts, peopleAlsoViewed, allPostsForLinking] = await Promise.all([
     client.fetch<Post[]>(
       RELATED_POSTS_FOR_IDEA_QUERY,
       { tags: idea.tags ?? [] },
@@ -394,7 +410,15 @@ export default async function IdeaPage({ params }: PageProps) {
       { slug, industry: idea.industry ?? '', tags: idea.tags ?? [] },
       { next: { tags: ['business-ideas'] } }
     ),
+    client.fetch<{ slug: string; title: string; tags?: string[] }[]>(
+      ALL_POSTS_FOR_LINKING_QUERY,
+      {},
+      { next: { tags: ['posts'] } }
+    ),
   ])
+
+  // Combine static auto-links with dynamic blog post links
+  const pageAutoLinks = [...AUTO_LINKS, ...buildBlogAutoLinks(allPostsForLinking)]
 
   // ── Reading time + ToC headings ────────────────────────────────────────────
   const wordCount = countIdeaWords(idea)
@@ -407,7 +431,7 @@ export default async function IdeaPage({ params }: PageProps) {
     idea.things_to_note?.length && { id: 'things-to-note', text: 'Things to Be Mindful Of', level: 2 },
     idea.current_landscape && { id: 'current-landscape', text: 'Current Landscape', level: 2 },
     idea.unit_economics && Object.values(idea.unit_economics).some(Boolean) && { id: 'unit-economics', text: 'Unit Economics', level: 2 },
-    idea.google_trends_keyword && { id: 'search-demand', text: 'Search Demand Trend', level: 2 },
+    { id: 'search-demand', text: 'Search Demand Trend', level: 2 },
     idea.competitors?.length && { id: 'competitors', text: 'Indian Competitors', level: 2 },
     idea.regulatory_table?.length && { id: 'regulatory', text: 'Licenses & Regulations', level: 2 },
     idea.case_study?.founder_name && { id: 'founder-story', text: 'Real Founder Story', level: 2 },
@@ -520,11 +544,11 @@ export default async function IdeaPage({ params }: PageProps) {
       <header className="mb-8 max-w-4xl">
         <div className="mb-3 flex flex-wrap gap-2">
           {idea.featured && (
-            <span className="badge bg-indigo-100 text-indigo-700">Featured</span>
+            <span className="badge border border-slate-300 dark:border-slate-600 text-slate-500 dark:text-slate-400 bg-transparent">Featured</span>
           )}
-          <span className="badge bg-slate-100 text-slate-600 text-xs">{idea.industry}</span>
+          <span className="badge border border-slate-300 dark:border-slate-600 text-slate-500 dark:text-slate-400 bg-transparent text-xs">{idea.industry}</span>
           {idea.market_saturation && (
-            <span className={`badge text-xs ${SATURATION_COLOR[idea.market_saturation]}`}>
+            <span className={`badge text-xs border bg-transparent ${SATURATION_COLOR[idea.market_saturation]}`}>
               {MARKET_SATURATION_LABELS[idea.market_saturation] || idea.market_saturation}
             </span>
           )}
@@ -532,17 +556,36 @@ export default async function IdeaPage({ params }: PageProps) {
         <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100 sm:text-4xl">{idea.title}</h1>
         <p className="mt-3 text-lg text-slate-600 dark:text-slate-400">{idea.description}</p>
 
-        {/* Meta line: published / updated / reading time */}
-        <div className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-500 dark:text-slate-500">
-          {publishedDate && <time dateTime={idea.published_at}>Published {publishedDate}</time>}
-          {updatedDate && updatedDate !== publishedDate && (
-            <>
-              <span className="text-slate-300 dark:text-slate-600">·</span>
-              <time dateTime={idea._updatedAt}>Updated {updatedDate}</time>
-            </>
-          )}
-          <span className="text-slate-300 dark:text-slate-600">·</span>
-          <span>{readingMinutes} min read</span>
+        {/* Author + meta + share */}
+        <div className="mt-5 flex flex-wrap items-center justify-between gap-4">
+          {/* Author + timestamps */}
+          <div className="flex items-center gap-3">
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-indigo-600 text-white text-xs font-bold select-none">
+              BI
+            </div>
+            <div>
+              <p className="text-sm font-medium text-slate-800 dark:text-slate-200 leading-tight">
+                BusinessIdeas.live Research
+              </p>
+              <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-slate-400 dark:text-slate-500 leading-tight mt-0.5">
+                {publishedDate && <time dateTime={idea.published_at}>{publishedDate}</time>}
+                {updatedDate && updatedDate !== publishedDate && (
+                  <>
+                    <span>·</span>
+                    <time dateTime={idea._updatedAt}>Updated {updatedDate}</time>
+                  </>
+                )}
+                <span>·</span>
+                <span>{readingMinutes} min read</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Share buttons */}
+          <ShareButtons
+            title={idea.title}
+            url={`https://businessideas.live/business-ideas/${idea.slug ?? ''}`}
+          />
         </div>
       </header>
 
@@ -558,8 +601,8 @@ export default async function IdeaPage({ params }: PageProps) {
       {/* ── At a Glance metrics ─────────────────────────────────────────────── */}
       {hasNewMetrics && (
         <section className="mb-10">
-          <h2 className="mb-4 text-sm font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400">At a Glance</h2>
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+          <h2 className="mb-3 text-[11px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500">At a glance</h2>
+          <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3">
             {idea.monthly_revenue_range && (
               <GlanceCard label="Monthly Revenue" value={idea.monthly_revenue_range} accent="green" />
             )}
@@ -610,24 +653,24 @@ export default async function IdeaPage({ params }: PageProps) {
       {/* Revenue model & resources */}
       <div className="mb-10 grid gap-6 sm:grid-cols-2">
         {idea.revenue_model?.length > 0 && (
-          <TagGroup label="Revenue Model" items={idea.revenue_model} color="bg-emerald-100 text-emerald-700" />
+          <TagGroup label="Revenue Model" items={idea.revenue_model} />
         )}
         {idea.resources_needed?.length > 0 && (
-          <TagGroup label="Resources Needed" items={idea.resources_needed} color="bg-amber-100 text-amber-700" />
+          <TagGroup label="Resources Needed" items={idea.resources_needed} />
         )}
       </div>
 
       {/* Who Is It For */}
       {idea.target_audience && (
         <Section id="who-is-it-for" title="Who Is It For?">
-          <PortableText value={idea.target_audience as Parameters<typeof PortableText>[0]['value']} />
+          <PortableText value={injectAutoLinks(idea.target_audience as unknown[], pageAutoLinks) as Parameters<typeof PortableText>[0]['value']} components={PT_COMPONENTS} />
         </Section>
       )}
 
       {/* What Works & Why */}
       {idea.why_it_works && (
         <Section id="what-works" title="What Works in This & Why?">
-          <PortableText value={idea.why_it_works as Parameters<typeof PortableText>[0]['value']} />
+          <PortableText value={injectAutoLinks(idea.why_it_works as unknown[], pageAutoLinks) as Parameters<typeof PortableText>[0]['value']} components={PT_COMPONENTS} />
         </Section>
       )}
 
@@ -648,7 +691,7 @@ export default async function IdeaPage({ params }: PageProps) {
       {/* Scope in India */}
       {idea.scope_in_india && (
         <Section id="scope-in-india" title="Scope in India">
-          <PortableText value={idea.scope_in_india as Parameters<typeof PortableText>[0]['value']} />
+          <PortableText value={injectAutoLinks(idea.scope_in_india as unknown[], pageAutoLinks) as Parameters<typeof PortableText>[0]['value']} components={PT_COMPONENTS} />
         </Section>
       )}
 
@@ -669,7 +712,7 @@ export default async function IdeaPage({ params }: PageProps) {
       {/* Current Landscape */}
       {idea.current_landscape && (
         <Section id="current-landscape" title="Current Landscape in India">
-          <PortableText value={idea.current_landscape as Parameters<typeof PortableText>[0]['value']} />
+          <PortableText value={injectAutoLinks(idea.current_landscape as unknown[], pageAutoLinks) as Parameters<typeof PortableText>[0]['value']} components={PT_COMPONENTS} />
         </Section>
       )}
 
@@ -680,15 +723,30 @@ export default async function IdeaPage({ params }: PageProps) {
           <p className="mb-4 text-sm text-slate-500 dark:text-slate-400">Real benchmarks from Indian operators in this space</p>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
             {[
-              { label: 'Customer Acq. Cost', value: idea.unit_economics.cac },
-              { label: 'Lifetime Value', value: idea.unit_economics.ltv },
-              { label: 'LTV : CAC', value: idea.unit_economics.ltv_cac_ratio },
-              { label: 'Avg Order Value', value: idea.unit_economics.avg_order_value },
-              { label: 'Monthly Churn', value: idea.unit_economics.churn_rate },
-              { label: 'CAC Payback', value: idea.unit_economics.payback_period },
+              { label: 'Customer Acq. Cost', value: idea.unit_economics.cac,
+                tip: 'How much you spend to win one paying customer — ads, commissions, referrals. Lower is better. Aim to recover this within 3–6 months.' },
+              { label: 'Lifetime Value', value: idea.unit_economics.ltv,
+                tip: 'Total revenue you expect from one customer over their entire relationship with you. Higher LTV = more room to spend on acquisition.' },
+              { label: 'LTV : CAC', value: idea.unit_economics.ltv_cac_ratio,
+                tip: 'Ratio of lifetime value to acquisition cost. A ratio above 3:1 is healthy; above 5:1 is excellent. Below 1:1 means you\'re losing money on each customer.' },
+              { label: 'Avg Order Value', value: idea.unit_economics.avg_order_value,
+                tip: 'Average amount a customer spends per transaction. Increasing this (via upsells or bundles) is one of the fastest ways to grow revenue without new customers.' },
+              { label: 'Monthly Churn', value: idea.unit_economics.churn_rate,
+                tip: 'Percentage of customers who stop paying each month. 2–5% is typical for Indian B2C; under 1% for B2B SaaS. High churn kills growth even with strong acquisition.' },
+              { label: 'CAC Payback', value: idea.unit_economics.payback_period,
+                tip: 'How long until a customer\'s payments cover what you spent to acquire them. Under 12 months is strong. Shorter payback = faster you can reinvest in growth.' },
             ].filter(r => r.value).map(row => (
               <div key={row.label} className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800/60 p-4">
-                <p className="text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500 mb-1">{row.label}</p>
+                <div className="flex items-center gap-1.5 mb-1">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">{row.label}</p>
+                  <div className="group relative">
+                    <span className="flex h-3.5 w-3.5 items-center justify-center rounded-full border border-slate-300 dark:border-slate-600 text-[9px] font-bold text-slate-400 dark:text-slate-500 cursor-default select-none leading-none">i</span>
+                    <div className="pointer-events-none absolute bottom-full left-1/2 z-50 mb-2 w-56 -translate-x-1/2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-2.5 text-xs text-slate-600 dark:text-slate-300 shadow-lg opacity-0 transition-opacity group-hover:opacity-100 group-hover:pointer-events-auto">
+                      <div className="absolute left-1/2 top-full -translate-x-1/2 border-4 border-transparent border-t-white dark:border-t-slate-900" />
+                      {row.tip}
+                    </div>
+                  </div>
+                </div>
                 <p className="text-sm font-bold text-slate-800 dark:text-slate-200">{row.value}</p>
               </div>
             ))}
@@ -700,67 +758,75 @@ export default async function IdeaPage({ params }: PageProps) {
       )}
 
       {/* ── Google Trends ──────────────────────────────────────────────────────── */}
-      {idea.google_trends_keyword && (
-        <section className="mb-10">
-          <h2 id="search-demand" className="mb-1 text-xl font-bold text-slate-900 dark:text-slate-100 scroll-mt-24">Search Demand Trend</h2>
-          <p className="mb-3 text-sm text-slate-500 dark:text-slate-400">Google Trends — India — past 5 years</p>
-          <TrendsChart
-            keyword={idea.google_trends_keyword}
-            trendsUrl={`https://trends.google.com/trends/explore?q=${encodeURIComponent(idea.google_trends_keyword)}&geo=IN&date=today%205-y`}
-          />
-        </section>
-      )}
+      {(() => {
+        const kw = idea.google_trends_keyword || deriveTrendsKeyword(idea.title)
+        return (
+          <section className="mb-10">
+            <h2 id="search-demand" className="mb-1 text-xl font-bold text-slate-900 dark:text-slate-100 scroll-mt-24">Search Demand Trend</h2>
+            <p className="mb-3 text-sm text-slate-500 dark:text-slate-400">Google Trends — India — past 5 years</p>
+            <TrendsChart
+              keyword={kw}
+              trendsUrl={`https://trends.google.com/trends/explore?q=${encodeURIComponent(kw)}&geo=IN&date=today%205-y`}
+            />
+          </section>
+        )
+      })()}
 
       {/* ── Indian Competitors ─────────────────────────────────────────────────── */}
-      {idea.competitors && idea.competitors.length > 0 && (
+      {((idea.competitors && idea.competitors.length > 0) || idea.industry) && (
         <section className="mb-10">
-          <h2 id="competitors" className="mb-1 text-xl font-bold text-slate-900 dark:text-slate-100 scroll-mt-24">Who's Already Doing This in India</h2>
+          <h2 id="competitors" className="mb-1 text-xl font-bold text-slate-900 dark:text-slate-100 scroll-mt-24">Indian Competitors &amp; Players</h2>
           <p className="mb-4 text-sm text-slate-500 dark:text-slate-400">Know your competition before you start</p>
-          <div className="overflow-hidden rounded-xl border border-slate-200 dark:border-slate-700">
-            <table className="w-full text-sm">
-              <thead className="bg-slate-50 dark:bg-slate-800 text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">
-                <tr>
-                  <th className="px-4 py-3 text-left">Company</th>
-                  <th className="px-4 py-3 text-left hidden sm:table-cell">City</th>
-                  <th className="px-4 py-3 text-left hidden md:table-cell">Funding</th>
-                  <th className="px-4 py-3 text-left">Scale / Revenue Signal</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-                {idea.competitors.map((c) => (
-                  <tr key={c._key ?? c.name} className="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors">
-                    <td className="px-4 py-3">
-                      <div className="font-semibold text-slate-800 dark:text-slate-200">{c.name}</div>
-                      {c.type && (
-                        <span className={`mt-0.5 inline-block rounded-full px-2 py-0.5 text-xs font-medium ${
-                          c.type === 'Funded' ? 'bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300' :
-                          c.type === 'Listed' ? 'bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300' :
-                          c.type === 'MNC' ? 'bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300' :
-                          'bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-300'
-                        }`}>{c.type}</span>
-                      )}
-                    </td>
-                    <td className="px-4 py-3 text-slate-500 dark:text-slate-400 hidden sm:table-cell">{c.city || '—'}</td>
-                    <td className="px-4 py-3 text-slate-600 dark:text-slate-400 hidden md:table-cell">{c.funding_raised || '—'}</td>
-                    <td className="px-4 py-3">
-                      <p className="text-slate-700 dark:text-slate-300">{c.revenue_signal || c.description || '—'}</p>
-                      {c.differentiator && (
-                        <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">{c.differentiator}</p>
-                      )}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </section>
-      )}
 
-      {/* ── Who's Already Doing This: DPIIT + MSME ──────────────────────────── */}
-      {idea.industry && (
-        <section className="mb-10">
-          <DPIITLookup industry={idea.industry} ideaTitle={idea.title} />
-          <MSMELookup industry={idea.industry} ideaTitle={idea.title} />
+          {idea.competitors && idea.competitors.length > 0 && (
+            <>
+              <p className="mb-2 text-[11px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500">Key players</p>
+              <div className="overflow-hidden rounded-xl border border-slate-200 dark:border-slate-700 mb-6">
+                <table className="w-full text-sm">
+                  <thead className="bg-slate-50 dark:bg-slate-800 text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">
+                    <tr>
+                      <th className="px-4 py-3 text-left">Company</th>
+                      <th className="px-4 py-3 text-left hidden sm:table-cell">City</th>
+                      <th className="px-4 py-3 text-left hidden md:table-cell">Funding</th>
+                      <th className="px-4 py-3 text-left">Scale / Revenue Signal</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                    {idea.competitors.map((c) => (
+                      <tr key={c._key ?? c.name} className="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors">
+                        <td className="px-4 py-3">
+                          <div className="font-semibold text-slate-800 dark:text-slate-200">{c.name}</div>
+                          {c.type && (
+                            <span className={`mt-0.5 inline-block rounded-full px-2 py-0.5 text-xs font-medium ${
+                              c.type === 'Funded' ? 'bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300' :
+                              c.type === 'Listed' ? 'bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300' :
+                              c.type === 'MNC' ? 'bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300' :
+                              'bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-300'
+                            }`}>{c.type}</span>
+                          )}
+                        </td>
+                        <td className="px-4 py-3 text-slate-500 dark:text-slate-400 hidden sm:table-cell">{c.city || '—'}</td>
+                        <td className="px-4 py-3 text-slate-600 dark:text-slate-400 hidden md:table-cell">{c.funding_raised || '—'}</td>
+                        <td className="px-4 py-3">
+                          <p className="text-slate-700 dark:text-slate-300">{c.revenue_signal || c.description || '—'}</p>
+                          {c.differentiator && (
+                            <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">{c.differentiator}</p>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </>
+          )}
+
+          {idea.industry && (
+            <>
+              <DPIITLookup industry={idea.industry} ideaTitle={idea.title} />
+              <MSMELookup industry={idea.industry} ideaTitle={idea.title} />
+            </>
+          )}
         </section>
       )}
 
@@ -781,8 +847,8 @@ export default async function IdeaPage({ params }: PageProps) {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-                {idea.regulatory_table.map((reg) => (
-                  <tr key={reg._key} className="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors">
+                {idea.regulatory_table.map((reg, ri) => (
+                  <tr key={reg._key ?? ri} className="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors">
                     <td className="px-4 py-3">
                       <div className="font-medium text-slate-800 dark:text-slate-200">{reg.name}</div>
                       <span className={`text-xs font-medium ${reg.mandatory ? 'text-red-500 dark:text-red-400' : 'text-slate-400 dark:text-slate-500'}`}>
@@ -973,7 +1039,7 @@ export default async function IdeaPage({ params }: PageProps) {
               <Link
                 key={tag}
                 href={`/business-ideas?tags=${encodeURIComponent(tag)}`}
-                className="badge bg-slate-100 text-slate-600 hover:bg-indigo-100 hover:text-indigo-700 transition-colors"
+                className="badge bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-indigo-100 dark:hover:bg-indigo-900/40 hover:text-indigo-700 dark:hover:text-indigo-300 transition-colors"
               >
                 {tag}
               </Link>
@@ -981,6 +1047,12 @@ export default async function IdeaPage({ params }: PageProps) {
           </div>
         </div>
       )}
+
+      {/* Feedback */}
+      <FeedbackForm ideaSlug={idea.slug ?? ''} ideaTitle={idea.title} />
+
+      {/* Sources & References */}
+      <IdeaSources idea={idea} />
 
       {/* Disclaimer */}
       <Disclaimer className="mt-12" />
@@ -1041,21 +1113,21 @@ export default async function IdeaPage({ params }: PageProps) {
 
 // ── Sub-components ────────────────────────────────────────────────────────────
 
-const ACCENT_STYLES: Record<string, { bg: string; border: string; label: string; value: string }> = {
-  green:  { bg: 'bg-green-50 dark:bg-green-950/40',   border: 'border-green-100 dark:border-green-900',   label: 'text-green-700 dark:text-green-400',   value: 'text-green-800 dark:text-green-300' },
-  blue:   { bg: 'bg-blue-50 dark:bg-blue-950/40',     border: 'border-blue-100 dark:border-blue-900',     label: 'text-blue-700 dark:text-blue-400',     value: 'text-blue-800 dark:text-blue-300' },
-  amber:  { bg: 'bg-amber-50 dark:bg-amber-950/40',   border: 'border-amber-100 dark:border-amber-900',   label: 'text-amber-700 dark:text-amber-400',   value: 'text-amber-800 dark:text-amber-300' },
-  indigo: { bg: 'bg-indigo-50 dark:bg-indigo-950/40', border: 'border-indigo-100 dark:border-indigo-900', label: 'text-indigo-600 dark:text-indigo-400', value: 'text-indigo-800 dark:text-indigo-300' },
-  red:    { bg: 'bg-red-50 dark:bg-red-950/40',       border: 'border-red-100 dark:border-red-900',       label: 'text-red-600 dark:text-red-400',       value: 'text-red-800 dark:text-red-300' },
-  slate:  { bg: 'bg-slate-50 dark:bg-slate-800/60',   border: 'border-slate-200 dark:border-slate-700',   label: 'text-slate-500 dark:text-slate-400',   value: 'text-slate-800 dark:text-slate-200' },
+const ACCENT_LEFT: Record<string, string> = {
+  green:  'border-l-emerald-400',
+  blue:   'border-l-blue-400',
+  amber:  'border-l-amber-400',
+  indigo: 'border-l-indigo-400',
+  red:    'border-l-rose-400',
+  slate:  'border-l-slate-300 dark:border-l-slate-600',
 }
 
 function GlanceCard({ label, value, accent }: { label: string; value: string; accent: string }) {
-  const s = ACCENT_STYLES[accent] || ACCENT_STYLES.slate
+  const left = ACCENT_LEFT[accent] || ACCENT_LEFT.slate
   return (
-    <div className={`rounded-xl border ${s.border} ${s.bg} p-4`}>
-      <p className={`text-xs font-semibold uppercase tracking-wide ${s.label} mb-1`}>{label}</p>
-      <p className={`text-sm font-bold ${s.value}`}>{value}</p>
+    <div className={`rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 border-l-4 ${left} px-4 py-3.5`}>
+      <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-1.5">{label}</p>
+      <p className="text-sm font-semibold text-slate-800 dark:text-slate-100 leading-snug">{value}</p>
     </div>
   )
 }
@@ -1070,6 +1142,13 @@ function Section({ id, title, children }: { id?: string; title: string; children
 }
 
 // Extract plain text from a Portable Text array (or pass through plain string)
+function deriveTrendsKeyword(title: string): string {
+  const noise = /\b(business|india|indian|service|services|platform|startup|company|online|digital|solution|solutions|provider|maker|manufacturing|production|based|driven|enabled|and|the|a|an|in|of|for|with|by)\b/gi
+  const cleaned = title.replace(noise, ' ').replace(/\s+/g, ' ').trim()
+  const words = cleaned.split(' ').filter(Boolean).slice(0, 4)
+  return words.join(' ') || title
+}
+
 function ptText(value: unknown): string {
   if (!value) return ''
   if (typeof value === 'string') return value
@@ -1102,13 +1181,84 @@ function countIdeaWords(idea: Idea): number {
   return total ? total.split(/\s+/).filter(Boolean).length : 0
 }
 
-function TagGroup({ label, items, color }: { label: string; items: string[]; color: string }) {
+function IdeaSources({ idea }: { idea: Idea }) {
+  type SourceEntry = { label: string; url?: string; description?: string }
+  const sources: SourceEntry[] = []
+
+  // Proof points
+  idea.proof_points?.forEach(pp => {
+    if (pp.source) sources.push({ label: pp.source, url: pp.url, description: pp.headline })
+  })
+
+  // Case study source
+  if (idea.case_study?.source_url && idea.case_study?.founder_name) {
+    sources.push({ label: `Founder interview — ${idea.case_study.founder_name}`, url: idea.case_study.source_url })
+  }
+
+  // Regulatory portals
+  idea.regulatory_table?.forEach(reg => {
+    if (reg.portal && reg.name) {
+      const already = sources.some(s => s.label === reg.portal)
+      if (!already) sources.push({ label: reg.authority ?? reg.portal!, description: reg.portal! })
+    }
+  })
+
+  // Always-present platform sources
+  const platform: SourceEntry[] = [
+    { label: 'Google Trends', description: 'Search demand index — India, 5-year window' },
+    { label: 'DPIIT Startup Recognition Database (Dec 2023)', description: 'Ministry of Commerce & Industry — DPIIT recognised startups' },
+    { label: 'MCA21 Company Master Data — data.gov.in', description: 'Ministry of Corporate Affairs — registered MSME companies' },
+  ]
+  if (idea.unit_economics?.context) {
+    platform.unshift({ label: 'Unit Economics', description: idea.unit_economics.context })
+  }
+
+  const all = [...sources, ...platform]
+  if (all.length === 0) return null
+
   return (
-    <div className="rounded-xl border border-slate-100 dark:border-slate-700 p-4">
-      <p className="mb-2 text-xs font-medium uppercase tracking-wide text-slate-400 dark:text-slate-500">{label}</p>
-      <div className="flex flex-wrap gap-2">
+    <details className="group mt-10 border-t border-slate-100 dark:border-slate-800 pt-6">
+      <summary className="flex cursor-pointer list-none items-center gap-2 text-sm font-semibold text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition-colors select-none">
+        <svg className="h-4 w-4 shrink-0 transition-transform group-open:rotate-90" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+        </svg>
+        Sources &amp; References
+        <span className="ml-1 rounded-full bg-slate-100 dark:bg-slate-800 px-2 py-0.5 text-xs font-medium text-slate-500 dark:text-slate-400">{all.length}</span>
+      </summary>
+
+      <ol className="mt-4 space-y-2.5">
+        {all.map((src, i) => (
+          <li key={i} className="flex gap-3 text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+            <span className="shrink-0 font-mono text-[11px] text-slate-300 dark:text-slate-600 pt-0.5">[{i + 1}]</span>
+            <span>
+              {src.url ? (
+                <a href={src.url} target="_blank" rel="noopener noreferrer"
+                  className="font-medium text-slate-700 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 hover:underline">
+                  {src.label} ↗
+                </a>
+              ) : (
+                <span className="font-medium text-slate-700 dark:text-slate-300">{src.label}</span>
+              )}
+              {src.description && (
+                <span className="text-slate-400 dark:text-slate-500"> — {src.description}</span>
+              )}
+            </span>
+          </li>
+        ))}
+      </ol>
+    </details>
+  )
+}
+
+function TagGroup({ label, items }: { label: string; items: string[]; color?: string }) {
+  return (
+    <div className="rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-4 py-3.5">
+      <p className="mb-2.5 text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500">{label}</p>
+      <div className="flex flex-wrap gap-1.5">
         {items.map((item) => (
-          <span key={item} className={`badge ${color}`}>{item}</span>
+          <span key={item} className="inline-flex items-center rounded-full border border-slate-200 dark:border-slate-700 px-2.5 py-0.5 text-xs font-medium text-slate-600 dark:text-slate-400">
+            {item}
+          </span>
         ))}
       </div>
     </div>

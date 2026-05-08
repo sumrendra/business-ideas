@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { searchMSMEs, matchMSMESector, refineSectorByTitle, COMPANIES, MSME_SECTOR_MAP } from '@/lib/msme/companies'
+import { searchMSMEs, matchMSMESector, refineSectorByTitle, refineSubSectorByTitle, nameFilterByTitle, COMPANIES, MSME_SECTOR_MAP } from '@/lib/msme/companies'
 
 const ALL_MSME_SECTORS = Object.keys(MSME_SECTOR_MAP)
 const ALL_MSME_STATES  = [...new Set(COMPANIES.map(c => c.state))].sort()
@@ -15,10 +15,12 @@ export async function GET(req: Request) {
   const q        = searchParams.get('q') ?? ''
   const limit    = Math.min(50, parseInt(searchParams.get('limit') ?? '30', 10))
 
-  const baseSector     = industry ? (matchMSMESector(industry) ?? 'Construction Materials') : 'Construction Materials'
-  const resolvedSector = title ? (refineSectorByTitle(title, baseSector) ?? baseSector) : baseSector
+  const baseSector        = industry ? (matchMSMESector(industry) ?? 'Construction Materials') : 'Construction Materials'
+  const resolvedSector    = title ? (refineSectorByTitle(title, baseSector) ?? baseSector) : baseSector
+  const resolvedSubSector = title ? refineSubSectorByTitle(title) : undefined
+  const resolvedNameFilter = title ? nameFilterByTitle(title) : undefined
 
-  const results = searchMSMEs(resolvedSector, q || undefined, state || undefined)
+  const results = searchMSMEs(resolvedSector, q || undefined, state || undefined, 50, resolvedSubSector, resolvedNameFilter)
 
   return NextResponse.json({
     sector:     resolvedSector,
