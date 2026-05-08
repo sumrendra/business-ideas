@@ -19,6 +19,7 @@ import TrendsChart from '@/components/TrendsChart'
 import TableOfContents, { type TocHeading } from '@/components/TableOfContents'
 import Disclaimer from '@/components/Disclaimer'
 import DPIITLookup from '@/components/DPIITLookup'
+import MSMELookup from '@/components/MSMELookup'
 import { Ld, breadcrumbSchema, collectionPageSchema, faqSchema } from '@/lib/jsonld'
 
 const BASE = 'https://businessideas.live'
@@ -756,10 +757,11 @@ export default async function IdeaPage({ params }: PageProps) {
         </section>
       )}
 
-      {/* ── DPIIT Startup Lookup ──────────────────────────────────────────────── */}
+      {/* ── Who's Already Doing This: DPIIT + MSME ──────────────────────────── */}
       {idea.industry && (
         <section className="mb-10">
           <DPIITLookup industry={idea.industry} ideaTitle={idea.title} />
+          <MSMELookup industry={idea.industry} ideaTitle={idea.title} />
         </section>
       )}
 
