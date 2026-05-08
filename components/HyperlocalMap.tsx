@@ -283,31 +283,33 @@ export default function HyperlocalMap() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchCenter])
 
-  // Click handler: clicking a hex moves the pin AND shows popup; empty space moves pin only
+  // Click handler:
+  //   supply point / cluster → show popup only (no pin move)
+  //   hex or empty area      → move pin (triggers re-analysis) + show hex popup if applicable
   const onClick = useCallback((e: MapLayerMouseEvent) => {
     if (!cityId) return
 
-    // Always move search centre to click location when a city is selected
+    const f = e.features?.[0]
+    const id = f?.layer?.id
+
+    // Supply markers — popup only, never move the pin
+    if (id === 'supply-point') {
+      const coords = (f!.geometry as GeoJSON.Point).coordinates
+      setPopup({ kind: 'point', lat: coords[1], lng: coords[0], props: f!.properties as PointProperties })
+      return
+    }
+    if (id === 'supply-clusters') {
+      const coords = (f!.geometry as GeoJSON.Point).coordinates
+      setPopup({ kind: 'cluster', lat: coords[1], lng: coords[0], count: (f!.properties as { point_count: number }).point_count })
+      return
+    }
+
+    // Hex or empty area — move the search pin
     setSearchCenter({ lat: e.lngLat.lat, lng: e.lngLat.lng })
-    setPopup(null)
-
-    if (!e.features?.length) return
-
-    const f = e.features[0]
-    const id = f.layer?.id
-    const clickLat = f.geometry.type === 'Polygon'
-      ? e.lngLat.lat
-      : (f.geometry as GeoJSON.Point).coordinates[1]
-    const clickLng = f.geometry.type === 'Polygon'
-      ? e.lngLat.lng
-      : (f.geometry as GeoJSON.Point).coordinates[0]
-
     if (id === 'hex-fill' || id === 'hex-outline') {
-      setPopup({ kind: 'hex', lat: e.lngLat.lat, lng: e.lngLat.lng, props: f.properties as HexProperties })
-    } else if (id === 'supply-point') {
-      setPopup({ kind: 'point', lat: clickLat, lng: clickLng, props: f.properties as PointProperties })
-    } else if (id === 'supply-clusters') {
-      setPopup({ kind: 'cluster', lat: clickLat, lng: clickLng, count: (f.properties as { point_count: number }).point_count })
+      setPopup({ kind: 'hex', lat: e.lngLat.lat, lng: e.lngLat.lng, props: f!.properties as HexProperties })
+    } else {
+      setPopup(null)
     }
   }, [cityId])
 
