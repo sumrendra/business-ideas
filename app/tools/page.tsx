@@ -95,6 +95,12 @@ const TOOLS = [
     description: 'McKinsey-style 8-signal economic vitality index for 30 sectors — formation velocity, survival rates, credit momentum, trade exposure, employment absorption, policy tailwind and more. Updated from MCA21, Udyam, RBI, DGFT, and EPFO data.',
     badge: 'New',
   },
+  {
+    href: '/tender-search',
+    label: 'Government Tender Search',
+    description: 'Live tenders from GeM, CPPP, and MahaTenders. Search active government contracts, view historical L1 bid prices, and identify top vendors winning government work.',
+    badge: 'Live',
+  },
 ]
 
 export default function ToolsPage() {
