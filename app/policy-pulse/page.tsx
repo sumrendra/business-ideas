@@ -5,6 +5,7 @@ import { POLICY_PULSE_PAGE_QUERY, POLICY_PULSE_COUNT_QUERY } from '@/lib/sanity/
 import type { Post } from '@/lib/sanity/types'
 import BlogCard from '@/components/BlogCard'
 import Pagination from '@/components/Pagination'
+import { Ld, breadcrumbSchema } from '@/lib/jsonld'
 
 const POSTS_PER_PAGE = 9
 const BASE = 'https://businessideas.live'
@@ -47,7 +48,14 @@ export default async function PolicyPulsePage({ searchParams }: PageProps) {
     return `/policy-pulse?page=${page}`
   }
 
+  const breadcrumb = breadcrumbSchema([
+    { name: 'Home', url: 'https://businessideas.live/' },
+    { name: 'Policy Pulse', url: 'https://businessideas.live/policy-pulse' },
+  ])
+
   return (
+    <>
+    <Ld data={breadcrumb} />
     <div className="mx-auto max-w-7xl px-4 py-10">
       {/* Header */}
       <div className="mb-10">
@@ -92,5 +100,6 @@ export default async function PolicyPulsePage({ searchParams }: PageProps) {
         </Link>
       </div>
     </div>
+    </>
   )
 }

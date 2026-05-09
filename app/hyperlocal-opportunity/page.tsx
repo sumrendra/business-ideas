@@ -19,7 +19,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    site: '@businessideaslv',
+    site: '@businessideaslive',
     title: 'Hyperlocal Opportunity Map | businessideas.live',
     description: 'Interactive demand-supply gap maps for Indian cities. Find where to start your business.',
     images: [`${BASE}/og-default.png`],

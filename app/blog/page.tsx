@@ -7,34 +7,38 @@ import { BLOG_CATEGORIES } from '@/lib/sanity/types'
 import BlogCard from '@/components/BlogCard'
 import Pagination from '@/components/Pagination'
 import TagFilter from '@/components/TagFilter'
+import { Ld, breadcrumbSchema } from '@/lib/jsonld'
 
 const POSTS_PER_PAGE = 5
 const BASE = 'https://businessideas.live'
 
-export const metadata: Metadata = {
-  title: 'Blogs — Startup Guides & Market Insights for Indian Entrepreneurs',
-  description:
-    'Guides, market insights, and entrepreneurship articles to help you evaluate and launch your next business idea in India.',
-  alternates: {
-    canonical: `${BASE}/blog`,
-  },
-  openGraph: {
-    title: 'Blog — Startup Guides & Market Insights | businessideas.live',
+export async function generateMetadata({ searchParams }: PageProps): Promise<Metadata> {
+  const sp = await searchParams
+  const page = Math.max(1, parseInt(sp.page ?? '1', 10))
+  const canonical = page > 1 ? `${BASE}/blog?page=${page}` : `${BASE}/blog`
+  return {
+    title: 'Blogs — Startup Guides & Market Insights for Indian Entrepreneurs',
     description:
-      'Actionable guides, Indian market research, and founder stories to help you launch your next business idea.',
-    url: `${BASE}/blog`,
-    siteName: 'businessideas.live',
-    images: [{ url: `${BASE}/og-blog.png`, width: 1200, height: 630, alt: 'businessideas.live Blog' }],
-    type: 'website',
-  },
-  twitter: {
-    card: 'summary_large_image',
-    site: '@businessideaslv',
-    title: 'Blog — Startup Guides & Market Insights | businessideas.live',
-    description:
-      'Actionable guides, Indian market research, and founder stories to help you launch your next business idea.',
-    images: [`${BASE}/og-blog.png`],
-  },
+      'Guides, market insights, and entrepreneurship articles to help you evaluate and launch your next business idea in India.',
+    alternates: { canonical },
+    openGraph: {
+      title: 'Blogs — Startup Guides & Market Insights | businessideas.live',
+      description:
+        'Actionable guides, Indian market research, and founder stories to help you launch your next business idea.',
+      url: canonical,
+      siteName: 'businessideas.live',
+      images: [{ url: `${BASE}/og-blog.png`, width: 1200, height: 630, alt: 'businessideas.live Blog' }],
+      type: 'website',
+    },
+    twitter: {
+      card: 'summary_large_image',
+      site: '@businessideaslive',
+      title: 'Blogs — Startup Guides & Market Insights | businessideas.live',
+      description:
+        'Actionable guides, Indian market research, and founder stories to help you launch your next business idea.',
+      images: [`${BASE}/og-blog.png`],
+    },
+  }
 }
 
 interface PageProps {
@@ -84,7 +88,14 @@ export default async function BlogPage({ searchParams }: PageProps) {
       : `/blog?tag=${encodeURIComponent(tag)}`
   }
 
+  const breadcrumb = breadcrumbSchema([
+    { name: 'Home', url: 'https://businessideas.live/' },
+    { name: 'Blogs', url: 'https://businessideas.live/blog' },
+  ])
+
   return (
+    <>
+    <Ld data={breadcrumb} />
     <div className="mx-auto max-w-7xl px-4 py-10">
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100">Blogs</h1>
@@ -169,5 +180,6 @@ export default async function BlogPage({ searchParams }: PageProps) {
         </div>
       </div>
     </div>
+    </>
   )
 }

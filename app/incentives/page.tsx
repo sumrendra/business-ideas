@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import IncentiveFinder from '@/components/IncentiveFinder'
 import { INCENTIVES, ALL_STATES } from '@/lib/incentives'
+import { Ld, breadcrumbSchema, faqSchema } from '@/lib/jsonld'
 
 const BASE = 'https://businessideas.live'
 
@@ -18,14 +19,29 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    site: '@businessideaslv',
+    site: '@businessideaslive',
     title: 'State Business Incentives India | businessideas.live',
     description: `${INCENTIVES.length} incentives across ${ALL_STATES.length} states for Indian MSMEs and startups.`,
   },
 }
 
+const breadcrumb = breadcrumbSchema([
+  { name: 'Home', url: 'https://businessideas.live/' },
+  { name: 'State Incentives', url: 'https://businessideas.live/incentives' },
+])
+
+const faq = faqSchema([
+  { q: 'Which Indian states offer the best business incentives?', a: 'Gujarat, Telangana, Karnataka, Tamil Nadu, and Maharashtra consistently offer the strongest MSME incentive packages — including capital subsidies up to 25%, GST reimbursements, and electricity concessions.' },
+  { q: 'What is a capital subsidy for new businesses?', a: 'A capital subsidy is a one-time grant from the state government covering a percentage (typically 10–25%) of your plant and machinery investment, reducing your upfront setup cost.' },
+  { q: 'Who is eligible for PM Surya Ghar subsidy?', a: 'All residential households across India are eligible. The subsidy is ₹30,000/kW for first 2 kW and ₹18,000/kW for 2–3 kW, with a maximum of ₹78,000 per household.' },
+  { q: 'How do I apply for state MSME incentives?', a: 'Most states require you to register on the state Single Window Portal and submit your project report after obtaining a factory/MSME registration. Each incentive card links to the official application portal.' },
+])
+
 export default function IncentivesPage() {
   return (
+    <>
+    <Ld data={breadcrumb} />
+    <Ld data={faq} />
     <div className="mx-auto max-w-7xl px-4 py-14">
       {/* Header */}
       <header className="mb-10 max-w-3xl">
@@ -104,5 +120,6 @@ export default function IncentivesPage() {
         </div>
       </section>
     </div>
+    </>
   )
 }
