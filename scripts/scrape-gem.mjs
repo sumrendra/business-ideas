@@ -33,6 +33,12 @@ function parseINR(str) {
 
 function parseDate(str) {
   if (!str) return null
+  // Handle DD-MM-YYYY (GeM format)
+  const m = str.match(/(\d{1,2})-(\d{1,2})-(\d{4})/)
+  if (m) {
+    try { return new Date(`${m[3]}-${m[2].padStart(2,'0')}-${m[1].padStart(2,'0')}`).toISOString() }
+    catch { return null }
+  }
   try { return new Date(str).toISOString() } catch { return null }
 }
 
@@ -104,61 +110,58 @@ async function scrapeGeMBids(page) {
       ))
 
       return cards.map(card => {
-        const text = card.innerText || ''
+        const rawText = card.innerText || ''
+        const lines = rawText.split('\n').map(l => l.trim()).filter(Boolean)
         const link = card.querySelector('a')?.href || ''
 
         // Extract bid number
-        const bidNoMatch = text.match(/GEM[/_\-][A-Z0-9/_\-]+/i)
+        const bidNoMatch = rawText.match(/GEM[/_\-][A-Z0-9/_\-]+/i)
         const bidNo = bidNoMatch?.[0]?.trim() ?? ''
 
-        // Extract all labeled fields from card
-        const fields = {}
-        card.querySelectorAll('[class*="label"], [class*="field"], [class*="key"], [class*="title"], dt, th').forEach(el => {
-          const key = el.innerText?.trim().toLowerCase().replace(/[^a-z]/g, '_')
-          const val = el.nextElementSibling?.innerText?.trim() ?? ''
-          if (key && val) fields[key] = val
-        })
-
-        // Fallback: extract from raw text
-        const lines = text.split('\n').map(l => l.trim()).filter(Boolean)
-
-        return { bidNo, text: lines.slice(0, 15).join(' | '), link, fields, lines }
-      }).filter(b => b.bidNo || b.text.length > 20)
+        return { bidNo, lines, link }
+      }).filter(b => b.bidNo)
     })
 
     for (const bid of bids) {
       const lines = bid.lines || []
-      const text = bid.text || ''
+      const rawText = lines.join('\n')
 
-      // Parse key fields from text
-      const catMatch = text.match(/Category[:\s]+([^|]+)/i)
-      const orgMatch = text.match(/(?:Buyer|Organization|Organisation|Ministry|Dept)[:\s]+([^|]+)/i)
-      const stateMatch = text.match(/State[:\s]+([^|]+)/i)
-      const valueMatch = text.match(/(?:Bid Value|Estimated Value|EMD)[:\s]+([₹\d,.]+\s*(?:Lakh|Crore|L|Cr)?)/i)
-      const deadlineMatch = text.match(/(?:Closing|End|Last)\s*Date[:\s]+(\d{2}[-/]\d{2}[-/]\d{4}[^|]*)/i)
-      const qtyMatch = text.match(/Quantity[:\s]+([^|]+)/i)
+      // Title — from "Items: ..." line
+      const itemMatch = rawText.match(/Items?:\s*(.+)/i)
+      const title = itemMatch?.[1]?.trim().replace(/\.{2,}$/, '').trim() || bid.bidNo
 
-      const category = catMatch?.[1]?.trim() || ''
-      const org = orgMatch?.[1]?.trim() || ''
-      const state = stateMatch?.[1]?.trim() || ''
+      // Organization — lines after "Department Name And Address:"
+      const deptIdx = lines.findIndex(l => /Department Name And Address/i.test(l))
+      let org = '', ministry = ''
+      if (deptIdx >= 0) {
+        const orgLines = lines.slice(deptIdx + 1, deptIdx + 4)
+          .filter(l => l && !/^(Department Name|Start Date|End Date|Quantity|Items?)[:\s]/i.test(l))
+        org = orgLines.slice(0, 2).join(', ')
+        ministry = orgLines.find(l => /Ministry/i.test(l)) || orgLines[0] || ''
+      }
+
+      // Dates in DD-MM-YYYY format
+      const endMatch   = rawText.match(/End Date:\s*(\d{1,2}-\d{1,2}-\d{4})/i)
+      const startMatch = rawText.match(/Start Date:\s*(\d{1,2}-\d{1,2}-\d{4})/i)
+      const qtyMatch   = rawText.match(/Quantity:\s*(\d+)/i)
 
       const t = {
-        id: `gem-${bid.bidNo || Date.now()}`,
+        id: `gem-${bid.bidNo}`,
         source: 'gem',
-        bid_no: bid.bidNo || `GEM-UNKNOWN-${Date.now()}`,
-        title: category || lines[0] || 'GeM Tender',
+        bid_no: bid.bidNo,
+        title,
         organization: org,
-        ministry: org,
-        department: '',
-        category,
-        state,
-        tender_value: parseINR(valueMatch?.[1]),
-        bid_deadline: parseDate(deadlineMatch?.[1]),
-        published_at: new Date().toISOString(),
+        ministry,
+        department: org,
+        category: '',
+        state: '',
+        tender_value: null,
+        bid_deadline: parseDate(endMatch?.[1]),
+        published_at: parseDate(startMatch?.[1]) || new Date().toISOString(),
         status: 'active',
         document_url: bid.link || `${BASE}/all-bids`,
-        item_description: lines.slice(0, 3).join(' '),
-        quantity: qtyMatch?.[1]?.trim() || '',
+        item_description: title,
+        quantity: qtyMatch?.[1] || '',
       }
       allTenders.push(t)
     }
