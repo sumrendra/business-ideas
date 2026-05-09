@@ -7,10 +7,10 @@ interface SponsoredBannerProps {
 
 export default function SponsoredBanner({ sponsor, text, ctaLabel, ctaHref }: SponsoredBannerProps) {
   return (
-    <div className="flex items-center justify-between gap-4 rounded-xl border border-dashed border-slate-200 bg-slate-50 px-5 py-4">
+    <div className="flex items-center justify-between gap-4 rounded-xl border border-dashed border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 px-5 py-4">
       <div>
-        <p className="text-xs font-medium text-slate-400">Sponsored · {sponsor}</p>
-        <p className="mt-0.5 text-sm text-slate-700">{text}</p>
+        <p className="text-xs font-medium text-slate-400 dark:text-slate-500">Sponsored · {sponsor}</p>
+        <p className="mt-0.5 text-sm text-slate-700 dark:text-slate-300">{text}</p>
       </div>
       <a
         href={ctaHref}

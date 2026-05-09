@@ -7,7 +7,7 @@ export async function GET() {
   const ideaSlugs = await client.fetch<{ slug: string }[]>(
     IDEA_SLUGS_QUERY,
     {},
-    { next: { tags: ['business-ideas'] } }
+    { cache: 'no-store' }
   )
 
   const ideaUrls = ideaSlugs.map(
@@ -24,6 +24,9 @@ ${ideaUrls}
 </urlset>`
 
   return new Response(xml, {
-    headers: { 'Content-Type': 'application/xml; charset=utf-8' },
+    headers: {
+      'Content-Type': 'application/xml; charset=utf-8',
+      'Cache-Control': 's-maxage=3600, stale-while-revalidate=86400',
+    },
   })
 }

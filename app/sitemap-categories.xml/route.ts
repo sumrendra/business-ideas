@@ -23,6 +23,9 @@ ${urls}
 </urlset>`
 
   return new Response(xml, {
-    headers: { 'Content-Type': 'application/xml; charset=utf-8' },
+    headers: {
+      'Content-Type': 'application/xml; charset=utf-8',
+      'Cache-Control': 's-maxage=86400, stale-while-revalidate=604800',
+    },
   })
 }
