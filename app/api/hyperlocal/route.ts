@@ -335,20 +335,46 @@ function buildHexGeoJSON(
   return { type: 'FeatureCollection', features }
 }
 
+// ─── Build ad-hoc category from a free-text query ─────────────────────────────
+function buildCustomCategory(query: string): import('@/lib/gap-engine/categories').Category {
+  const words = query.toLowerCase().split(/\s+/).filter(Boolean)
+  return {
+    id: `__custom__`,
+    label: query,
+    icon: '🔍',
+    placesTypes: [],
+    umbrellaTypes: [],
+    textSearchKeywords: [query],
+    nameKeywords: words,
+    trendsKeywords: [query],
+    description: `Custom search: ${query}`,
+    color: 'bg-slate-50 border-slate-200',
+    osmTags: [],
+  }
+}
+
 // ─── Main handler ──────────────────────────────────────────────────────────────
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url)
-  const cityId     = searchParams.get('city')
-  const categoryId = searchParams.get('category')
-  const radius     = parseInt(searchParams.get('radius') ?? '3000', 10)
-  const centerLat  = parseFloat(searchParams.get('centerLat') ?? '')
-  const centerLng  = parseFloat(searchParams.get('centerLng') ?? '')
+  const cityId      = searchParams.get('city')
+  const categoryId  = searchParams.get('category')
+  const customQuery = searchParams.get('customQuery')?.trim()
+  const radius      = parseInt(searchParams.get('radius') ?? '3000', 10)
+  const centerLat   = parseFloat(searchParams.get('centerLat') ?? '')
+  const centerLng   = parseFloat(searchParams.get('centerLng') ?? '')
 
-  if (!cityId || !categoryId) return NextResponse.json({ error: 'city and category required' }, { status: 400 })
+  if (!cityId || (!categoryId && !customQuery)) return NextResponse.json({ error: 'city and category (or customQuery) required' }, { status: 400 })
 
-  const city     = getCityById(cityId)
-  const category = getCategoryById(categoryId)
-  if (!city || !category) return NextResponse.json({ error: 'Invalid city or category' }, { status: 400 })
+  const city = getCityById(cityId)
+  if (!city) return NextResponse.json({ error: 'Invalid city' }, { status: 400 })
+
+  let category: import('@/lib/gap-engine/categories').Category | null = null
+  if (customQuery) {
+    category = buildCustomCategory(customQuery)
+  } else {
+    category = getCategoryById(categoryId!) ?? null
+    if (!category) return NextResponse.json({ error: 'Invalid category' }, { status: 400 })
+  }
 
   // Use custom pin location if provided, otherwise fall back to city centre
   const searchLat = Number.isFinite(centerLat) ? centerLat : city.lat
@@ -376,7 +402,7 @@ export async function GET(req: NextRequest) {
   const supplyGeoJSON = toSupplyGeoJSON(allPlaces)
 
   const { stateScore, cityScore } = trendsData
-  const rng = makeRng(cityId + categoryId)
+  const rng = makeRng(cityId + (categoryId ?? customQuery ?? ''))
 
   // Build H3 hex grid around the active search centre
   const hexGeoJSON = buildHexGeoJSON(city, searchLat, searchLng, cityScore, allPlaces, rng)

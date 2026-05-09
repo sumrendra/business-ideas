@@ -230,6 +230,8 @@ export default function HyperlocalMap() {
 
   const [cityId,       setCityId]       = useState('')
   const [catId,        setCatId]        = useState('')
+  const [customQuery,  setCustomQuery]  = useState('')
+  const [customInput,  setCustomInput]  = useState('')
   const [radius,       setRadius]       = useState(3000)
   const [tierFilter,   setTierFilter]   = useState<PopulationTier | 'all'>('all')
   const [searchCenter, setSearchCenter] = useState<{ lat: number; lng: number } | null>(null)
@@ -267,13 +269,20 @@ export default function HyperlocalMap() {
     })
   }, [rentProfile, stats])
 
+  const isCustomMode = !catId && !!customQuery
+
   const analyse = useCallback(async () => {
-    if (!cityId || !catId) return
+    if (!cityId || (!catId && !customQuery)) return
     setLoading(true)
     setError(null)
     setPopup(null)
     try {
-      const params = new URLSearchParams({ city: cityId, category: catId, radius: String(radius) })
+      const params = new URLSearchParams({ city: cityId, radius: String(radius) })
+      if (customQuery && !catId) {
+        params.set('customQuery', customQuery)
+      } else {
+        params.set('category', catId)
+      }
       if (searchCenter) {
         params.set('centerLat', String(searchCenter.lat))
         params.set('centerLng', String(searchCenter.lng))
@@ -291,7 +300,7 @@ export default function HyperlocalMap() {
     } finally {
       setLoading(false)
     }
-  }, [cityId, catId, radius, searchCenter])
+  }, [cityId, catId, customQuery, radius, searchCenter])
 
   const scanAll = useCallback(async () => {
     if (!cityId) return
@@ -356,7 +365,9 @@ export default function HyperlocalMap() {
 
   const ratingMeta = stats ? RATING_META[stats.rating] : null
   const trendMeta  = stats ? TREND_META[stats.trendDirection] : null
-  const catInfo    = CATEGORIES.find(c => c.id === catId)
+  const catInfo    = isCustomMode
+    ? (customQuery ? { trendsKeywords: [customQuery] } : null)
+    : CATEGORIES.find(c => c.id === catId)
 
   return (
     <div className="relative flex h-[84vh] min-h-[540px] w-full overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-700 shadow-xl">
@@ -394,14 +405,57 @@ export default function HyperlocalMap() {
             </select>
           </div>
 
+          {/* Custom search */}
+          <div className="space-y-1.5">
+            <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Custom search</label>
+            <form
+              onSubmit={e => {
+                e.preventDefault()
+                const q = customInput.trim()
+                if (!q) return
+                setCustomQuery(q)
+                setCatId('')
+              }}
+              className="flex gap-1.5"
+            >
+              <input
+                type="text"
+                value={customInput}
+                onChange={e => setCustomInput(e.target.value)}
+                placeholder="e.g. korean spa, art store…"
+                className="flex-1 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-2.5 py-1.5 text-xs text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              />
+              <button
+                type="submit"
+                disabled={!customInput.trim()}
+                className="shrink-0 rounded-lg bg-indigo-600 px-3 py-1.5 text-xs font-bold text-white hover:bg-indigo-500 disabled:opacity-40 transition-colors"
+              >
+                Go
+              </button>
+            </form>
+            {isCustomMode && (
+              <div className="flex items-center justify-between rounded-lg border border-indigo-200 dark:border-indigo-800 bg-indigo-50 dark:bg-indigo-950/40 px-2.5 py-1.5">
+                <span className="text-[11px] font-semibold text-indigo-700 dark:text-indigo-300 truncate">🔍 {customQuery}</span>
+                <button
+                  onClick={() => { setCustomQuery(''); setCustomInput('') }}
+                  className="shrink-0 ml-2 text-[10px] font-bold text-indigo-500 hover:text-indigo-700 dark:hover:text-indigo-300 underline"
+                >
+                  Clear
+                </button>
+              </div>
+            )}
+          </div>
+
           {/* Category */}
           <div className="space-y-1.5">
-            <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Category</label>
+            <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400">
+              {isCustomMode ? 'Or pick a preset' : 'Category'}
+            </label>
             <div className="space-y-0.5">
               {CATEGORIES.map(cat => {
-                const selected = catId === cat.id
+                const selected = !isCustomMode && catId === cat.id
                 return (
-                  <button key={cat.id} onClick={() => setCatId(cat.id)}
+                  <button key={cat.id} onClick={() => { setCatId(cat.id); setCustomQuery(''); setCustomInput('') }}
                     className={`w-full flex items-center gap-2.5 rounded-lg px-2.5 py-1.5 text-left text-xs font-medium transition-colors border ${
                       selected
                         ? 'border-indigo-400 bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300'
@@ -426,13 +480,16 @@ export default function HyperlocalMap() {
           </div>
 
           {/* Search demand trends — appears once a category is selected */}
-          {catId && cityId && (() => {
+          {cityId && (catId || customQuery) && (() => {
             const city = CITIES.find(c => c.id === cityId)
-            const cat  = CATEGORIES.find(c => c.id === catId)
-            if (!city || !cat) return null
+            if (!city) return null
+            const keywords = customQuery && !catId
+              ? [customQuery]
+              : CATEGORIES.find(c => c.id === catId)?.trendsKeywords ?? []
+            if (!keywords.length) return null
             return (
               <HyperlocalTrendsPanel
-                keywords={cat.trendsKeywords}
+                keywords={keywords}
                 stateCode={city.stateCode}
                 stateName={city.state}
               />
@@ -471,7 +528,7 @@ export default function HyperlocalMap() {
           ) : null}
 
           {/* Analyse */}
-          <button onClick={analyse} disabled={!cityId || !catId || loading}
+          <button onClick={analyse} disabled={!cityId || (!catId && !customQuery) || loading}
             className="w-full rounded-xl bg-indigo-600 py-2.5 text-sm font-bold text-white shadow hover:bg-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
             {loading ? 'Analysing…' : 'Analyse →'}
           </button>
