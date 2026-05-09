@@ -28,6 +28,18 @@ import { Ld, breadcrumbSchema, collectionPageSchema, faqSchema } from '@/lib/jso
 
 const BASE = 'https://businessideas.live'
 
+// Maps Sanity industry value → category page slug (for internal linking)
+const INDUSTRY_SLUG: Record<string, string> = {
+  'SaaS':                    'saas',
+  'E-commerce':              'ecommerce',
+  'Health & Wellness':       'health',
+  'EdTech':                  'edtech',
+  'FinTech':                 'fintech',
+  'Local Services':          'local-services',
+  'Climate / Sustainability':'climate',
+  'AI / ML':                 'ai-ml',
+}
+
 // ── Programmatic SEO category definitions ─────────────────────────────────────
 interface CategoryConfig {
   title: string
@@ -522,6 +534,12 @@ export default async function IdeaPage({ params }: PageProps) {
         <Link href="/" className="hover:text-indigo-600 dark:hover:text-indigo-400">Home</Link>
         <span className="mx-2">/</span>
         <Link href="/business-ideas" className="hover:text-indigo-600 dark:hover:text-indigo-400">Ideas</Link>
+        {idea.industry && INDUSTRY_SLUG[idea.industry] && (
+          <>
+            <span className="mx-2">/</span>
+            <Link href={`/business-ideas/${INDUSTRY_SLUG[idea.industry]}`} className="hover:text-indigo-600 dark:hover:text-indigo-400">{idea.industry}</Link>
+          </>
+        )}
         <span className="mx-2">/</span>
         <span className="truncate text-slate-700 dark:text-slate-300">{idea.title}</span>
       </nav>
@@ -546,7 +564,11 @@ export default async function IdeaPage({ params }: PageProps) {
           {idea.featured && (
             <span className="badge border border-slate-300 dark:border-slate-600 text-slate-500 dark:text-slate-400 bg-transparent">Featured</span>
           )}
-          <span className="badge border border-slate-300 dark:border-slate-600 text-slate-500 dark:text-slate-400 bg-transparent text-xs">{idea.industry}</span>
+          {idea.industry && INDUSTRY_SLUG[idea.industry] ? (
+            <Link href={`/business-ideas/${INDUSTRY_SLUG[idea.industry]}`} className="badge border border-slate-300 dark:border-slate-600 text-slate-500 dark:text-slate-400 bg-transparent text-xs hover:border-indigo-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">{idea.industry}</Link>
+          ) : (
+            <span className="badge border border-slate-300 dark:border-slate-600 text-slate-500 dark:text-slate-400 bg-transparent text-xs">{idea.industry}</span>
+          )}
           {idea.market_saturation && (
             <span className={`badge text-xs border bg-transparent ${SATURATION_COLOR[idea.market_saturation]}`}>
               {MARKET_SATURATION_LABELS[idea.market_saturation] || idea.market_saturation}
@@ -1030,6 +1052,34 @@ export default async function IdeaPage({ params }: PageProps) {
         </section>
       )}
 
+      {/* Sector cross-link strip */}
+      {idea.industry && (
+        <div className="mt-10 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/60 px-5 py-4 flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <p className="text-xs font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-0.5">Explore more</p>
+            <p className="text-sm font-semibold text-slate-800 dark:text-slate-200">
+              Browse all <span className="text-indigo-600 dark:text-indigo-400">{idea.industry}</span> business ideas
+            </p>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {INDUSTRY_SLUG[idea.industry] && (
+              <Link
+                href={`/business-ideas/${INDUSTRY_SLUG[idea.industry]}`}
+                className="inline-flex items-center rounded-lg bg-indigo-600 px-3.5 py-1.5 text-sm font-semibold text-white hover:bg-indigo-500 transition-colors"
+              >
+                Browse {idea.industry} ideas →
+              </Link>
+            )}
+            <Link
+              href={`/business-ideas?industry=${encodeURIComponent(idea.industry)}`}
+              className="inline-flex items-center rounded-lg border border-slate-300 dark:border-slate-600 px-3.5 py-1.5 text-sm font-medium text-slate-600 dark:text-slate-300 hover:border-indigo-400 hover:text-indigo-600 transition-colors"
+            >
+              Filter by industry
+            </Link>
+          </div>
+        </div>
+      )}
+
       {/* Tags */}
       {idea.tags?.length > 0 && (
         <div className="mt-10 border-t border-slate-100 pt-6">
@@ -1068,12 +1118,31 @@ export default async function IdeaPage({ params }: PageProps) {
 
       {/* People Also Viewed */}
       {peopleAlsoViewed.length > 0 && (
-        <section className="mt-16 border-t border-slate-100 pt-12">
-          <h2 className="mb-2 text-xl font-bold text-slate-900 dark:text-slate-100">People Also Viewed</h2>
-          <p className="mb-6 text-sm text-slate-500 dark:text-slate-400">Similar ideas other founders are exploring</p>
+        <section className="mt-16 border-t border-slate-100 dark:border-slate-800 pt-12">
+          <div className="flex items-end justify-between gap-4 mb-6">
+            <div>
+              <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100">People Also Viewed</h2>
+              <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">Similar ideas other founders are exploring</p>
+            </div>
+            {idea.industry && INDUSTRY_SLUG[idea.industry] && (
+              <Link
+                href={`/business-ideas/${INDUSTRY_SLUG[idea.industry]}`}
+                className="hidden sm:inline-flex shrink-0 text-sm font-medium text-indigo-600 dark:text-indigo-400 hover:underline"
+              >
+                All {idea.industry} ideas →
+              </Link>
+            )}
+          </div>
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
             {peopleAlsoViewed.map(i => <IdeaCard key={i._id} idea={i} />)}
           </div>
+          {idea.industry && INDUSTRY_SLUG[idea.industry] && (
+            <div className="mt-6 text-center sm:hidden">
+              <Link href={`/business-ideas/${INDUSTRY_SLUG[idea.industry]}`} className="btn-outline text-sm">
+                All {idea.industry} ideas →
+              </Link>
+            </div>
+          )}
         </section>
       )}
     </article>

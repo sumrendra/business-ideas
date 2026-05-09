@@ -145,7 +145,13 @@ export default async function BlogPostPage({ params }: PageProps) {
         <nav className="mb-6 flex min-w-0 items-center gap-1 text-sm text-slate-500">
           <Link href="/" className="shrink-0 hover:text-indigo-600">Home</Link>
           <span className="shrink-0 mx-1">/</span>
-          <Link href="/blog" className="shrink-0 hover:text-indigo-600">Blog</Link>
+          <Link href="/blog" className="shrink-0 hover:text-indigo-600">Blogs</Link>
+          {post.category && (
+            <>
+              <span className="shrink-0 mx-1">/</span>
+              <Link href={`/blog?category=${encodeURIComponent(post.category)}`} className="shrink-0 hover:text-indigo-600 dark:hover:text-indigo-400">{post.category}</Link>
+            </>
+          )}
           <span className="shrink-0 mx-1">/</span>
           <span className="min-w-0 truncate text-slate-700 dark:text-slate-300">{post.title}</span>
         </nav>
@@ -409,9 +415,12 @@ export default async function BlogPostPage({ params }: PageProps) {
               </section>
             )}
 
-            {/* Back CTA */}
-            <div className="mt-12 text-center">
-              <Link href="/blog" className="btn-outline">← Back to Blog</Link>
+            {/* Back CTAs */}
+            <div className="mt-12 flex flex-wrap items-center justify-center gap-3">
+              <Link href="/blog" className="btn-outline">← Back to Blogs</Link>
+              <Link href="/business-ideas" className="inline-flex items-center rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-500 transition-colors">
+                Browse 298 Business Ideas →
+              </Link>
             </div>
           </div>
         </div>
