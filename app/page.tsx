@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
+import RotatingText from '@/components/RotatingText'
 import { client } from '@/lib/sanity/client'
 import { FEATURED_IDEAS_QUERY, RECENT_POSTS_QUERY, POLICY_PULSE_QUERY, SECTOR_COUNTS_QUERY } from '@/lib/sanity/queries'
 import IdeaCard from '@/components/IdeaCard'
@@ -58,7 +59,7 @@ export default async function HomePage() {
             298 validated ideas · updated weekly
           </div>
           <h1 className="mt-6 text-4xl font-extrabold tracking-tight text-slate-900 dark:text-slate-100 sm:text-5xl lg:text-6xl">
-            Find your next <span className="text-indigo-600 dark:text-indigo-400">business idea</span>
+            Find your next <RotatingText />
           </h1>
           <p className="mx-auto mt-5 max-w-2xl text-lg text-slate-600 dark:text-slate-400">
             Real setup costs, unit economics, competitor data and funding routes —

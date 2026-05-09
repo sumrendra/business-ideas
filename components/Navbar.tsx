@@ -4,7 +4,8 @@ import ThemeToggle from './ThemeToggle'
 
 const NAV_LINKS = [
   { href: '/business-ideas',          label: 'Opportunities' },
-  { href: '/blog',                    label: 'Insights' },
+  { href: '/blog',                    label: 'Blogs' },
+  { href: '/policy-pulse',            label: 'Policy Pulse' },
   { href: '/sectors',                 label: 'Sectors' },
   { href: '/incentives',              label: 'State Incentives' },
   { href: '/hyperlocal-opportunity',  label: 'Opportunity Map' },
@@ -18,10 +19,11 @@ export default function Navbar() {
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2 shrink-0">
           <Image
-            src="/icon.png"
+            src="/logo.png"
             alt="businessideas.live"
-            width={40}
-            height={40}
+            width={192}
+            height={192}
+            quality={100}
             className="h-10 w-auto"
           />
           <span className="font-bold text-slate-900 dark:text-slate-100 text-base sm:text-lg">
