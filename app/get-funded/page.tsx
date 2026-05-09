@@ -24,7 +24,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    site: '@businessideaslv',
+    site: '@businessideaslive',
     title: 'Get Funded — Government Schemes & Startup Grants | businessideas.live',
     description:
       'MUDRA loans, Startup India grants, CGTMSE, and more — find the right government funding scheme for your Indian business idea.',

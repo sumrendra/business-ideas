@@ -4,6 +4,7 @@ import Image from 'next/image'
 import { client } from '@/lib/sanity/client'
 import { urlFor } from '@/lib/sanity/image'
 import { SECTOR_HEROES_QUERY } from '@/lib/sanity/queries'
+import { Ld, breadcrumbSchema } from '@/lib/jsonld'
 
 const BASE = 'https://businessideas.live'
 
@@ -23,7 +24,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    site: '@businessideaslv',
+    site: '@businessideaslive',
     title: 'Business Ideas by Industry Sector | businessideas.live',
     description: 'Browse 298 vetted Indian business ideas by sector — Food & Beverage, Technology, Retail, Agriculture, Manufacturing, and more.',
   },
@@ -82,7 +83,14 @@ export default async function SectorsPage() {
 
   const totalIdeas = ideas.length
 
+  const breadcrumb = breadcrumbSchema([
+    { name: 'Home', url: 'https://businessideas.live/' },
+    { name: 'Sectors', url: 'https://businessideas.live/sectors' },
+  ])
+
   return (
+    <>
+    <Ld data={breadcrumb} />
     <div className="mx-auto max-w-7xl px-4 py-14">
       <header className="mb-10 max-w-3xl">
         <p className="text-xs font-bold uppercase tracking-widest text-indigo-600 dark:text-indigo-400">Sectors</p>
@@ -148,5 +156,6 @@ export default async function SectorsPage() {
         })}
       </div>
     </div>
+    </>
   )
 }

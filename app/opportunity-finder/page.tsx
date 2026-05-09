@@ -20,7 +20,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    site: '@businessideaslv',
+    site: '@businessideaslive',
     title: 'Opportunity Finder — Supply-Demand Gap Engine | businessideas.live',
     description: 'Find where demand outstrips supply in your city. Powered by Google Trends + Maps data.',
     images: [`${BASE}/og-default.png`],

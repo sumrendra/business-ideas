@@ -20,7 +20,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    site: '@businessideaslv',
+    site: '@businessideaslive',
     title: 'Funding Calculators for Indian Businesses',
     description: 'MUDRA, CGTMSE, PMEGP & EMI calculators for Indian entrepreneurs.',
   },
