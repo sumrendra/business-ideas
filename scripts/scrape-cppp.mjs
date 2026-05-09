@@ -1,18 +1,23 @@
 /**
- * Scrapes active tenders from CPPP (eprocure.gov.in)
- * Uses the "Tenders by Closing Date" page which has NO CAPTCHA.
- * Tabs: Closing Today, Closing within 7 days, Closing within 14 days
+ * Scrapes active tenders + bid awards from CPPP (eprocure.gov.in)
+ *
+ * Active tenders: "Tenders by Closing Date" page — NO CAPTCHA via date tabs.
+ * Bid Awards: "ResultOfTenders" page — CAPTCHA solved with Tesseract.js.
+ *   The solver removes dot-separators between chars before OCR.
+ *
  * Run: DATABASE_URL=... node scripts/scrape-cppp.mjs
  */
 
 import { chromium } from 'playwright'
 import pg from 'pg'
+import { solveCaptchaFromElement, terminateSolver } from './solve-captcha.mjs'
 
 const { Pool } = pg
 const pool = new Pool({ connectionString: process.env.DATABASE_URL })
 
 const BASE = 'https://eprocure.gov.in/eprocure/app'
 const MAX_PAGES = 30
+const MAX_CAPTCHA_ATTEMPTS = 6
 
 function parseDate(str) {
   if (!str) return null
@@ -197,10 +202,175 @@ async function scrapeTab(page, submitName, label) {
   return tenders
 }
 
+async function upsertBidResult(b) {
+  try {
+    const r = await pool.query(`
+      INSERT INTO bid_results(id,source,bid_no,category,item_description,ministry,organization,
+        state,l1_price,l1_seller_name,estimated_value,total_bidders,award_date,savings_percent,scraped_at)
+      VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,NOW())
+      ON CONFLICT(bid_no,source) DO UPDATE SET
+        l1_price=EXCLUDED.l1_price, l1_seller_name=EXCLUDED.l1_seller_name,
+        total_bidders=EXCLUDED.total_bidders, award_date=EXCLUDED.award_date,
+        savings_percent=EXCLUDED.savings_percent, scraped_at=NOW()
+    `, [b.id,b.source,b.bid_no,b.category,b.item_description,b.ministry,b.organization,
+        b.state,b.l1_price,b.l1_seller_name,b.estimated_value,b.total_bidders,
+        b.award_date,b.savings_percent])
+    return r.rowCount > 0
+  } catch(e) {
+    console.error('  bid upsert error:', e.message.slice(0, 80))
+    return false
+  }
+}
+
+/**
+ * Submit the CPPP Bid Awards search form using Tesseract CAPTCHA solver.
+ * Retries up to MAX_CAPTCHA_ATTEMPTS times with a fresh CAPTCHA each time.
+ * Returns true if results loaded successfully.
+ */
+async function submitBidAwardsSearch(page) {
+  for (let attempt = 1; attempt <= MAX_CAPTCHA_ATTEMPTS; attempt++) {
+    console.log(`  CAPTCHA attempt ${attempt}/${MAX_CAPTCHA_ATTEMPTS}...`)
+
+    if (attempt > 1) {
+      // Reload a fresh CAPTCHA
+      const refreshBtn = await page.$('button[name="captcha"]')
+      if (refreshBtn) {
+        await refreshBtn.click()
+        await page.waitForTimeout(1200)
+      } else {
+        await page.reload({ waitUntil: 'networkidle' })
+        await page.waitForTimeout(1000)
+      }
+    }
+
+    const captchaEl = await page.$('#captchaImage')
+    if (!captchaEl) { console.log('  No CAPTCHA image — submitting directly'); return true }
+
+    let solved = ''
+    try {
+      solved = await solveCaptchaFromElement(page, '#captchaImage')
+    } catch(e) {
+      console.log(`  CAPTCHA screenshot failed: ${e.message}`)
+      continue
+    }
+
+    // Reject if result is obviously wrong (CPPP CAPTCHA is exactly 6 chars)
+    if (!solved || solved.length < 4 || solved.length > 10) {
+      console.log(`  Rejected low-confidence result "${solved}" (len ${solved.length})`)
+      continue
+    }
+
+    // Fill input and submit
+    const captchaInput = await page.$('input[name="captchaText"]')
+    if (!captchaInput) { console.log('  No captchaText input found'); break }
+    await captchaInput.fill(solved)
+    await page.waitForTimeout(300)
+
+    const submitBtn = await page.$('input[value="Search"]')
+    if (!submitBtn) { console.log('  No Search button found'); break }
+    await submitBtn.click()
+    await page.waitForLoadState('networkidle')
+    await page.waitForTimeout(1500)
+
+    const body = await page.evaluate(() => document.body.innerText.toLowerCase())
+    if (body.includes('invalid captcha') || body.includes('wrong captcha') ||
+        body.includes('captcha mismatch') || body.includes('enter captcha') ||
+        body.includes('incorrect captcha')) {
+      console.log(`  CAPTCHA rejected ("${solved}"), retrying...`)
+      await page.goto(`${BASE}?page=ResultOfTenders&service=page`, { waitUntil: 'networkidle', timeout: 20000 })
+      await page.waitForTimeout(800)
+      continue
+    }
+
+    console.log(`  CAPTCHA accepted ("${solved}")`)
+    return true
+  }
+
+  console.log(`  Gave up after ${MAX_CAPTCHA_ATTEMPTS} attempts`)
+  return false
+}
+
+// ── Scrape CPPP Bid Awards (AOC = Award of Contract, L1 winner data) ──────────
+async function scrapeCPPPBidAwards(page) {
+  console.log('\nNavigating to CPPP Bid Awards...')
+  await page.goto(`${BASE}?page=ResultOfTenders&service=page`, {
+    waitUntil: 'networkidle', timeout: 30000
+  })
+  await page.waitForTimeout(1500)
+
+  const accepted = await submitBidAwardsSearch(page)
+  if (!accepted) return []
+
+  const allBids = []
+  let pageNum = 1
+
+  while (pageNum <= MAX_PAGES) {
+    console.log(`  Bid awards page ${pageNum}...`)
+
+    try {
+      await page.waitForSelector('table tr td', { timeout: 10000 })
+    } catch { console.log('  No table, stopping'); break }
+
+    const rows = await page.evaluate(() => {
+      return Array.from(document.querySelectorAll('table tr')).map(row => {
+        const cells = Array.from(row.querySelectorAll('td'))
+        const link = row.querySelector('a')?.href ?? ''
+        return { texts: cells.map(c => c.innerText?.trim() ?? ''), link }
+      }).filter(r => {
+        // Rows: S.No | AOC Date | e-Published Date | Title+Ref | Org Chain | AOC
+        // Keep only numbered rows (serial number like "1.")
+        return /^\d+\.$/.test(r.texts[0] || '')
+      })
+    })
+
+    console.log(`    Found ${rows.length} bid award rows`)
+
+    for (const { texts, link } of rows) {
+      if (texts.length < 4) continue
+      // texts[0] = serial, texts[1] = AOC Date, texts[2] = Published Date,
+      // texts[3] = Title+Ref, texts[4] = Org Chain, texts[5] = AOC (link)
+      const { title, bidNo } = parseTitleCell(texts[3])
+      if (!bidNo) continue
+
+      const orgParts = (texts[4] || '').split(/\|\|/)
+      const organization = orgParts.filter(Boolean).join(' > ')
+      const ministry = orgParts.find(p => /ministry/i.test(p)) || guessMinistry(organization)
+
+      const b = {
+        id: `cppp-bid-${bidNo}`.replace(/[^a-zA-Z0-9\-]/g, '-').slice(0, 64),
+        source: 'cppp',
+        bid_no: bidNo,
+        category: '',
+        item_description: title,
+        ministry,
+        organization,
+        state: '',
+        l1_price: null,       // in AOC PDF — not in listing view
+        l1_seller_name: '',   // in AOC PDF — not in listing view
+        estimated_value: null,
+        total_bidders: null,
+        award_date: parseDate(texts[1]),  // AOC Date
+        savings_percent: null,
+      }
+      allBids.push(b)
+    }
+
+    // Pagination
+    const nextBtn = await page.$('a:text-matches("Next|>"), input[value*="Next"]')
+    if (!nextBtn) break
+    await nextBtn.click()
+    await page.waitForLoadState('networkidle')
+    await page.waitForTimeout(1000)
+    pageNum++
+  }
+
+  return allBids
+}
+
 // ── Main ─────────────────────────────────────────────────────────────────────
 const logRow = await pool.query(`INSERT INTO scrape_log(source,status) VALUES('cppp','running') RETURNING id`)
 const logId = logRow.rows[0].id
-let found = 0, upserted = 0
+let found = 0, upserted = 0, bidsFound = 0, bidsUpserted = 0
 
 const browser = await chromium.launch({
   headless: true,
@@ -220,29 +390,24 @@ try {
   })
   await page.waitForTimeout(1500)
 
-  // Scrape all three date tabs in sequence
+  // Scrape all three date tabs in sequence (no CAPTCHA)
   const allTenders = []
 
-  // Tab 1: Closing Today
   const todayTenders = await scrapeTab(page, 'tabByClosingToday', 'Closing Today')
   allTenders.push(...todayTenders)
 
-  // Go back to the form page before next tab
   await page.goto(`${BASE}?page=FrontEndListTendersbyDate&service=page`, { waitUntil: 'networkidle', timeout: 20000 })
   await page.waitForTimeout(1000)
 
-  // Tab 2: Closing within 7 days
   const week7Tenders = await scrapeTab(page, 'LinkSubmit_0', 'Closing within 7 days')
   allTenders.push(...week7Tenders)
 
   await page.goto(`${BASE}?page=FrontEndListTendersbyDate&service=page`, { waitUntil: 'networkidle', timeout: 20000 })
   await page.waitForTimeout(1000)
 
-  // Tab 3: Closing within 14 days
   const week14Tenders = await scrapeTab(page, 'LinkSubmit_1', 'Closing within 14 days')
   allTenders.push(...week14Tenders)
 
-  // Deduplicate by bid_no
   const seen = new Set()
   const unique = allTenders.filter(t => {
     if (seen.has(t.bid_no)) return false
@@ -256,10 +421,19 @@ try {
     if (await upsertTender(t)) upserted++
   }
 
-  console.log(`\n✅ CPPP done: ${upserted}/${found} tenders upserted`)
+  // Scrape Bid Awards (CAPTCHA-gated, uses Tesseract solver)
+  const bids = await scrapeCPPPBidAwards(page)
+  bidsFound = bids.length
+  console.log(`\nFound ${bidsFound} CPPP bid awards. Upserting...`)
+  for (const b of bids) {
+    if (await upsertBidResult(b)) bidsUpserted++
+  }
+
+  console.log(`\n✅ CPPP done: ${upserted}/${found} tenders, ${bidsUpserted}/${bidsFound} bid awards`)
   await pool.query(
-    `UPDATE scrape_log SET finished_at=NOW(),tenders_found=$1,tenders_upserted=$2,status='ok' WHERE id=$3`,
-    [found, upserted, logId]
+    `UPDATE scrape_log SET finished_at=NOW(),tenders_found=$1,tenders_upserted=$2,
+     bids_found=$3,bids_upserted=$4,status='ok' WHERE id=$5`,
+    [found, upserted, bidsFound, bidsUpserted, logId]
   )
 } catch(e) {
   console.error('❌ Error:', e.message)
@@ -268,6 +442,7 @@ try {
     [e.message, logId]
   )
 } finally {
+  await terminateSolver()
   await browser.close()
   await pool.end()
 }
