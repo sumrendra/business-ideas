@@ -1,17 +1,18 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { client } from '@/lib/sanity/client'
-import { POSTS_PAGE_QUERY, POSTS_COUNT_QUERY, POST_TAGS_QUERY } from '@/lib/sanity/queries'
+import { AUTHORED_POSTS_PAGE_QUERY, AUTHORED_POSTS_COUNT_QUERY, AUTHORED_POST_TAGS_QUERY } from '@/lib/sanity/queries'
 import type { Post } from '@/lib/sanity/types'
 import { BLOG_CATEGORIES } from '@/lib/sanity/types'
 import BlogCard from '@/components/BlogCard'
 import Pagination from '@/components/Pagination'
+import TagFilter from '@/components/TagFilter'
 
 const POSTS_PER_PAGE = 5
 const BASE = 'https://businessideas.live'
 
 export const metadata: Metadata = {
-  title: 'Blog — Startup Guides & Market Insights for Indian Entrepreneurs',
+  title: 'Blogs — Startup Guides & Market Insights for Indian Entrepreneurs',
   description:
     'Guides, market insights, and entrepreneurship articles to help you evaluate and launch your next business idea in India.',
   alternates: {
@@ -54,9 +55,9 @@ export default async function BlogPage({ searchParams }: PageProps) {
   const filterParams = { category: sp.category ?? '', tags: activeTags }
 
   const [posts, count, allTags] = await Promise.all([
-    client.fetch<Post[]>(POSTS_PAGE_QUERY, { ...filterParams, from, to }, { next: { tags: ['posts'] } }),
-    client.fetch<number>(POSTS_COUNT_QUERY, filterParams, { next: { tags: ['posts'] } }),
-    client.fetch<string[]>(POST_TAGS_QUERY, {}, { next: { tags: ['posts'] } }),
+    client.fetch<Post[]>(AUTHORED_POSTS_PAGE_QUERY, { ...filterParams, from, to }, { next: { tags: ['posts'] } }),
+    client.fetch<number>(AUTHORED_POSTS_COUNT_QUERY, filterParams, { next: { tags: ['posts'] } }),
+    client.fetch<string[]>(AUTHORED_POST_TAGS_QUERY, {}, { next: { tags: ['posts'] } }),
   ])
 
   const totalPages = Math.ceil(count / POSTS_PER_PAGE)
@@ -86,7 +87,7 @@ export default async function BlogPage({ searchParams }: PageProps) {
   return (
     <div className="mx-auto max-w-7xl px-4 py-10">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-slate-900">Blog</h1>
+        <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100">Blogs</h1>
         <p className="mt-2 text-slate-500">
           {count} article{count !== 1 ? 's' : ''} found
           {hasFilters ? ' — filters applied' : ''}
@@ -141,21 +142,7 @@ export default async function BlogPage({ searchParams }: PageProps) {
                     <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
                   </svg>
                 </summary>
-                <div className="flex flex-wrap gap-1.5">
-                  {allTags.sort().map((tag) => (
-                    <Link
-                      key={tag}
-                      href={tagUrl(tag)}
-                      className={`badge text-xs transition-colors cursor-pointer ${
-                        sp.tag === tag
-                          ? 'bg-indigo-600 text-white'
-                          : 'bg-slate-100 text-slate-600 hover:bg-indigo-100 hover:text-indigo-700'
-                      }`}
-                    >
-                      {tag}
-                    </Link>
-                  ))}
-                </div>
+                <TagFilter allTags={allTags} activeTag={sp.tag} activeCategory={sp.category} />
               </details>
             )}
           </div>

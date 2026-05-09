@@ -334,6 +334,56 @@ export const POSTS_PAGE_QUERY = groq`
   }
 `
 
+/** Authored blog posts only (excludes policy-pulse tag) */
+export const AUTHORED_POSTS_PAGE_QUERY = groq`
+  *[
+    _type == "post"
+    && defined(slug.current)
+    && defined(published_at)
+    && !("policy-pulse" in coalesce(tags, []))
+    && ($category == "" || category == $category)
+    && (count($tags) == 0 || count(tags[@ in $tags]) > 0)
+  ] | order(published_at desc) [$from..$to] {
+    ${POST_CARD_FIELDS}
+  }
+`
+
+export const AUTHORED_POSTS_COUNT_QUERY = groq`
+  count(*[
+    _type == "post"
+    && defined(slug.current)
+    && defined(published_at)
+    && !("policy-pulse" in coalesce(tags, []))
+    && ($category == "" || category == $category)
+    && (count($tags) == 0 || count(tags[@ in $tags]) > 0)
+  ])
+`
+
+export const AUTHORED_POST_TAGS_QUERY = groq`
+  array::unique(*[_type == "post" && defined(tags) && !("policy-pulse" in coalesce(tags, []))].tags[])
+`
+
+/** Policy Pulse posts only */
+export const POLICY_PULSE_PAGE_QUERY = groq`
+  *[
+    _type == "post"
+    && defined(slug.current)
+    && defined(published_at)
+    && "policy-pulse" in coalesce(tags, [])
+  ] | order(published_at desc) [$from..$to] {
+    ${POST_CARD_FIELDS}
+  }
+`
+
+export const POLICY_PULSE_COUNT_QUERY = groq`
+  count(*[
+    _type == "post"
+    && defined(slug.current)
+    && defined(published_at)
+    && "policy-pulse" in coalesce(tags, [])
+  ])
+`
+
 export const RECENT_POSTS_QUERY = groq`
   *[_type == "post" && defined(published_at)]
   | order(published_at desc)[0...4] {

@@ -147,7 +147,7 @@ export default async function BlogPostPage({ params }: PageProps) {
           <span className="shrink-0 mx-1">/</span>
           <Link href="/blog" className="shrink-0 hover:text-indigo-600">Blog</Link>
           <span className="shrink-0 mx-1">/</span>
-          <span className="min-w-0 truncate text-slate-700">{post.title}</span>
+          <span className="min-w-0 truncate text-slate-700 dark:text-slate-300">{post.title}</span>
         </nav>
 
         {/* Hero: two-column title + cover image */}
@@ -157,13 +157,13 @@ export default async function BlogPostPage({ params }: PageProps) {
             {post.category && (
               <Link
                 href={`/blog?category=${encodeURIComponent(post.category)}`}
-                className="mb-3 inline-block rounded-md bg-teal-100 px-3 py-1 text-xs font-bold uppercase tracking-widest text-teal-700 hover:bg-teal-200 transition-colors"
+                className="mb-3 inline-block rounded-md bg-teal-100 dark:bg-teal-900/40 px-3 py-1 text-xs font-bold uppercase tracking-widest text-teal-700 dark:text-teal-300 hover:bg-teal-200 dark:hover:bg-teal-900/60 transition-colors"
               >
                 {post.category}
               </Link>
             )}
 
-            <h1 className="text-3xl font-extrabold leading-tight text-slate-900 sm:text-4xl">
+            <h1 className="text-3xl font-extrabold leading-tight text-slate-900 dark:text-slate-100 sm:text-4xl">
               {post.title}
             </h1>
 
@@ -197,7 +197,7 @@ export default async function BlogPostPage({ params }: PageProps) {
               <div className="flex h-8 w-8 items-center justify-center rounded-full bg-indigo-100 text-xs font-bold text-indigo-700 shrink-0">
                 {author.charAt(0).toUpperCase()}
               </div>
-              <span className="text-sm font-medium text-slate-700">{author}</span>
+              <span className="text-sm font-medium text-slate-700 dark:text-slate-300">{author}</span>
             </div>
 
             {/* Share buttons */}
@@ -303,22 +303,22 @@ export default async function BlogPostPage({ params }: PageProps) {
             {/* FAQs */}
             {post.faqs && post.faqs.length > 0 && (
               <section className="mt-12">
-                <h2 className="mb-6 text-2xl font-bold text-slate-900">Frequently Asked Questions</h2>
+                <h2 className="mb-6 text-2xl font-bold text-slate-900 dark:text-slate-100">Frequently Asked Questions</h2>
                 <div className="space-y-4">
                   {post.faqs.map((faq, i) => (
                     <details
                       key={i}
-                      className="group rounded-xl border border-slate-100 bg-slate-50 p-5 open:bg-white open:shadow-sm transition-all"
+                      className="group rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 p-5 open:bg-white dark:open:bg-slate-800 open:shadow-sm transition-all"
                     >
-                      <summary className="flex cursor-pointer items-center justify-between gap-4 font-semibold text-slate-800 list-none">
+                      <summary className="flex cursor-pointer items-center justify-between gap-4 font-semibold text-slate-800 dark:text-slate-100 list-none">
                         {faq.question}
-                        <span className="shrink-0 text-slate-400 group-open:rotate-180 transition-transform duration-200">
+                        <span className="shrink-0 text-slate-400 dark:text-slate-500 group-open:rotate-180 transition-transform duration-200">
                           <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                           </svg>
                         </span>
                       </summary>
-                      <p className="mt-3 text-slate-600 leading-relaxed">{faq.answer}</p>
+                      <p className="mt-3 text-slate-600 dark:text-slate-400 leading-relaxed">{faq.answer}</p>
                     </details>
                   ))}
                 </div>
@@ -351,8 +351,8 @@ export default async function BlogPostPage({ params }: PageProps) {
 
             {/* Related posts */}
             {relatedPosts.length > 0 && (
-              <section className="mt-16 border-t-2 border-slate-100 pt-10">
-                <h2 className="mb-8 text-2xl font-bold uppercase tracking-widest text-amber-700">
+              <section className="mt-16 border-t-2 border-slate-200 dark:border-slate-700 pt-10">
+                <h2 className="mb-8 text-2xl font-bold uppercase tracking-widest text-amber-700 dark:text-amber-400">
                   Related Blog
                 </h2>
                 <div className="grid gap-8 sm:grid-cols-3">
@@ -362,7 +362,7 @@ export default async function BlogPostPage({ params }: PageProps) {
                       : null
                     return (
                       <div key={related._id} className="flex flex-col">
-                        <div className="relative h-48 w-full overflow-hidden rounded-sm bg-slate-100">
+                        <div className="relative h-48 w-full overflow-hidden rounded-sm bg-slate-100 dark:bg-slate-800">
                           {relatedCover ? (
                             <Image
                               src={relatedCover}
@@ -371,7 +371,7 @@ export default async function BlogPostPage({ params }: PageProps) {
                               className="object-cover transition-transform duration-300 hover:scale-105"
                             />
                           ) : (
-                            <div className="flex h-full items-center justify-center text-slate-300">
+                            <div className="flex h-full items-center justify-center text-slate-300 dark:text-slate-600">
                               <svg className="h-12 w-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <rect x="3" y="3" width="18" height="18" rx="2" strokeWidth="1.5"/>
                                 <circle cx="8.5" cy="8.5" r="1.5" strokeWidth="1.5"/>
@@ -380,13 +380,13 @@ export default async function BlogPostPage({ params }: PageProps) {
                             </div>
                           )}
                         </div>
-                        <h3 className="mt-4 text-base font-semibold leading-snug text-slate-800 line-clamp-2">
+                        <h3 className="mt-4 text-base font-semibold leading-snug text-slate-800 dark:text-slate-100 line-clamp-2">
                           {related.title}
                         </h3>
                         <div className="mt-4">
                           <Link
                             href={`/blog/${related.slug}`}
-                            className="inline-block border border-slate-400 px-4 py-1.5 text-xs font-semibold uppercase tracking-widest text-slate-700 hover:border-amber-700 hover:text-amber-700 transition-colors"
+                            className="inline-block border border-slate-400 dark:border-slate-600 px-4 py-1.5 text-xs font-semibold uppercase tracking-widest text-slate-700 dark:text-slate-300 hover:border-amber-600 dark:hover:border-amber-500 hover:text-amber-700 dark:hover:text-amber-400 transition-colors"
                           >
                             Read More
                           </Link>
@@ -401,7 +401,7 @@ export default async function BlogPostPage({ params }: PageProps) {
             {/* Related Business Ideas */}
             {relatedIdeas.length > 0 && (
               <section className="mt-16 border-t-2 border-slate-100 pt-10">
-                <h2 className="mb-2 text-xl font-bold text-slate-900">Related Business Ideas</h2>
+                <h2 className="mb-2 text-xl font-bold text-slate-900 dark:text-slate-100">Related Business Ideas</h2>
                 <p className="mb-6 text-sm text-slate-500">Ideas you can start based on this article</p>
                 <div className="grid gap-5 sm:grid-cols-3">
                   {relatedIdeas.map(idea => <IdeaCard key={idea._id} idea={idea} />)}
