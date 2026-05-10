@@ -222,121 +222,105 @@ async function upsertBidResult(b) {
   }
 }
 
-/**
- * Submit the CPPP Bid Awards search form using Tesseract CAPTCHA solver.
- * Retries up to MAX_CAPTCHA_ATTEMPTS times with a fresh CAPTCHA each time.
- * Returns true if results loaded successfully.
- */
-async function submitBidAwardsSearch(page) {
-  for (let attempt = 1; attempt <= MAX_CAPTCHA_ATTEMPTS; attempt++) {
-    console.log(`  CAPTCHA attempt ${attempt}/${MAX_CAPTCHA_ATTEMPTS}...`)
+// CPPP ResultOfTenders returns max 100 rows per keyword search (no pagination).
+// We search multiple keywords to maximise coverage. The CAPTCHA must be solved
+// BEFORE touching any other field — typing in Keyword triggers a Tapestry AJAX
+// event that refreshes the server-side CAPTCHA token (but not the DOM image),
+// so filling keyword first makes subsequent CAPTCHA solves incorrect.
+// Solution: solve CAPTCHA first, fill captchaText, then set keyword via JS
+// (no DOM events) so the CAPTCHA session stays valid.
 
+const BID_KEYWORDS = [
+  'supply', 'work', 'service', 'civil', 'repair', 'electrical',
+  'equipment', 'vehicle', 'medical', 'computer', 'construction',
+  'maintenance', 'purchase', 'installation', 'contract',
+]
+
+async function searchBidAwards(page, keyword) {
+  await page.goto(`${BASE}?page=ResultOfTenders&service=page`, {
+    waitUntil: 'networkidle', timeout: 30000
+  })
+  await page.waitForTimeout(1000)
+
+  for (let attempt = 1; attempt <= MAX_CAPTCHA_ATTEMPTS; attempt++) {
     if (attempt > 1) {
-      // Reload a fresh CAPTCHA
-      const refreshBtn = await page.$('button[name="captcha"]')
-      if (refreshBtn) {
-        await refreshBtn.click()
-        await page.waitForTimeout(1200)
-      } else {
-        await page.reload({ waitUntil: 'networkidle' })
-        await page.waitForTimeout(1000)
-      }
+      await page.reload({ waitUntil: 'networkidle' })
+      await page.waitForTimeout(800)
     }
 
     const captchaEl = await page.$('#captchaImage')
-    if (!captchaEl) { console.log('  No CAPTCHA image — submitting directly'); return true }
+    if (!captchaEl) { console.log('  No CAPTCHA — submitting directly'); break }
 
     let solved = ''
-    try {
-      solved = await solveCaptchaFromElement(page, '#captchaImage')
-    } catch(e) {
-      console.log(`  CAPTCHA screenshot failed: ${e.message}`)
-      continue
-    }
+    try { solved = await solveCaptchaFromElement(page, '#captchaImage') }
+    catch(e) { console.log(`  Screenshot failed: ${e.message}`); continue }
 
-    // Reject if result is obviously wrong (CPPP CAPTCHA is exactly 6 chars)
     if (!solved || solved.length < 4 || solved.length > 10) {
-      console.log(`  Rejected low-confidence result "${solved}" (len ${solved.length})`)
+      console.log(`  Bad length "${solved}", retrying`)
       continue
     }
 
-    // Fill input and submit
+    // Fill captchaText FIRST (before any other field interaction)
     const captchaInput = await page.$('input[name="captchaText"]')
-    if (!captchaInput) { console.log('  No captchaText input found'); break }
+    if (!captchaInput) { console.log('  No captchaText input'); break }
     await captchaInput.fill(solved)
-    await page.waitForTimeout(300)
 
-    const submitBtn = await page.$('input[value="Search"]')
-    if (!submitBtn) { console.log('  No Search button found'); break }
+    // Set keyword via JS (no DOM events) so CAPTCHA session stays valid
+    await page.evaluate((kw) => {
+      const el = document.querySelector('input[name="Keyword"]')
+      if (el) el.value = kw
+    }, keyword)
+
+    const submitBtn = await page.$('input[name="Search"]')
+    if (!submitBtn) { console.log('  No Search button'); break }
     await submitBtn.click()
     await page.waitForLoadState('networkidle')
     await page.waitForTimeout(1500)
 
     const body = await page.evaluate(() => document.body.innerText.toLowerCase())
-    if (body.includes('invalid captcha') || body.includes('wrong captcha') ||
-        body.includes('captcha mismatch') || body.includes('enter captcha') ||
-        body.includes('incorrect captcha')) {
+    const hasError = body.includes('invalid captcha') || body.includes('wrong captcha') ||
+        body.includes('captcha mismatch') || body.includes('incorrect captcha')
+
+    if (hasError) {
       console.log(`  CAPTCHA rejected ("${solved}"), retrying...`)
-      await page.goto(`${BASE}?page=ResultOfTenders&service=page`, { waitUntil: 'networkidle', timeout: 20000 })
-      await page.waitForTimeout(800)
       continue
     }
 
-    console.log(`  CAPTCHA accepted ("${solved}")`)
-    return true
+    // Extract rows (CPPP shows max 100 per search, no pagination)
+    const rows = await page.evaluate(() =>
+      Array.from(document.querySelectorAll('table tr')).map(row => {
+        const cells = Array.from(row.querySelectorAll('td'))
+        return { texts: cells.map(c => c.innerText?.trim() ?? '') }
+      }).filter(r => /^\d+\.$/.test(r.texts[0] || ''))
+    )
+    console.log(`  [${keyword}] CAPTCHA accepted ("${solved}") → ${rows.length} rows`)
+    return rows
   }
 
-  console.log(`  Gave up after ${MAX_CAPTCHA_ATTEMPTS} attempts`)
-  return false
+  console.log(`  [${keyword}] Gave up after ${MAX_CAPTCHA_ATTEMPTS} attempts`)
+  return []
 }
 
 // ── Scrape CPPP Bid Awards (AOC = Award of Contract, L1 winner data) ──────────
 async function scrapeCPPPBidAwards(page) {
   console.log('\nNavigating to CPPP Bid Awards...')
-  await page.goto(`${BASE}?page=ResultOfTenders&service=page`, {
-    waitUntil: 'networkidle', timeout: 30000
-  })
-  await page.waitForTimeout(1500)
 
-  const accepted = await submitBidAwardsSearch(page)
-  if (!accepted) return []
-
+  const seen = new Set()
   const allBids = []
-  let pageNum = 1
 
-  while (pageNum <= MAX_PAGES) {
-    console.log(`  Bid awards page ${pageNum}...`)
-
-    try {
-      await page.waitForSelector('table tr td', { timeout: 10000 })
-    } catch { console.log('  No table, stopping'); break }
-
-    const rows = await page.evaluate(() => {
-      return Array.from(document.querySelectorAll('table tr')).map(row => {
-        const cells = Array.from(row.querySelectorAll('td'))
-        const link = row.querySelector('a')?.href ?? ''
-        return { texts: cells.map(c => c.innerText?.trim() ?? ''), link }
-      }).filter(r => {
-        // Rows: S.No | AOC Date | e-Published Date | Title+Ref | Org Chain | AOC
-        // Keep only numbered rows (serial number like "1.")
-        return /^\d+\.$/.test(r.texts[0] || '')
-      })
-    })
-
-    console.log(`    Found ${rows.length} bid award rows`)
-
-    for (const { texts, link } of rows) {
+  for (const keyword of BID_KEYWORDS) {
+    const rows = await searchBidAwards(page, keyword)
+    for (const { texts } of rows) {
       if (texts.length < 4) continue
-      // texts[0] = serial, texts[1] = AOC Date, texts[2] = Published Date,
-      // texts[3] = Title+Ref, texts[4] = Org Chain, texts[5] = AOC (link)
       const { title, bidNo } = parseTitleCell(texts[3])
-      if (!bidNo) continue
+      if (!bidNo || seen.has(bidNo)) continue
+      seen.add(bidNo)
 
       const orgParts = (texts[4] || '').split(/\|\|/)
       const organization = orgParts.filter(Boolean).join(' > ')
       const ministry = orgParts.find(p => /ministry/i.test(p)) || guessMinistry(organization)
 
-      const b = {
+      allBids.push({
         id: `cppp-bid-${bidNo}`.replace(/[^a-zA-Z0-9\-]/g, '-').slice(0, 64),
         source: 'cppp',
         bid_no: bidNo,
@@ -345,23 +329,14 @@ async function scrapeCPPPBidAwards(page) {
         ministry,
         organization,
         state: '',
-        l1_price: null,       // in AOC PDF — not in listing view
-        l1_seller_name: '',   // in AOC PDF — not in listing view
+        l1_price: null,
+        l1_seller_name: '',
         estimated_value: null,
         total_bidders: null,
-        award_date: parseDate(texts[1]),  // AOC Date
+        award_date: parseDate(texts[1]),
         savings_percent: null,
-      }
-      allBids.push(b)
+      })
     }
-
-    // Pagination
-    const nextBtn = await page.$('a:text-matches("Next|>"), input[value*="Next"]')
-    if (!nextBtn) break
-    await nextBtn.click()
-    await page.waitForLoadState('networkidle')
-    await page.waitForTimeout(1000)
-    pageNum++
   }
 
   return allBids
