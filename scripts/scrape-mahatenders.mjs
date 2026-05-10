@@ -1,5 +1,9 @@
 /**
  * Scrapes active tenders from MahaTenders (mahatenders.gov.in)
+ *
+ * Uses the same GePNIC/Tapestry architecture as CPPP — same date tab approach,
+ * no CAPTCHA for the active tenders listing.
+ *
  * Run: DATABASE_URL=... node scripts/scrape-mahatenders.mjs
  */
 
@@ -9,99 +13,119 @@ import pg from 'pg'
 const { Pool } = pg
 const pool = new Pool({ connectionString: process.env.DATABASE_URL })
 
-const BASE = 'https://mahatenders.gov.in'
-const MAX_PAGES = 20
-
-function parseINR(str) {
-  if (!str) return null
-  const clean = String(str).replace(/[₹,\s]/g, '').replace(/lakhs?/i, '00000').replace(/crores?/i, '0000000')
-  const n = parseFloat(clean)
-  return isNaN(n) || n === 0 ? null : n
-}
+const BASE = 'https://mahatenders.gov.in/nicgep/app'
+const MAX_PAGES = 30
 
 function parseDate(str) {
   if (!str) return null
-  // Handle DD-MM-YYYY or DD/MM/YYYY
-  const m = str.match(/(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})/)
-  if (m) {
-    try { return new Date(`${m[3]}-${m[2].padStart(2,'0')}-${m[1].padStart(2,'0')}`).toISOString() } catch { return null }
+  const m1 = str.match(/(\d{1,2})-([A-Za-z]{3})-(\d{4})/)
+  if (m1) {
+    const months = { Jan:1,Feb:2,Mar:3,Apr:4,May:5,Jun:6,Jul:7,Aug:8,Sep:9,Oct:10,Nov:11,Dec:12 }
+    const month = months[m1[2]]
+    if (month) {
+      try { return new Date(`${m1[3]}-${String(month).padStart(2,'0')}-${m1[1].padStart(2,'0')}`).toISOString() } catch {}
+    }
+  }
+  const m2 = str.match(/(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})/)
+  if (m2) {
+    try { return new Date(`${m2[3]}-${m2[2].padStart(2,'0')}-${m2[1].padStart(2,'0')}`).toISOString() } catch {}
   }
   try { return new Date(str).toISOString() } catch { return null }
+}
+
+function parseTitleCell(cell) {
+  if (!cell) return { title: '', bidNo: '', refNo: '' }
+  const tidMatch = cell.match(/\[(\d{4}_[A-Z][A-Za-z0-9_]+)\]\s*$/)
+  const bidNo = tidMatch ? tidMatch[1] : ''
+  const brackets = []
+  const bRe = /\[([^\]]+)\]/g
+  let m
+  while ((m = bRe.exec(cell)) !== null) {
+    if (m[1] !== bidNo) brackets.push(m[1].trim())
+  }
+  const firstBracket = brackets[0] || ''
+  const isDescriptive = firstBracket.length > 10 && /\s/.test(firstBracket) && !/^[A-Z0-9\/\-]+$/.test(firstBracket)
+  const title = isDescriptive ? firstBracket : (brackets[brackets.length - 1] || bidNo)
+  const refNo = isDescriptive ? (brackets[1] || brackets[0] || '') : (brackets[0] || '')
+  return { title, bidNo, refNo }
 }
 
 async function upsertTender(t) {
   try {
     const r = await pool.query(`
       INSERT INTO tenders(id,source,bid_no,title,organization,ministry,department,category,state,
-        tender_value,bid_deadline,published_at,status,document_url,item_description,quantity,scraped_at)
-      VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,NOW())
+        tender_value,bid_deadline,published_at,status,document_url,item_description,scraped_at)
+      VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,NOW())
       ON CONFLICT(bid_no,source) DO UPDATE SET
         title=EXCLUDED.title, organization=EXCLUDED.organization,
-        category=EXCLUDED.category, tender_value=EXCLUDED.tender_value,
         bid_deadline=EXCLUDED.bid_deadline, status=EXCLUDED.status,
         item_description=EXCLUDED.item_description, scraped_at=NOW()
     `, [t.id,t.source,t.bid_no,t.title,t.organization,t.ministry,t.department,t.category,
-        t.state,t.tender_value,t.bid_deadline,t.published_at,t.status,t.document_url,
-        t.item_description,t.quantity])
+        t.state,t.tender_value,t.bid_deadline,t.published_at,t.status,t.document_url,t.item_description])
     return r.rowCount > 0
   } catch { return false }
 }
 
-async function scrapeMahaTenders(page) {
-  console.log('Navigating to MahaTenders...')
-  await page.goto(`${BASE}/nicgep/app?page=FrontEndLatestActiveTenders&service=page`, {
-    waitUntil: 'networkidle', timeout: 30000
+async function extractRows(page) {
+  return page.evaluate(() => {
+    return Array.from(document.querySelectorAll('table tr')).filter(row => {
+      const cells = row.querySelectorAll('td')
+      return cells.length >= 5 && /^\d+\.$/.test(cells[0]?.innerText?.trim())
+    }).map(row => {
+      const cells = Array.from(row.querySelectorAll('td'))
+      return {
+        published: cells[1]?.innerText?.trim() ?? '',
+        closing:   cells[2]?.innerText?.trim() ?? '',
+        titleCell: cells[4]?.innerText?.trim() ?? '',
+        orgChain:  cells[5]?.innerText?.trim() ?? '',
+        link:      row.querySelector('a')?.href ?? '',
+      }
+    })
   })
+}
 
-  const allTenders = []
+async function scrapeTab(page, submitName, label) {
+  console.log(`\n  Tab: ${label}`)
+  await page.evaluate((name) => tapestry.form.submit('ListTendersbyDate', name), submitName)
+  await page.waitForLoadState('networkidle')
+  await page.waitForTimeout(1200)
+
+  const tenders = []
   let pageNum = 1
 
   while (pageNum <= MAX_PAGES) {
-    console.log(`  MahaTenders page ${pageNum}...`)
+    const rows = await extractRows(page)
+    console.log(`    Page ${pageNum}: ${rows.length} rows`)
+    if (!rows.length) break
 
-    try {
-      await page.waitForSelector('table tr td, .tender-list, [class*="tender"]', { timeout: 10000 })
-    } catch { break }
+    for (const row of rows) {
+      const { title, bidNo, refNo } = parseTitleCell(row.titleCell)
+      if (!bidNo && !refNo) continue
 
-    await page.waitForTimeout(800)
+      const id = `maha-${bidNo || refNo}`.replace(/[^a-zA-Z0-9\-]/g, '-').slice(0, 64)
+      const orgParts = row.orgChain.split(/\|\|/)
+      const organization = orgParts.filter(Boolean).join(' > ')
 
-    const tenders = await page.evaluate(() => {
-      const rows = Array.from(document.querySelectorAll('table tr')).filter(r => r.querySelectorAll('td').length >= 3)
-      return rows.map(row => {
-        const cells = Array.from(row.querySelectorAll('td'))
-        const link = row.querySelector('a')?.href ?? ''
-        return { texts: cells.map(c => c.innerText?.trim() ?? ''), link }
-      }).filter(r => r.texts.some(t => t.length > 5))
-    })
-
-    for (const { texts, link } of tenders) {
-      if (texts.length < 3) continue
-      // MahaTenders columns: Sr No | Ref No | Title | Org | Closing Date | Value
-      const bidNo = texts[1] || texts[0] || ''
-      if (!bidNo || bidNo === 'Sr No' || bidNo === 'S.No') continue
-
-      const t = {
-        id: `maha-${Buffer.from(bidNo).toString('base64').slice(0, 16)}-${Date.now()}`,
+      tenders.push({
+        id,
         source: 'mahatenders',
-        bid_no: bidNo,
-        title: texts[2] || texts[1] || 'Maharashtra Tender',
-        organization: texts[3] || '',
+        bid_no: bidNo || refNo,
+        title: title || refNo || bidNo,
+        organization,
         ministry: 'Government of Maharashtra',
-        department: texts[3] || '',
+        department: orgParts[0] || '',
         category: '',
         state: 'Maharashtra',
-        tender_value: parseINR(texts[5] || texts[4] || ''),
-        bid_deadline: parseDate(texts[4] || texts[5] || ''),
-        published_at: new Date().toISOString(),
+        tender_value: null,
+        bid_deadline: parseDate(row.closing),
+        published_at: parseDate(row.published) || new Date().toISOString(),
         status: 'active',
-        document_url: link || `${BASE}/nicgep/app`,
-        item_description: texts.slice(0, 4).join(' | '),
-        quantity: '',
-      }
-      if (t.bid_no && t.bid_no.length > 3) allTenders.push(t)
+        document_url: row.link || BASE,
+        item_description: row.titleCell,
+      })
     }
 
-    const nextBtn = await page.$('a:has-text("Next"), a[title="Next Page"], input[value="Next"]')
+    const nextBtn = await page.$('a:text-matches("Next|>|»"), input[value*="Next"]')
     if (!nextBtn) break
     await nextBtn.click()
     await page.waitForLoadState('networkidle')
@@ -109,7 +133,7 @@ async function scrapeMahaTenders(page) {
     pageNum++
   }
 
-  return allTenders
+  return tenders
 }
 
 // ── Main ─────────────────────────────────────────────────────────────────────
@@ -128,13 +152,37 @@ const ctx = await browser.newContext({
 const page = await ctx.newPage()
 
 try {
-  const tenders = await scrapeMahaTenders(page)
-  found = tenders.length
-  console.log(`\nFound ${found} MahaTenders. Upserting...`)
-  for (const t of tenders) {
-    const ok = await upsertTender(t)
-    if (ok) upserted++
-  }
+  console.log('Navigating to MahaTenders by Closing Date...')
+  await page.goto(`${BASE}?page=FrontEndListTendersbyDate&service=page`, { waitUntil: 'networkidle', timeout: 30000 })
+  await page.waitForTimeout(1500)
+
+  const allTenders = []
+
+  const todayTenders = await scrapeTab(page, 'tabByClosingToday', 'Closing Today')
+  allTenders.push(...todayTenders)
+
+  await page.goto(`${BASE}?page=FrontEndListTendersbyDate&service=page`, { waitUntil: 'networkidle', timeout: 20000 })
+  await page.waitForTimeout(1000)
+  const week7Tenders = await scrapeTab(page, 'LinkSubmit_0', 'Closing within 7 days')
+  allTenders.push(...week7Tenders)
+
+  await page.goto(`${BASE}?page=FrontEndListTendersbyDate&service=page`, { waitUntil: 'networkidle', timeout: 20000 })
+  await page.waitForTimeout(1000)
+  const week14Tenders = await scrapeTab(page, 'LinkSubmit_1', 'Closing within 14 days')
+  allTenders.push(...week14Tenders)
+
+  // Deduplicate
+  const seen = new Set()
+  const unique = allTenders.filter(t => {
+    if (seen.has(t.bid_no)) return false
+    seen.add(t.bid_no)
+    return true
+  })
+
+  found = unique.length
+  console.log(`\nFound ${found} unique MahaTenders. Upserting...`)
+  for (const t of unique) { if (await upsertTender(t)) upserted++ }
+
   console.log(`✅ MahaTenders done: ${upserted}/${found}`)
   await pool.query(
     `UPDATE scrape_log SET finished_at=NOW(),tenders_found=$1,tenders_upserted=$2,status='ok' WHERE id=$3`,
@@ -142,10 +190,7 @@ try {
   )
 } catch(e) {
   console.error('❌ Error:', e.message)
-  await pool.query(
-    `UPDATE scrape_log SET finished_at=NOW(),status='error',error=$1 WHERE id=$2`,
-    [e.message, logId]
-  )
+  await pool.query(`UPDATE scrape_log SET finished_at=NOW(),status='error',error=$1 WHERE id=$2`, [e.message, logId])
 } finally {
   await browser.close()
   await pool.end()

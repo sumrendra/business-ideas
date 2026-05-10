@@ -1,8 +1,18 @@
 /**
- * Scrapes live bids + bid results from GeM (bidplus.gem.gov.in)
- * Run: DATABASE_URL=... node scripts/scrape-gem.mjs
+ * Scrapes active bids + bid results from GeM (bidplus.gem.gov.in)
  *
- * When GeM Open API key arrives, update fetchGeMAPI() instead of Playwright.
+ * GeM's WAF blocks direct HTTP requests but the `all-bids-data` JSON API works
+ * when called from within a browser session (has real cookies + CSRF token).
+ * Strategy: load the page once, capture the CSRF token, then call the API
+ * from `page.evaluate()` for all pages — no DOM scraping needed.
+ *
+ * API returns 10 records/page, paginated with `page` param (1-indexed).
+ * 37k+ ongoing bids, 5.5M+ bid results available.
+ *
+ * Bid result L1 data (seller name/price) requires login — not scraped here.
+ * We store bid result metadata (bid_no, category, ministry, closed_date).
+ *
+ * Run: DATABASE_URL=... node scripts/scrape-gem.mjs
  */
 
 import { chromium } from 'playwright'
@@ -11,35 +21,32 @@ import pg from 'pg'
 const { Pool } = pg
 const pool = new Pool({ connectionString: process.env.DATABASE_URL })
 const BASE = 'https://bidplus.gem.gov.in'
-const MAX_PAGES = 50   // ~1250 bids per run (25 per page)
-
-// ── If GeM Open API key is set, use it instead of Playwright ─────────────────
-async function fetchGeMAPI(endpoint, params = {}) {
-  const key = process.env.GEM_API_KEY
-  if (!key) return null
-  const url = new URL(`https://openapi.gem.gov.in/v1/${endpoint}`)
-  for (const [k, v] of Object.entries(params)) url.searchParams.set(k, v)
-  const res = await fetch(url, { headers: { 'api-key': key, 'Accept': 'application/json' } })
-  if (!res.ok) return null
-  return res.json()
-}
-
-function parseINR(str) {
-  if (!str) return null
-  const clean = String(str).replace(/[₹,\s]/g, '')
-  const n = parseFloat(clean)
-  return isNaN(n) || n === 0 ? null : n
-}
+const MAX_PAGES = 500   // 500 pages × 10 = 5,000 bids per run
 
 function parseDate(str) {
   if (!str) return null
-  // Handle DD-MM-YYYY (GeM format)
-  const m = str.match(/(\d{1,2})-(\d{1,2})-(\d{4})/)
-  if (m) {
-    try { return new Date(`${m[3]}-${m[2].padStart(2,'0')}-${m[1].padStart(2,'0')}`).toISOString() }
-    catch { return null }
-  }
   try { return new Date(str).toISOString() } catch { return null }
+}
+
+function guessMinistry(min) {
+  if (!min) return 'Central Government'
+  const m = min.toLowerCase()
+  if (m.includes('pmo') || m.includes('prime minister')) return 'Prime Minister\'s Office'
+  if (m.includes('defence') || m.includes('defense')) return 'Ministry of Defence'
+  if (m.includes('health') || m.includes('medical')) return 'Ministry of Health & Family Welfare'
+  if (m.includes('railway')) return 'Ministry of Railways'
+  if (m.includes('education') || m.includes('school')) return 'Ministry of Education'
+  if (m.includes('road') || m.includes('highway')) return 'Ministry of Road Transport'
+  if (m.includes('power') || m.includes('energy') || m.includes('electric')) return 'Ministry of Power'
+  if (m.includes('water') || m.includes('jal')) return 'Ministry of Jal Shakti'
+  if (m.includes('home') || m.includes('police')) return 'Ministry of Home Affairs'
+  if (m.includes('finance') || m.includes('tax')) return 'Ministry of Finance'
+  if (m.includes('urban') || m.includes('municipal')) return 'Ministry of Housing & Urban Affairs'
+  if (m.includes('atomic') || m.includes('nuclear')) return 'Department of Atomic Energy'
+  if (m.includes('space') || m.includes('isro')) return 'Department of Space'
+  if (m.includes('heavy') || m.includes('industry')) return 'Ministry of Heavy Industries'
+  if (m.includes('commerce') || m.includes('gem')) return 'Ministry of Commerce & Industry'
+  return min
 }
 
 async function upsertTender(t) {
@@ -51,7 +58,6 @@ async function upsertTender(t) {
       ON CONFLICT(bid_no,source) DO UPDATE SET
         title=EXCLUDED.title, organization=EXCLUDED.organization,
         ministry=EXCLUDED.ministry, category=EXCLUDED.category,
-        state=EXCLUDED.state, tender_value=EXCLUDED.tender_value,
         bid_deadline=EXCLUDED.bid_deadline, status=EXCLUDED.status,
         item_description=EXCLUDED.item_description, quantity=EXCLUDED.quantity,
         scraped_at=NOW()
@@ -66,194 +72,166 @@ async function upsertBid(b) {
   try {
     const r = await pool.query(`
       INSERT INTO bid_results(id,source,bid_no,category,item_description,ministry,organization,
-        state,l1_price,l1_seller_name,l1_seller_gstin,estimated_value,total_bidders,
-        bid_closing_date,savings_percent,scraped_at)
-      VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,NOW())
+        state,l1_price,l1_seller_name,estimated_value,total_bidders,award_date,scraped_at)
+      VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,NOW())
       ON CONFLICT(bid_no,source) DO UPDATE SET
-        l1_price=EXCLUDED.l1_price, l1_seller_name=EXCLUDED.l1_seller_name,
-        l1_seller_gstin=EXCLUDED.l1_seller_gstin, total_bidders=EXCLUDED.total_bidders,
-        savings_percent=EXCLUDED.savings_percent, scraped_at=NOW()
+        category=EXCLUDED.category, ministry=EXCLUDED.ministry,
+        award_date=EXCLUDED.award_date, scraped_at=NOW()
     `, [b.id,b.source,b.bid_no,b.category,b.item_description,b.ministry,b.organization,
-        b.state,b.l1_price,b.l1_seller_name,b.l1_seller_gstin,b.estimated_value,
-        b.total_bidders,b.bid_closing_date,b.savings_percent])
+        b.state,null,null,null,null,b.award_date])
     return r.rowCount > 0
   } catch { return false }
 }
 
-// ── Scrape GeM active bids using Playwright ───────────────────────────────────
-async function scrapeGeMBids(page) {
-  console.log('Navigating to GeM all-bids...')
-  await page.goto(`${BASE}/all-bids`, { waitUntil: 'networkidle', timeout: 30000 })
-
-  const allTenders = []
-  let pageNum = 1
-
-  while (pageNum <= MAX_PAGES) {
-    console.log(`  GeM bids page ${pageNum}...`)
-
-    // Wait for bid cards to load
-    try {
-      await page.waitForSelector('.bid-box, .card-body, .bidcard, [class*="bid"], [class*="card"]', { timeout: 15000 })
-    } catch {
-      console.log('  No bid cards found, trying table...')
-      try { await page.waitForSelector('table tbody tr', { timeout: 8000 }) }
-      catch { console.log('  No data on this page, stopping'); break }
-    }
-
-    // Give JS a moment to fully render
-    await page.waitForTimeout(1000)
-
-    const bids = await page.evaluate(() => {
-      // GeM bidplus uses card-based layout
-      const cards = Array.from(document.querySelectorAll(
-        '.bid-box, .bidcard, .card, [class*="bid-card"], [class*="bidcard"]'
-      ))
-
-      return cards.map(card => {
-        const rawText = card.innerText || ''
-        const lines = rawText.split('\n').map(l => l.trim()).filter(Boolean)
-        const link = card.querySelector('a')?.href || ''
-
-        // Extract bid number
-        const bidNoMatch = rawText.match(/GEM[/_\-][A-Z0-9/_\-]+/i)
-        const bidNo = bidNoMatch?.[0]?.trim() ?? ''
-
-        return { bidNo, lines, link }
-      }).filter(b => b.bidNo)
+// ── Call all-bids-data API from within the browser page context ───────────────
+// This avoids WAF blocking — the browser session already has valid cookies+CSRF.
+async function callGeMAPI(page, csrf, statusType, pageNum) {
+  return page.evaluate(async ({ csrf, statusType, pageNum }) => {
+    const body = new URLSearchParams({
+      payload: JSON.stringify({
+        page: pageNum,
+        param: { searchBid: "", searchType: "fullText" },
+        filter: {
+          bidStatusType: statusType,
+          byType: "all",
+          highBidValue: "",
+          byEndDate: { from: "", to: "" },
+          sort: "Bid-End-Date-Oldest",
+        },
+      }),
+      csrf_bd_gem_nk: csrf,
     })
+    const r = await fetch('/all-bids-data', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+        'X-Requested-With': 'XMLHttpRequest',
+      },
+      body: body.toString(),
+    })
+    const data = await r.json()
+    return {
+      total: data?.response?.response?.numFound || 0,
+      docs: data?.response?.response?.docs || [],
+    }
+  }, { csrf, statusType, pageNum })
+}
 
-    for (const bid of bids) {
-      const lines = bid.lines || []
-      const rawText = lines.join('\n')
+// ── Scrape GeM active bids ────────────────────────────────────────────────────
+async function scrapeGeMBids(page, csrf) {
+  console.log('Scraping GeM active bids via API...')
+  const allTenders = []
+  const seen = new Set()
 
-      // Title — from "Items: ..." line
-      const itemMatch = rawText.match(/Items?:\s*(.+)/i)
-      const title = itemMatch?.[1]?.trim().replace(/\.{2,}$/, '').trim() || bid.bidNo
+  for (let pg = 1; pg <= MAX_PAGES; pg++) {
+    const { total, docs } = await callGeMAPI(page, csrf, 'ongoing_bids', pg)
+    if (pg === 1) console.log(`  Total ongoing bids: ${total}`)
+    if (!docs.length) break
 
-      // Organization — lines after "Department Name And Address:"
-      const deptIdx = lines.findIndex(l => /Department Name And Address/i.test(l))
-      let org = '', ministry = ''
-      if (deptIdx >= 0) {
-        const orgLines = lines.slice(deptIdx + 1, deptIdx + 4)
-          .filter(l => l && !/^(Department Name|Start Date|End Date|Quantity|Items?)[:\s]/i.test(l))
-        org = orgLines.slice(0, 2).join(', ')
-        ministry = orgLines.find(l => /Ministry/i.test(l)) || orgLines[0] || ''
-      }
+    for (const d of docs) {
+      const bidNo = d.b_bid_number?.[0] || ''
+      if (!bidNo || seen.has(bidNo)) continue
+      seen.add(bidNo)
 
-      // Dates in DD-MM-YYYY format
-      const endMatch   = rawText.match(/End Date:\s*(\d{1,2}-\d{1,2}-\d{4})/i)
-      const startMatch = rawText.match(/Start Date:\s*(\d{1,2}-\d{1,2}-\d{4})/i)
-      const qtyMatch   = rawText.match(/Quantity:\s*(\d+)/i)
+      const category  = d.b_category_name?.[0] || d.bd_category_name?.[0] || ''
+      const minName   = d.ba_official_details_minName?.[0] || ''
+      const deptName  = d.ba_official_details_deptName?.[0] || ''
+      const ministry  = guessMinistry(minName || deptName)
+      const org       = [deptName, minName].filter(Boolean).join(' — ') || ministry
+      const isHighVal = d.is_high_value?.[0] || false
 
-      const t = {
-        id: `gem-${bid.bidNo}`,
+      allTenders.push({
+        id: `gem-${bidNo}`.replace(/[^a-zA-Z0-9\-]/g, '-').slice(0, 64),
         source: 'gem',
-        bid_no: bid.bidNo,
-        title,
+        bid_no: bidNo,
+        title: category,
         organization: org,
         ministry,
-        department: org,
-        category: '',
+        department: deptName,
+        category,
         state: '',
-        tender_value: null,
-        bid_deadline: parseDate(endMatch?.[1]),
-        published_at: parseDate(startMatch?.[1]) || new Date().toISOString(),
+        tender_value: isHighVal ? 10000000 : null,  // flag only — real value requires auth
+        bid_deadline: parseDate(d.final_end_date_sort?.[0]),
+        published_at: parseDate(d.final_start_date_sort?.[0]) || new Date().toISOString(),
         status: 'active',
-        document_url: bid.link || `${BASE}/all-bids`,
-        item_description: title,
-        quantity: qtyMatch?.[1] || '',
-      }
-      allTenders.push(t)
+        document_url: `${BASE}/showbidDocument/${d.b_id?.[0] || ''}`,
+        item_description: category,
+        quantity: String(d.b_total_quantity?.[0] || ''),
+      })
     }
 
-    // Try to go to next page
-    const nextBtn = await page.$('a[aria-label="Next"], .pagination .next, a:has-text("Next"), button:has-text("Next")')
-    if (!nextBtn) break
-    await nextBtn.click()
-    await page.waitForLoadState('networkidle')
-    await page.waitForTimeout(1500)
-    pageNum++
+    console.log(`  Page ${pg}: ${docs.length} bids (total collected: ${allTenders.length})`)
+    if (allTenders.length >= total) break
+    await page.waitForTimeout(300)  // light rate limit
   }
 
   return allTenders
 }
 
-// ── Scrape GeM bid results ────────────────────────────────────────────────────
-async function scrapeGeMBidResults(page) {
-  console.log('\nNavigating to GeM bid results...')
-  await page.goto(`${BASE}/bidresultlists/?lang=english`, { waitUntil: 'networkidle', timeout: 30000 })
-
+// ── Scrape GeM bid results (metadata only — L1 data requires auth) ────────────
+async function scrapeGeMBidResults(page, csrf) {
+  console.log('\nScraping GeM bid results via API...')
   const allBids = []
-  let pageNum = 1
+  const seen = new Set()
 
-  while (pageNum <= MAX_PAGES) {
-    console.log(`  GeM bid results page ${pageNum}...`)
-
-    try {
-      await page.waitForSelector('table tbody tr, .result-card, [class*="result"]', { timeout: 12000 })
-    } catch { break }
-
-    await page.waitForTimeout(1000)
-
-    const results = await page.evaluate(() => {
-      // Try table rows first
-      const rows = Array.from(document.querySelectorAll('table tbody tr'))
-      if (rows.length > 0) {
-        return rows.map(row => {
-          const cells = Array.from(row.querySelectorAll('td'))
-          const link = row.querySelector('a')?.href ?? ''
-          return { cells: cells.map(c => c.innerText?.trim() ?? ''), link, type: 'table' }
-        })
-      }
-      // Fallback: cards
-      return Array.from(document.querySelectorAll('[class*="result"], [class*="bid-result"]')).map(card => ({
-        cells: [card.innerText],
-        link: card.querySelector('a')?.href ?? '',
-        type: 'card',
-      }))
+  // Sort newest first so we get recent results; stop after MAX_PAGES
+  const result = await page.evaluate(async ({ csrf }) => {
+    const body = new URLSearchParams({
+      payload: JSON.stringify({
+        page: 1,
+        param: { searchBid: "", searchType: "fullText" },
+        filter: {
+          bidStatusType: "bid_result",
+          byType: "all",
+          highBidValue: "",
+          byEndDate: { from: "", to: "" },
+          sort: "Bid-End-Date-Newest",
+        },
+      }),
+      csrf_bd_gem_nk: csrf,
     })
+    const r = await fetch('/all-bids-data', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8', 'X-Requested-With': 'XMLHttpRequest' },
+      body: body.toString(),
+    })
+    const data = await r.json()
+    return { total: data?.response?.response?.numFound || 0, docs: data?.response?.response?.docs || [] }
+  }, { csrf })
 
-    for (const r of results) {
-      if (r.cells.length < 3) continue
-      const cells = r.cells
+  console.log(`  Total bid results available: ${result.total}`)
 
-      // GeM bid result table columns (typical):
-      // Bid No | Item | L1 Seller | L1 Price | No. of Bidders | Est. Value | Closing Date
-      const bidNoMatch = (cells[0] || '').match(/GEM[/_\-][A-Z0-9/_\-]+/i)
-      const bidNo = bidNoMatch?.[0] || cells[0] || ''
+  // Collect from pages 1..MAX_PAGES (newest first)
+  for (let pg = 1; pg <= MAX_PAGES; pg++) {
+    const { docs } = await callGeMAPI(page, csrf, 'bid_result', pg)
+    if (!docs.length) break
 
-      const bid = {
-        id: `gem-result-${bidNo || Date.now()}`,
+    for (const d of docs) {
+      const bidNo = d.b_bid_number?.[0] || d.b_bid_number_parent?.[0] || ''
+      if (!bidNo || seen.has(bidNo)) continue
+      seen.add(bidNo)
+
+      const category = d.b_category_name?.[0] || d.bd_category_name?.[0] || ''
+      const minName  = d.ba_official_details_minName?.[0] || ''
+      const deptName = d.ba_official_details_deptName?.[0] || ''
+      const ministry = guessMinistry(minName || deptName)
+
+      allBids.push({
+        id: `gem-result-${bidNo}`.replace(/[^a-zA-Z0-9\-]/g, '-').slice(0, 64),
         source: 'gem',
         bid_no: bidNo,
-        category: cells[1] || '',
-        item_description: cells[1] || cells[2] || '',
-        ministry: '',
-        organization: '',
+        category,
+        item_description: category,
+        ministry,
+        organization: [deptName, minName].filter(Boolean).join(' — ') || ministry,
         state: '',
-        l1_price: parseINR(cells[3] || cells[4] || ''),
-        l1_seller_name: cells[2] || cells[3] || '',
-        l1_seller_gstin: '',
-        estimated_value: parseINR(cells[5] || ''),
-        total_bidders: parseInt(cells[4] || cells[5] || '0') || null,
-        bid_closing_date: parseDate(cells[6] || cells[7] || ''),
-        savings_percent: null,
-      }
-
-      // Calculate savings
-      if (bid.estimated_value && bid.l1_price && bid.estimated_value > 0) {
-        bid.savings_percent = Math.round(((bid.estimated_value - bid.l1_price) / bid.estimated_value) * 100 * 10) / 10
-      }
-
-      if (bid.bid_no || bid.l1_seller_name) allBids.push(bid)
+        // L1 data not in public index — requires login
+        award_date: parseDate(d.final_end_date_sort?.[0]),
+      })
     }
 
-    const nextBtn = await page.$('a[aria-label="Next"], .pagination .next, a:has-text("Next")')
-    if (!nextBtn) break
-    await nextBtn.click()
-    await page.waitForLoadState('networkidle')
-    await page.waitForTimeout(1500)
-    pageNum++
+    console.log(`  Page ${pg}: ${docs.length} results (total collected: ${allBids.length})`)
+    if (pg % 50 === 0) await page.waitForTimeout(500)
   }
 
   return allBids
@@ -266,47 +244,64 @@ let found = 0, upserted = 0, bidsFound = 0, bidsUpserted = 0
 
 const browser = await chromium.launch({
   headless: true,
-  args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage'],
+  args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage', '--disable-blink-features=AutomationControlled'],
 })
 const ctx = await browser.newContext({
   userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
   viewport: { width: 1280, height: 900 },
-  extraHTTPHeaders: { 'Accept-Language': 'en-US,en;q=0.9' },
+  extraHTTPHeaders: {
+    'sec-ch-ua': '"Google Chrome";v="124", "Chromium";v="124", "Not-A.Brand";v="99"',
+    'sec-ch-ua-mobile': '?0',
+    'sec-ch-ua-platform': '"macOS"',
+  },
 })
+await ctx.addInitScript(() => { Object.defineProperty(navigator, 'webdriver', { get: () => false }) })
 const page = await ctx.newPage()
 
-// Suppress non-critical console noise
-page.on('console', m => { if (m.type() === 'error') console.error(' [page]', m.text().slice(0, 80)) })
-
 try {
-  const tenders = await scrapeGeMBids(page)
-  found = tenders.length
-  console.log(`\nFound ${found} active GeM bids. Upserting to DB...`)
-  for (const t of tenders) {
-    const ok = await upsertTender(t)
-    if (ok) upserted++
+  // Load page once to get a live session + CSRF token
+  let csrf = ''
+  page.on('request', req => {
+    if (req.url().includes('all-bids-data')) {
+      const m = (req.postData() || '').match(/csrf_bd_gem_nk=([a-f0-9]+)/)
+      if (m) csrf = m[1]
+    }
+  })
+
+  console.log('Loading GeM all-bids page...')
+  await page.goto(`${BASE}/all-bids`, { waitUntil: 'domcontentloaded', timeout: 30000 })
+  await page.waitForTimeout(6000)  // let the page's own API call fire to capture CSRF
+
+  if (!csrf) {
+    // Fallback: read from hidden input
+    csrf = await page.evaluate(() => {
+      const inputs = document.querySelectorAll('input[type="hidden"]')
+      for (const inp of inputs) { if (inp.name === 'csrf_bd_gem_nk' || inp.value?.match(/^[a-f0-9]{32}$/)) return inp.value }
+      return ''
+    })
   }
 
-  const bids = await scrapeGeMBidResults(page)
+  if (!csrf) throw new Error('Could not get CSRF token from GeM page')
+  console.log(`CSRF token acquired: ${csrf.slice(0, 8)}...`)
+
+  const tenders = await scrapeGeMBids(page, csrf)
+  found = tenders.length
+  console.log(`\nFound ${found} active GeM bids. Upserting...`)
+  for (const t of tenders) { if (await upsertTender(t)) upserted++ }
+
+  const bids = await scrapeGeMBidResults(page, csrf)
   bidsFound = bids.length
-  console.log(`Found ${bidsFound} GeM bid results. Upserting to DB...`)
-  for (const b of bids) {
-    const ok = await upsertBid(b)
-    if (ok) bidsUpserted++
-  }
+  console.log(`\nFound ${bidsFound} GeM bid results. Upserting...`)
+  for (const b of bids) { if (await upsertBid(b)) bidsUpserted++ }
 
   console.log(`\n✅ GeM done: ${upserted}/${found} tenders, ${bidsUpserted}/${bidsFound} bid results`)
   await pool.query(
-    `UPDATE scrape_log SET finished_at=NOW(),tenders_found=$1,tenders_upserted=$2,
-     bids_found=$3,bids_upserted=$4,status='ok' WHERE id=$5`,
+    `UPDATE scrape_log SET finished_at=NOW(),tenders_found=$1,tenders_upserted=$2,bids_found=$3,bids_upserted=$4,status='ok' WHERE id=$5`,
     [found, upserted, bidsFound, bidsUpserted, logId]
   )
 } catch(e) {
   console.error('❌ Error:', e.message)
-  await pool.query(
-    `UPDATE scrape_log SET finished_at=NOW(),status='error',error=$1 WHERE id=$2`,
-    [e.message, logId]
-  )
+  await pool.query(`UPDATE scrape_log SET finished_at=NOW(),status='error',error=$1 WHERE id=$2`, [e.message, logId])
 } finally {
   await browser.close()
   await pool.end()
