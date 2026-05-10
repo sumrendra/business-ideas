@@ -2,8 +2,11 @@ import type { Metadata } from 'next'
 import IncentiveFinder from '@/components/IncentiveFinder'
 import { INCENTIVES, ALL_STATES } from '@/lib/incentives'
 import { Ld, breadcrumbSchema, faqSchema } from '@/lib/jsonld'
+import { getNeonPool } from '@/lib/neon'
 
 const BASE = 'https://businessideas.live'
+
+export const revalidate = 3600
 
 export const metadata: Metadata = {
   title: 'State Business Incentives India — Capital Subsidy, GST Reimbursement & More | businessideas.live',
@@ -37,7 +40,56 @@ const faq = faqSchema([
   { q: 'How do I apply for state MSME incentives?', a: 'Most states require you to register on the state Single Window Portal and submit your project report after obtaining a factory/MSME registration. Each incentive card links to the official application portal.' },
 ])
 
-export default function IncentivesPage() {
+interface NeonIncentive {
+  state: string
+  scheme_name: string
+  incentive_type: string
+  sector: string
+  benefit_desc: string
+  amount_percent: number | null
+  portal_url: string | null
+}
+
+const TYPE_BADGE: Record<string, string> = {
+  capital_subsidy:      'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300',
+  interest_subsidy:     'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300',
+  startup_grant:        'bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300',
+  sector_subsidy:       'bg-orange-100 text-orange-700 dark:bg-orange-900/40 dark:text-orange-300',
+  employment_subsidy:   'bg-teal-100 text-teal-700 dark:bg-teal-900/40 dark:text-teal-300',
+  power_subsidy:        'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-300',
+  investment_incentive: 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300',
+  revival_support:      'bg-rose-100 text-rose-700 dark:bg-rose-900/40 dark:text-rose-300',
+}
+
+function typeLabel(t: string) {
+  return t.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())
+}
+
+async function fetchNeonIncentives(): Promise<NeonIncentive[]> {
+  try {
+    const pool = getNeonPool()
+    const { rows } = await pool.query<NeonIncentive>(
+      `SELECT state, scheme_name, incentive_type, sector, benefit_desc, amount_percent, portal_url
+       FROM state_incentives
+       ORDER BY amount_percent DESC NULLS LAST`
+    )
+    return rows
+  } catch {
+    return []
+  }
+}
+
+export default async function IncentivesPage() {
+  const neonIncentives = await fetchNeonIncentives()
+
+  // Group by state for the live DB section
+  const byState: Record<string, NeonIncentive[]> = {}
+  for (const inc of neonIncentives) {
+    if (!byState[inc.state]) byState[inc.state] = []
+    byState[inc.state].push(inc)
+  }
+  const stateList = Object.keys(byState).sort()
+
   return (
     <>
     <Ld data={breadcrumb} />
@@ -50,7 +102,7 @@ export default function IncentivesPage() {
           State-wise Business Incentive Database
         </h1>
         <p className="mt-3 text-lg text-slate-600 dark:text-slate-400">
-          {INCENTIVES.length} verified incentives across {ALL_STATES.length} states — capital subsidies, GST reimbursements,
+          {INCENTIVES.length + neonIncentives.length} verified incentives across {ALL_STATES.length} states — capital subsidies, GST reimbursements,
           stamp duty waivers, electricity concessions, and more. All sourced from official state industrial policies.
         </p>
 
@@ -73,6 +125,97 @@ export default function IncentivesPage() {
       </header>
 
       <IncentiveFinder />
+
+      {/* ── Live DB: MSME Scheme Database ──────────────────────────────────── */}
+      {neonIncentives.length > 0 && (
+        <section className="mt-16 border-t border-slate-200 dark:border-slate-800 pt-12">
+          <div className="mb-6 flex flex-wrap items-start justify-between gap-3">
+            <div>
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-100 dark:bg-emerald-900/30 px-3 py-0.5 text-xs font-bold uppercase tracking-wide text-emerald-700 dark:text-emerald-300 mb-2">
+                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                Live · MSME Scheme Database
+              </span>
+              <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-100">
+                State MSME Capital Subsidy Schemes
+              </h2>
+              <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                {neonIncentives.length} schemes from official state industrial policies across {stateList.length} states
+              </p>
+            </div>
+          </div>
+
+          {/* State-grouped accordion-style sections */}
+          <div className="space-y-8">
+            {stateList.map(state => {
+              const schemes = byState[state]
+              return (
+                <div key={state}>
+                  <h3 className="mb-3 flex items-center gap-2 text-base font-bold text-slate-800 dark:text-slate-200">
+                    <span className="h-px flex-1 bg-slate-200 dark:bg-slate-700" />
+                    <span>{state}</span>
+                    <span className="rounded-full bg-slate-100 dark:bg-slate-800 px-2 py-0.5 text-xs font-medium text-slate-500 dark:text-slate-400">
+                      {schemes.length} scheme{schemes.length !== 1 ? 's' : ''}
+                    </span>
+                    <span className="h-px flex-1 bg-slate-200 dark:bg-slate-700" />
+                  </h3>
+
+                  <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                    {schemes.map((inc, i) => {
+                      const badgeColor = TYPE_BADGE[inc.incentive_type] ?? 'bg-slate-100 text-slate-600'
+                      return (
+                        <div
+                          key={i}
+                          className="flex flex-col gap-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-4 hover:border-indigo-300 dark:hover:border-indigo-600 transition-colors"
+                        >
+                          <div className="flex flex-wrap gap-1.5">
+                            <span className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${badgeColor}`}>
+                              {typeLabel(inc.incentive_type)}
+                            </span>
+                            {inc.sector && inc.sector !== 'All' && inc.sector !== 'General' && (
+                              <span className="rounded-full bg-slate-100 dark:bg-slate-800 px-2.5 py-0.5 text-xs text-slate-500 dark:text-slate-400">
+                                {inc.sector}
+                              </span>
+                            )}
+                          </div>
+
+                          <p className="text-sm font-semibold text-slate-900 dark:text-slate-100 leading-snug">
+                            {inc.scheme_name}
+                          </p>
+
+                          {inc.amount_percent && (
+                            <p className="text-sm font-bold text-green-700 dark:text-green-400">
+                              {inc.amount_percent}% subsidy
+                            </p>
+                          )}
+
+                          <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-3 leading-relaxed">
+                            {inc.benefit_desc}
+                          </p>
+
+                          {inc.portal_url && (
+                            <a
+                              href={inc.portal_url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="mt-auto inline-flex items-center gap-1 text-xs font-medium text-indigo-600 dark:text-indigo-400 hover:underline"
+                            >
+                              Official portal ↗
+                            </a>
+                          )}
+                        </div>
+                      )
+                    })}
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+
+          <p className="mt-6 text-xs text-slate-400 dark:text-slate-500">
+            Data sourced from official state industrial policies (2020–2024). Updated periodically.
+          </p>
+        </section>
+      )}
 
       {/* ── Central Government Schemes ──────────────────────────────────────── */}
       <section className="mt-16 border-t border-slate-200 dark:border-slate-800 pt-12">

@@ -108,7 +108,10 @@ export const PEOPLE_ALSO_VIEWED_QUERY = groq`
 `
 
 export const IDEA_SLUGS_QUERY = groq`
-  *[_type == "businessIdea" && defined(slug.current)] { "slug": slug.current }
+  *[_type == "businessIdea" && defined(slug.current)] {
+    "slug": slug.current,
+    "lastmod": coalesce(_updatedAt, _createdAt)
+  }
 `
 
 export const CATEGORY_IDEAS_QUERY = groq`
@@ -307,7 +310,10 @@ export const POST_TAGS_QUERY = groq`
 `
 
 export const POST_SLUGS_QUERY = groq`
-  *[_type == "post" && defined(slug.current)] { "slug": slug.current }
+  *[_type == "post" && defined(slug.current)] {
+    "slug": slug.current,
+    "lastmod": coalesce(_updatedAt, _createdAt)
+  }
 `
 
 /** Count of posts matching the same filters */

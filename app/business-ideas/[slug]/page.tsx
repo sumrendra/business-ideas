@@ -24,6 +24,7 @@ import ShareButtons from '@/components/ShareButtons'
 import FeedbackForm from '@/components/FeedbackForm'
 import DPIITLookup from '@/components/DPIITLookup'
 import MSMELookup from '@/components/MSMELookup'
+import StateIncentivesWidget from '@/components/StateIncentivesWidget'
 import { Ld, breadcrumbSchema, collectionPageSchema, faqSchema } from '@/lib/jsonld'
 
 const BASE = 'https://businessideas.live'
@@ -847,6 +848,7 @@ export default async function IdeaPage({ params }: PageProps) {
             <>
               <DPIITLookup industry={idea.industry} ideaTitle={idea.title} />
               <MSMELookup industry={idea.industry} ideaTitle={idea.title} />
+              <StateIncentivesWidget industry={idea.industry} />
             </>
           )}
         </section>

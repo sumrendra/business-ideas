@@ -1,20 +1,23 @@
 const BASE = 'https://businessideas.live'
 
 export async function GET() {
+  const today = new Date().toISOString().split('T')[0]
+
+  const sitemaps = [
+    'sitemap-business-ideas.xml',
+    'sitemap-blogs.xml',
+    'sitemap-ideas.xml',
+    'sitemap-categories.xml',
+  ]
+
+  const entries = sitemaps.map(s => `  <sitemap>
+    <loc>${BASE}/${s}</loc>
+    <lastmod>${today}</lastmod>
+  </sitemap>`).join('\n')
+
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <sitemap>
-    <loc>${BASE}/sitemap-business-ideas.xml</loc>
-  </sitemap>
-  <sitemap>
-    <loc>${BASE}/sitemap-blogs.xml</loc>
-  </sitemap>
-  <sitemap>
-    <loc>${BASE}/sitemap-ideas.xml</loc>
-  </sitemap>
-  <sitemap>
-    <loc>${BASE}/sitemap-categories.xml</loc>
-  </sitemap>
+${entries}
 </sitemapindex>`
 
   return new Response(xml, {
