@@ -85,8 +85,8 @@ async function upsertBid(b) {
 
 // ── Call all-bids-data API from within the browser page context ───────────────
 // This avoids WAF blocking — the browser session already has valid cookies+CSRF.
-async function callGeMAPI(page, csrf, statusType, pageNum) {
-  return page.evaluate(async ({ csrf, statusType, pageNum }) => {
+async function callGeMAPI(page, csrf, statusType, pageNum, sort = 'Bid-End-Date-Oldest') {
+  return page.evaluate(async ({ csrf, statusType, pageNum, sort }) => {
     const body = new URLSearchParams({
       payload: JSON.stringify({
         page: pageNum,
@@ -96,7 +96,7 @@ async function callGeMAPI(page, csrf, statusType, pageNum) {
           byType: "all",
           highBidValue: "",
           byEndDate: { from: "", to: "" },
-          sort: "Bid-End-Date-Oldest",
+          sort,
         },
       }),
       csrf_bd_gem_nk: csrf,
@@ -110,11 +110,9 @@ async function callGeMAPI(page, csrf, statusType, pageNum) {
       body: body.toString(),
     })
     const data = await r.json()
-    return {
-      total: data?.response?.response?.numFound || 0,
-      docs: data?.response?.response?.docs || [],
-    }
-  }, { csrf, statusType, pageNum })
+    const res = data?.response?.response || {}
+    return { total: res.numFound || 0, docs: res.docs || [] }
+  }, { csrf, statusType, pageNum, sort })
 }
 
 // ── Scrape GeM active bids ────────────────────────────────────────────────────
@@ -174,36 +172,10 @@ async function scrapeGeMBidResults(page, csrf) {
   const allBids = []
   const seen = new Set()
 
-  // Sort newest first so we get recent results; stop after MAX_PAGES
-  const result = await page.evaluate(async ({ csrf }) => {
-    const body = new URLSearchParams({
-      payload: JSON.stringify({
-        page: 1,
-        param: { searchBid: "", searchType: "fullText" },
-        filter: {
-          bidStatusType: "bid_result",
-          byType: "all",
-          highBidValue: "",
-          byEndDate: { from: "", to: "" },
-          sort: "Bid-End-Date-Newest",
-        },
-      }),
-      csrf_bd_gem_nk: csrf,
-    })
-    const r = await fetch('/all-bids-data', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8', 'X-Requested-With': 'XMLHttpRequest' },
-      body: body.toString(),
-    })
-    const data = await r.json()
-    return { total: data?.response?.response?.numFound || 0, docs: data?.response?.response?.docs || [] }
-  }, { csrf })
-
-  console.log(`  Total bid results available: ${result.total}`)
-
-  // Collect from pages 1..MAX_PAGES (newest first)
+  // Collect from pages 1..MAX_PAGES (newest first = most recent completions)
   for (let pg = 1; pg <= MAX_PAGES; pg++) {
-    const { docs } = await callGeMAPI(page, csrf, 'bid_result', pg)
+    const { docs, total } = await callGeMAPI(page, csrf, 'bid_result', pg, 'Bid-End-Date-Newest')
+    if (pg === 1) console.log(`  Total bid results available: ${total}`)
     if (!docs.length) break
 
     for (const d of docs) {
@@ -286,10 +258,32 @@ try {
 
   const tenders = await scrapeGeMBids(page, csrf)
   found = tenders.length
-  console.log(`\nFound ${found} active GeM bids. Upserting...`)
-  for (const t of tenders) { if (await upsertTender(t)) upserted++ }
+  console.log(`\nFound ${found} active GeM bids. Upserting (10 parallel)...`)
+  // Batch upserts 10 at a time — Neon serverless has ~75ms/query latency so
+  // sequential takes 5-7 min and expires the browser session
+  for (let i = 0; i < tenders.length; i += 10) {
+    const batch = tenders.slice(i, i + 10)
+    const results = await Promise.all(batch.map(t => upsertTender(t)))
+    upserted += results.filter(Boolean).length
+    // Keep the page session alive with a no-op every 100 items
+    if (i % 100 === 0) await page.evaluate(() => true)
+  }
 
-  const bids = await scrapeGeMBidResults(page, csrf)
+  // Reload page to get fresh session/CSRF before bid results scrape
+  // (session may expire during the tender upsert phase)
+  let csrf2 = ''
+  page.on('request', req => {
+    if (req.url().includes('all-bids-data')) {
+      const m = (req.postData() || '').match(/csrf_bd_gem_nk=([a-f0-9]+)/)
+      if (m) csrf2 = m[1]
+    }
+  })
+  console.log('\nRefreshing GeM session for bid results...')
+  await page.goto(`${BASE}/all-bids`, { waitUntil: 'domcontentloaded', timeout: 30000 })
+  await page.waitForTimeout(6000)
+  if (!csrf2) csrf2 = csrf  // fall back to original if reload didn't trigger API call
+
+  const bids = await scrapeGeMBidResults(page, csrf2)
   bidsFound = bids.length
   console.log(`\nFound ${bidsFound} GeM bid results. Upserting...`)
   for (const b of bids) { if (await upsertBid(b)) bidsUpserted++ }
