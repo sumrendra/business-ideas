@@ -119,9 +119,12 @@ export default async function BlogPostPage({ params }: PageProps) {
     dateModified: post._updatedAt,
     author,
   })
+  const isPolicyPulse = post.tags?.includes('policy-pulse')
   const breadcrumb = breadcrumbSchema([
     { name: 'Home', url: 'https://businessideas.live' },
-    { name: 'Blog', url: 'https://businessideas.live/blog' },
+    isPolicyPulse
+      ? { name: 'Policy Pulse', url: 'https://businessideas.live/policy-pulse' }
+      : { name: 'Blog', url: 'https://businessideas.live/blog' },
     { name: post.title, url: pageUrl },
   ])
   const faqLd = post.faqs?.length ? faqSchema(post.faqs.map(f => ({ q: f.question, a: f.answer }))) : null
@@ -142,11 +145,15 @@ export default async function BlogPostPage({ params }: PageProps) {
       {faqLd && <Ld data={faqLd} />}
       <div className="mx-auto max-w-7xl px-4 py-10">
         {/* Breadcrumb */}
-        <nav className="mb-6 flex min-w-0 items-center gap-1 text-sm text-slate-500">
-          <Link href="/" className="shrink-0 hover:text-indigo-600">Home</Link>
+        <nav className="mb-6 flex min-w-0 items-center gap-1 text-sm text-slate-500 dark:text-slate-400">
+          <Link href="/" className="shrink-0 hover:text-indigo-600 dark:hover:text-indigo-400">Home</Link>
           <span className="shrink-0 mx-1">/</span>
-          <Link href="/blog" className="shrink-0 hover:text-indigo-600">Blogs</Link>
-          {post.category && (
+          {isPolicyPulse ? (
+            <Link href="/policy-pulse" className="shrink-0 hover:text-indigo-600 dark:hover:text-indigo-400">Policy Pulse</Link>
+          ) : (
+            <Link href="/blog" className="shrink-0 hover:text-indigo-600 dark:hover:text-indigo-400">Blog</Link>
+          )}
+          {post.category && !isPolicyPulse && (
             <>
               <span className="shrink-0 mx-1">/</span>
               <Link href={`/blog?category=${encodeURIComponent(post.category)}`} className="shrink-0 hover:text-indigo-600 dark:hover:text-indigo-400">{post.category}</Link>
@@ -156,37 +163,69 @@ export default async function BlogPostPage({ params }: PageProps) {
           <span className="min-w-0 truncate text-slate-700 dark:text-slate-300">{post.title}</span>
         </nav>
 
-        {/* Hero: two-column title + cover image */}
-        <div className="grid grid-cols-1 gap-8 lg:grid-cols-2 lg:items-start mb-8">
-          {/* Left: category, title, meta, share */}
-          <div>
-            {post.category && (
-              <Link
-                href={`/blog?category=${encodeURIComponent(post.category)}`}
-                className="mb-3 inline-block rounded-md bg-teal-100 dark:bg-teal-900/40 px-3 py-1 text-xs font-bold uppercase tracking-widest text-teal-700 dark:text-teal-300 hover:bg-teal-200 dark:hover:bg-teal-900/60 transition-colors"
-              >
-                {post.category}
-              </Link>
-            )}
+        {/* Hero: cover image full-width, then title below */}
+        <div className="mb-10">
+          {/* Cover image */}
+          {coverUrl && (
+            <div className="relative mb-8 h-64 w-full overflow-hidden rounded-2xl sm:h-80 lg:h-96">
+              <Image
+                src={coverUrl}
+                alt={post.cover_image?.alt || post.title}
+                fill
+                className="object-cover"
+                priority
+              />
+              {isPolicyPulse && (
+                <div className="absolute top-4 left-4">
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-red-500/90 px-3 py-1 text-xs font-bold text-white backdrop-blur-sm">
+                    <span className="h-1.5 w-1.5 rounded-full bg-white animate-pulse" />
+                    Policy Pulse
+                  </span>
+                </div>
+              )}
+            </div>
+          )}
 
-            <h1 className="text-3xl font-extrabold leading-tight text-slate-900 dark:text-slate-100 sm:text-4xl">
-              {post.title}
-            </h1>
+          {/* Category badge (non-policy-pulse) */}
+          {post.category && !isPolicyPulse && (
+            <Link
+              href={`/blog?category=${encodeURIComponent(post.category)}`}
+              className="mb-4 inline-block rounded-md bg-teal-100 dark:bg-teal-900/40 px-3 py-1 text-xs font-bold uppercase tracking-widest text-teal-700 dark:text-teal-300 hover:bg-teal-200 dark:hover:bg-teal-900/60 transition-colors"
+            >
+              {post.category}
+            </Link>
+          )}
 
-            {/* Date · reading time */}
-            <div className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-slate-500">
+          {/* Title */}
+          <h1 className="text-3xl font-extrabold leading-tight text-slate-900 dark:text-slate-100 sm:text-4xl lg:text-5xl max-w-4xl">
+            {post.title}
+          </h1>
+
+          {/* Meta row */}
+          <div className="mt-5 flex flex-wrap items-center justify-between gap-4">
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-slate-500 dark:text-slate-400">
+              {/* Author */}
+              <div className="flex items-center gap-2">
+                <div className="flex h-7 w-7 items-center justify-center rounded-full bg-indigo-100 dark:bg-indigo-900/40 text-xs font-bold text-indigo-700 dark:text-indigo-300 shrink-0">
+                  {author.charAt(0).toUpperCase()}
+                </div>
+                <span className="font-medium text-slate-700 dark:text-slate-300">{author}</span>
+              </div>
               {publishedDate && (
-                <time dateTime={post.published_at}>Published {publishedDate}</time>
+                <>
+                  <span className="text-slate-300 dark:text-slate-600">·</span>
+                  <time dateTime={post.published_at}>{publishedDate}</time>
+                </>
               )}
               {updatedDate && updatedDate !== publishedDate && (
                 <>
-                  <span className="text-slate-300">•</span>
+                  <span className="text-slate-300 dark:text-slate-600">·</span>
                   <time dateTime={post._updatedAt}>Updated {updatedDate}</time>
                 </>
               )}
               {post.reading_time && (
                 <>
-                  <span className="text-slate-300">•</span>
+                  <span className="text-slate-300 dark:text-slate-600">·</span>
                   <span className="flex items-center gap-1">
                     <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <circle cx="12" cy="12" r="10" strokeWidth="2"/>
@@ -197,34 +236,11 @@ export default async function BlogPostPage({ params }: PageProps) {
                 </>
               )}
             </div>
-
-            {/* Author */}
-            <div className="mt-4 flex items-center gap-2">
-              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-indigo-100 text-xs font-bold text-indigo-700 shrink-0">
-                {author.charAt(0).toUpperCase()}
-              </div>
-              <span className="text-sm font-medium text-slate-700 dark:text-slate-300">{author}</span>
-            </div>
-
-            {/* Share buttons */}
             <ShareButtons title={post.title} url={pageUrl} />
           </div>
-
-          {/* Right: cover image */}
-          {coverUrl && (
-            <div className="relative h-56 w-full overflow-hidden rounded-2xl sm:h-72 lg:h-64">
-              <Image
-                src={coverUrl}
-                alt={post.cover_image?.alt || post.title}
-                fill
-                className="object-cover"
-                priority
-              />
-            </div>
-          )}
         </div>
 
-        <hr className="mb-8 border-slate-100" />
+        <hr className="mb-8 border-slate-100 dark:border-slate-800" />
 
         {/* Body area: TOC sidebar + content */}
         <div className="flex gap-10 items-start">
