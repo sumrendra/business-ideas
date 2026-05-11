@@ -23,6 +23,31 @@ function slugify(text: string) {
   return text.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
 }
 
+function MetaRow({ author, publishedDate, updatedDate, publishedAt, updatedAt, readingTime }: {
+  author: string; publishedDate: string | null; updatedDate: string | null
+  publishedAt?: string | null; updatedAt?: string | null; readingTime?: number | null
+}) {
+  return (
+    <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-slate-500 dark:text-slate-400">
+      <div className="flex items-center gap-2">
+        <div className="flex h-7 w-7 items-center justify-center rounded-full bg-indigo-100 dark:bg-indigo-900/40 text-xs font-bold text-indigo-700 dark:text-indigo-300 shrink-0">
+          {author.charAt(0).toUpperCase()}
+        </div>
+        <span className="font-medium text-slate-700 dark:text-slate-300">{author}</span>
+      </div>
+      {publishedDate && <><span className="text-slate-300 dark:text-slate-600">·</span><time dateTime={publishedAt ?? ''}>{publishedDate}</time></>}
+      {updatedDate && updatedDate !== publishedDate && <><span className="text-slate-300 dark:text-slate-600">·</span><time dateTime={updatedAt ?? ''}>Updated {updatedDate}</time></>}
+      {readingTime && (
+        <><span className="text-slate-300 dark:text-slate-600">·</span>
+        <span className="flex items-center gap-1">
+          <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" strokeWidth="2"/><polyline points="12,6 12,12 16,14" strokeWidth="2"/></svg>
+          {readingTime} min read
+        </span></>
+      )}
+    </div>
+  )
+}
+
 function extractHeadings(body: unknown[]): TocHeading[] {
   const headings: TocHeading[] = []
   for (const block of body as any[]) {
@@ -146,14 +171,11 @@ export default async function PolicyPulsePostPage({ params }: PageProps) {
         </nav>
 
         {/* Hero */}
-        <div className="mb-10">
-          {coverUrl ? (
+        {coverUrl ? (
+          /* With image: full-width image then title below */
+          <div className="mb-10">
             <div className="relative mb-8 h-64 w-full overflow-hidden rounded-2xl sm:h-80 lg:h-96">
-              <Image
-                src={coverUrl}
-                alt={post.cover_image?.alt || post.title}
-                fill className="object-cover" priority
-              />
+              <Image src={coverUrl} alt={post.cover_image?.alt || post.title} fill className="object-cover" priority />
               <div className="absolute top-4 left-4">
                 <span className="inline-flex items-center gap-1.5 rounded-full bg-red-500/90 px-3 py-1 text-xs font-bold text-white backdrop-blur-sm">
                   <span className="h-1.5 w-1.5 rounded-full bg-white animate-pulse" />
@@ -161,51 +183,46 @@ export default async function PolicyPulsePostPage({ params }: PageProps) {
                 </span>
               </div>
             </div>
-          ) : (
-            /* No image — show a compact dark banner instead */
-            <div className="mb-8 rounded-2xl bg-slate-900 dark:bg-slate-800 px-6 py-5 flex items-center gap-3">
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-red-500/90 px-3 py-1 text-xs font-bold text-white shrink-0">
+            <h1 className="text-2xl font-bold leading-snug text-slate-900 dark:text-slate-100 sm:text-3xl lg:text-4xl max-w-4xl">
+              {post.title}
+            </h1>
+            <div className="mt-5 flex flex-wrap items-center justify-between gap-4">
+              <MetaRow author={author} publishedDate={publishedDate} updatedDate={updatedDate} publishedAt={post.published_at} updatedAt={post._updatedAt} readingTime={post.reading_time} />
+              <ShareButtons title={post.title} url={pageUrl} />
+            </div>
+          </div>
+        ) : (
+          /* No image: two-column hero — title left, info card right */
+          <div className="mb-10 grid grid-cols-1 gap-8 lg:grid-cols-5 lg:items-start">
+            {/* Left: badge + title */}
+            <div className="lg:col-span-3">
+              <span className="mb-4 inline-flex items-center gap-1.5 rounded-full bg-red-500 px-3 py-1 text-xs font-bold text-white">
                 <span className="h-1.5 w-1.5 rounded-full bg-white animate-pulse" />
                 Policy Pulse
               </span>
-              <span className="text-xs text-slate-400">Government policy update</span>
-            </div>
-          )}
-
-          <h1 className="text-2xl font-bold leading-snug text-slate-900 dark:text-slate-100 sm:text-3xl max-w-3xl">
-            {post.title}
-          </h1>
-
-          <div className="mt-5 flex flex-wrap items-center justify-between gap-4">
-            <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-slate-500 dark:text-slate-400">
-              <div className="flex items-center gap-2">
-                <div className="flex h-7 w-7 items-center justify-center rounded-full bg-indigo-100 dark:bg-indigo-900/40 text-xs font-bold text-indigo-700 dark:text-indigo-300 shrink-0">
-                  {author.charAt(0).toUpperCase()}
-                </div>
-                <span className="font-medium text-slate-700 dark:text-slate-300">{author}</span>
+              <h1 className="text-2xl font-bold leading-snug text-slate-900 dark:text-slate-100 sm:text-3xl">
+                {post.title}
+              </h1>
+              <div className="mt-5 flex flex-wrap items-center gap-4">
+                <MetaRow author={author} publishedDate={publishedDate} updatedDate={updatedDate} publishedAt={post.published_at} updatedAt={post._updatedAt} readingTime={post.reading_time} />
               </div>
-              {publishedDate && (
-                <><span className="text-slate-300 dark:text-slate-600">·</span>
-                <time dateTime={post.published_at}>{publishedDate}</time></>
-              )}
-              {updatedDate && updatedDate !== publishedDate && (
-                <><span className="text-slate-300 dark:text-slate-600">·</span>
-                <time dateTime={post._updatedAt}>Updated {updatedDate}</time></>
-              )}
-              {post.reading_time && (
-                <><span className="text-slate-300 dark:text-slate-600">·</span>
-                <span className="flex items-center gap-1">
-                  <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <circle cx="12" cy="12" r="10" strokeWidth="2"/>
-                    <polyline points="12,6 12,12 16,14" strokeWidth="2"/>
-                  </svg>
-                  {post.reading_time} min read
-                </span></>
-              )}
+              <div className="mt-4">
+                <ShareButtons title={post.title} url={pageUrl} />
+              </div>
             </div>
-            <ShareButtons title={post.title} url={pageUrl} />
+
+            {/* Right: excerpt summary card */}
+            {post.excerpt && (
+              <div className="lg:col-span-2 rounded-2xl border border-red-100 dark:border-red-900/40 bg-red-50 dark:bg-red-950/20 p-6">
+                <p className="mb-3 text-xs font-bold uppercase tracking-widest text-red-600 dark:text-red-400">Summary</p>
+                <p className="text-sm leading-relaxed text-slate-700 dark:text-slate-300">{post.excerpt}</p>
+                {post.reading_time && (
+                  <p className="mt-4 text-xs text-slate-400 dark:text-slate-500">{post.reading_time} min read · Government Policy Update</p>
+                )}
+              </div>
+            )}
           </div>
-        </div>
+        )}
 
         <hr className="mb-8 border-slate-100 dark:border-slate-800" />
 
