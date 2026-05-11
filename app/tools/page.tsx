@@ -30,18 +30,6 @@ const TOOLS = [
     badge: 'Funding',
   },
   {
-    href: '/business-ideas',
-    label: 'Idea Filters',
-    description: 'Filter 298 ideas by budget, sector, difficulty and tags to find what fits.',
-    badge: 'Discovery',
-  },
-  {
-    href: '/hyperlocal-opportunity',
-    label: 'Hyperlocal Opportunity + ROI',
-    description: 'Demand vs. supply gap heatmap for any Indian city — with rent zone markers showing ROI per rupee. Drop a pin, see gap scores and break-even cost for Prime, Secondary, Suburban, and Peripheral zones.',
-    badge: 'Maps',
-  },
-  {
     href: '/funding-radar',
     label: 'Startup Funding Radar',
     description: '65+ real Indian startup deals FY2022–24 — filter by sector, stage, and city. See where capital is flowing.',
