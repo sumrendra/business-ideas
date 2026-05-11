@@ -147,7 +147,7 @@ export default async function PolicyPulsePostPage({ params }: PageProps) {
 
         {/* Hero */}
         <div className="mb-10">
-          {coverUrl && (
+          {coverUrl ? (
             <div className="relative mb-8 h-64 w-full overflow-hidden rounded-2xl sm:h-80 lg:h-96">
               <Image
                 src={coverUrl}
@@ -161,9 +161,18 @@ export default async function PolicyPulsePostPage({ params }: PageProps) {
                 </span>
               </div>
             </div>
+          ) : (
+            /* No image — show a compact dark banner instead */
+            <div className="mb-8 rounded-2xl bg-slate-900 dark:bg-slate-800 px-6 py-5 flex items-center gap-3">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-red-500/90 px-3 py-1 text-xs font-bold text-white shrink-0">
+                <span className="h-1.5 w-1.5 rounded-full bg-white animate-pulse" />
+                Policy Pulse
+              </span>
+              <span className="text-xs text-slate-400">Government policy update</span>
+            </div>
           )}
 
-          <h1 className="text-3xl font-extrabold leading-tight text-slate-900 dark:text-slate-100 sm:text-4xl lg:text-5xl max-w-4xl">
+          <h1 className="text-2xl font-bold leading-snug text-slate-900 dark:text-slate-100 sm:text-3xl max-w-3xl">
             {post.title}
           </h1>
 
