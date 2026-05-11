@@ -33,10 +33,16 @@ Steps:
      });
    "
    ```
-3. Remove the seed file and commit:
+3. Remove the seed file and commit **to main** (mirroring the publish flow):
    ```bash
+   ORIG_BRANCH=$(git rev-parse --abbrev-ref HEAD)
+   HAS_TRACKED_CHANGES=$(git status --porcelain --untracked-files=no | wc -l | tr -d ' ')
+   [ "$HAS_TRACKED_CHANGES" != "0" ] && git stash push -m "rollback-autoswap-$ARGUMENTS"
+   git fetch origin main && git checkout main && git pull --ff-only origin main
    git rm scripts/seed-post-$ARGUMENTS.mjs 2>/dev/null || true
-   git commit -m "blog: rollback $ARGUMENTS [skip ci]" --allow-empty
-   git push
+   git commit -m "blog: rollback $ARGUMENTS" --allow-empty
+   git push origin main
+   git checkout "$ORIG_BRANCH"
+   [ "$HAS_TRACKED_CHANGES" != "0" ] && git stash pop
    ```
 4. Report: deleted post title, removed seed file path (if any), confirm webhook will purge the cache.

@@ -6,7 +6,9 @@ RUN apk add --no-cache libc6-compat
 WORKDIR /app
 
 COPY package.json package-lock.json* ./
-RUN npm ci --frozen-lockfile
+# Skip optional deps (e.g. `canvas`, used only by local scraper scripts and
+# has no Alpine/musl prebuilds — would need Python + build tools to compile).
+RUN npm ci --frozen-lockfile --omit=optional
 
 # ─── Stage 2: Build ───────────────────────────────────────────────────────────
 FROM node:20-alpine AS builder
