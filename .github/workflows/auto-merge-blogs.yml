@@ -1,0 +1,56 @@
+name: Auto-merge blog branches into main
+
+# Fires when the blog-writer agent pushes a branch matching blog/<slug>.
+# Fast-forwards (or merges) into main, then dispatches the deploy workflow.
+# (Pushes from GITHUB_TOKEN don't trigger other workflows — hence the explicit dispatch.)
+
+on:
+  push:
+    branches:
+      - 'blog/**'
+
+permissions:
+  contents: write
+  actions: write   # needed to dispatch deploy workflow
+
+concurrency:
+  group: auto-merge-blogs
+  cancel-in-progress: false
+
+jobs:
+  merge:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Merge blog branch into main
+        run: |
+          set -euo pipefail
+          BRANCH="${GITHUB_REF_NAME}"
+          git config user.email "blog-bot@users.noreply.github.com"
+          git config user.name  "blog-bot"
+          git fetch origin "$BRANCH"
+          if git merge --ff-only "origin/$BRANCH"; then
+            echo "Fast-forwarded main from $BRANCH"
+          else
+            git merge --no-ff "origin/$BRANCH" -m "Merge $BRANCH into main"
+          fi
+          git push origin main
+
+      - name: Delete merged blog branch
+        if: success()
+        run: |
+          git push origin --delete "${GITHUB_REF_NAME}" || true
+
+      - name: Trigger deploy workflow
+        if: success()
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh workflow run deploy.yml --ref main \
+            || echo "WARN: deploy dispatch failed — deploy.yml may need workflow_dispatch trigger"
