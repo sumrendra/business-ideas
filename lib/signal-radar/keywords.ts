@@ -36,7 +36,7 @@ export const OPPORTUNITY_CATEGORIES: OpportunityCategory[] = [
       'payment aggregator', 'pgda', 'razorpay', 'paytm', 'phonepe', 'gpay',
       'rupee', 'sebi regulation', 'rbi regulation', 'credit scoring',
     ],
-    ideaQuery: '/business-ideas?industry=fintech',
+    ideaQuery: '/business-ideas?industry=FinTech',
   },
   {
     id: 'agritech-food',
@@ -51,7 +51,7 @@ export const OPPORTUNITY_CATEGORIES: OpportunityCategory[] = [
       'drone spray', 'soil testing', 'organic farming', 'natural farming',
       'aquaculture', 'fishery', 'dairy startup', 'd2c food', 'snack brand',
     ],
-    ideaQuery: '/business-ideas?industry=food',
+    ideaQuery: '/business-ideas?industry=AgriTech+%26+Food',
   },
   {
     id: 'health-wellness',
@@ -67,7 +67,7 @@ export const OPPORTUNITY_CATEGORIES: OpportunityCategory[] = [
       'elder care', 'rehabilitation', 'physiotherapy', 'nutritionist',
       'abha', 'ndhm', 'health record', 'abdm',
     ],
-    ideaQuery: '/business-ideas?industry=healthcare',
+    ideaQuery: '/business-ideas?industry=Health+%26+Wellness',
   },
   {
     id: 'edtech-skills',
@@ -82,7 +82,7 @@ export const OPPORTUNITY_CATEGORIES: OpportunityCategory[] = [
       'tutoring', 'homework help', 'study app', 'physicswallah', 'byju',
       'classplus', 'national education policy', 'nep', 'higher education',
     ],
-    ideaQuery: '/business-ideas?industry=education',
+    ideaQuery: '/business-ideas?industry=EdTech',
   },
   {
     id: 'logistics',
@@ -97,7 +97,7 @@ export const OPPORTUNITY_CATEGORIES: OpportunityCategory[] = [
       'porter', 'shadowfax', 'truck aggregator', 'fleet management',
       'vehicle tracking', 'ev logistics', 'drone delivery', 'intermodal',
     ],
-    ideaQuery: '/business-ideas?industry=logistics',
+    ideaQuery: '/business-ideas?industry=Logistics+%26+Supply+Chain',
   },
   {
     id: 'd2c-retail',
@@ -112,7 +112,7 @@ export const OPPORTUNITY_CATEGORIES: OpportunityCategory[] = [
       'subscription box', 'pet brand', 'home decor startup',
       'handmade', 'artisan', 'vernacular commerce', 'tier 2 ecommerce',
     ],
-    ideaQuery: '/business-ideas?industry=ecommerce',
+    ideaQuery: '/business-ideas?industry=E-commerce',
   },
   {
     id: 'saas-b2b',
@@ -127,7 +127,7 @@ export const OPPORTUNITY_CATEGORIES: OpportunityCategory[] = [
       'legal tech', 'legaltech', 'compliance tech', 'regtech', 'ai saas',
       'developer tool', 'api startup', 'no-code', 'low-code',
     ],
-    ideaQuery: '/business-ideas?industry=saas',
+    ideaQuery: '/business-ideas?industry=SaaS',
   },
   {
     id: 'manufacturing-export',
@@ -143,7 +143,7 @@ export const OPPORTUNITY_CATEGORIES: OpportunityCategory[] = [
       'textile export', 'handicraft export', 'gems jewellery export',
       'pharma export', 'api export', 'agri export', 'seafood export',
     ],
-    ideaQuery: '/business-ideas?industry=manufacturing',
+    ideaQuery: '/business-ideas?industry=Manufacturing',
   },
   {
     id: 'climate-sustainability',
@@ -186,7 +186,7 @@ export const OPPORTUNITY_CATEGORIES: OpportunityCategory[] = [
       'home renovation', 'facility management', 'property management',
       'commercial real estate', 'warehousing', 'industrial park',
     ],
-    ideaQuery: '/business-ideas?industry=realestate',
+    ideaQuery: '/business-ideas?tags=proptech',
   },
 ]
 
