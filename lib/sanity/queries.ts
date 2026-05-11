@@ -356,7 +356,15 @@ export const AUTHORED_POSTS_PAGE_QUERY = groq`
     && !("policy-pulse" in coalesce(tags, []))
     && ($category == "" || category == $category)
     && (count($tags) == 0 || count(tags[@ in $tags]) > 0)
-  ] | order(published_at desc) [$from..$to] {
+  ] | order(
+    select($sort == "featured" => featured, false) desc,
+    select($sort == "newest"   => published_at, "") desc,
+    select($sort == "oldest"   => published_at, "9999") asc,
+    select($sort == "shortest" => coalesce(reading_time, 9999), 9999) asc,
+    select($sort == "longest"  => coalesce(reading_time, 0),    0)    desc,
+    featured desc,
+    published_at desc
+  ) [$from..$to] {
     ${POST_CARD_FIELDS}
   }
 `

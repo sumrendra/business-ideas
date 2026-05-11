@@ -7,10 +7,21 @@ import { BLOG_CATEGORIES } from '@/lib/sanity/types'
 import BlogCard from '@/components/BlogCard'
 import Pagination from '@/components/Pagination'
 import TagFilter from '@/components/TagFilter'
+import SortDropdown from '@/components/SortDropdown'
 import { Ld, breadcrumbSchema } from '@/lib/jsonld'
 
 const POSTS_PER_PAGE = 6
 const BASE = 'https://businessideas.live'
+
+const SORT_OPTIONS = [
+  { value: 'featured', label: 'Featured' },
+  { value: 'newest',   label: 'Newest' },
+  { value: 'oldest',   label: 'Oldest' },
+  { value: 'shortest', label: 'Quick reads' },
+  { value: 'longest',  label: 'Long reads' },
+]
+const DEFAULT_SORT = 'featured'
+const VALID_SORTS = new Set(SORT_OPTIONS.map((o) => o.value))
 
 export async function generateMetadata({ searchParams }: PageProps): Promise<Metadata> {
   const sp = await searchParams
@@ -45,6 +56,7 @@ interface PageProps {
   searchParams: Promise<{
     category?: string
     tag?: string
+    sort?: string
     page?: string
   }>
 }
@@ -56,10 +68,13 @@ export default async function BlogPage({ searchParams }: PageProps) {
   const from = (currentPage - 1) * POSTS_PER_PAGE
   const to   = currentPage * POSTS_PER_PAGE - 1
 
+  const requestedSort = sp.sort ?? DEFAULT_SORT
+  const currentSort = VALID_SORTS.has(requestedSort) ? requestedSort : DEFAULT_SORT
+
   const filterParams = { category: sp.category ?? '', tags: activeTags }
 
   const [posts, count, allTags] = await Promise.all([
-    client.fetch<Post[]>(AUTHORED_POSTS_PAGE_QUERY, { ...filterParams, from, to }, { next: { tags: ['posts'] } }),
+    client.fetch<Post[]>(AUTHORED_POSTS_PAGE_QUERY, { ...filterParams, from, to, sort: currentSort }, { next: { tags: ['posts'] } }),
     client.fetch<number>(AUTHORED_POSTS_COUNT_QUERY, filterParams, { next: { tags: ['posts'] } }),
     client.fetch<string[]>(AUTHORED_POST_TAGS_QUERY, {}, { next: { tags: ['posts'] } }),
   ])
@@ -67,25 +82,34 @@ export default async function BlogPage({ searchParams }: PageProps) {
   const totalPages = Math.ceil(count / POSTS_PER_PAGE)
   const hasFilters = !!sp.category || !!sp.tag
 
-  function pageUrl(page: number) {
+  function buildParams(overrides: Record<string, string | null> = {}) {
     const params = new URLSearchParams()
     if (sp.category) params.set('category', sp.category)
     if (sp.tag)      params.set('tag',      sp.tag)
-    params.set('page', String(page))
-    return `/blog?${params.toString()}`
+    if (currentSort !== DEFAULT_SORT) params.set('sort', currentSort)
+    Object.entries(overrides).forEach(([k, v]) => {
+      if (v === null || v === '') params.delete(k)
+      else params.set(k, v)
+    })
+    const qs = params.toString()
+    return qs ? `/blog?${qs}` : '/blog'
+  }
+
+  function pageUrl(page: number) {
+    return buildParams({ page: String(page) })
+  }
+
+  function sortUrl(value: string) {
+    return buildParams({ sort: value === DEFAULT_SORT ? null : value, page: '1' })
   }
 
   function catUrl(cat: string) {
-    return sp.tag
-      ? `/blog?category=${encodeURIComponent(cat)}&tag=${encodeURIComponent(sp.tag)}`
-      : `/blog?category=${encodeURIComponent(cat)}`
+    return buildParams({ category: cat, page: '1' })
   }
 
   function tagUrl(tag: string) {
-    if (sp.tag === tag) return sp.category ? `/blog?category=${encodeURIComponent(sp.category)}` : '/blog'
-    return sp.category
-      ? `/blog?category=${encodeURIComponent(sp.category)}&tag=${encodeURIComponent(tag)}`
-      : `/blog?tag=${encodeURIComponent(tag)}`
+    if (sp.tag === tag) return buildParams({ tag: null, page: '1' })
+    return buildParams({ tag, page: '1' })
   }
 
   const breadcrumb = breadcrumbSchema([
@@ -97,12 +121,20 @@ export default async function BlogPage({ searchParams }: PageProps) {
     <>
     <Ld data={breadcrumb} />
     <div className="mx-auto max-w-7xl px-4 py-10">
-      <div className="mb-8">
+      <div className="mb-6">
         <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100">Blogs</h1>
-        <p className="mt-2 text-slate-500">
-          {count} article{count !== 1 ? 's' : ''} found
-          {hasFilters ? ' — filters applied' : ''}
+      </div>
+
+      {/* Results bar + sort */}
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
+        <p className="text-sm text-slate-500 dark:text-slate-400">
+          Showing <span className="font-semibold text-slate-800 dark:text-slate-100">{count}</span> article{count !== 1 ? 's' : ''}
+          {hasFilters ? ' matching your filters' : ''}
         </p>
+        <SortDropdown
+          current={currentSort}
+          options={SORT_OPTIONS.map((o) => ({ ...o, url: sortUrl(o.value) }))}
+        />
       </div>
 
       <div className="flex flex-col gap-8 lg:flex-row">
