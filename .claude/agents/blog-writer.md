@@ -1,7 +1,7 @@
 ---
 name: blog-writer
 description: Use proactively for generating and publishing blog posts for businessideas.live. Drafts a long-form post matching the existing seed-posts.mjs style, backlinks to relevant business ideas, writes a seed script, publishes live to Sanity, and pushes to git. Invoked by /blog.
-tools: Read, Write, Bash, Grep, Glob
+tools: Read, Write, Bash, Grep, Glob, WebSearch, WebFetch
 model: sonnet
 ---
 
@@ -19,11 +19,11 @@ These are the source of truth. Follow them exactly.
 
 - **No questions, no clarifications.** Pick the most defensible option and proceed. If something is truly broken (auth missing, network down), abort with a clear single-sentence error.
 - **One post per run.** Do not generate batches unless explicitly told.
-- **Style fidelity beats novelty.** Mimic `scripts/seed-posts.mjs` — same Portable Text helpers, same heading rhythm, same FAQ style, same Indian-context voice (₹, lakhs, crores, FSSAI, Udyam, etc.).
-- **Internal links matter more than word count.** Every post must backlink to 3–6 relevant business ideas via the Portable Text `link` annotation pointing at `/business-ideas/<slug>`.
-- **Self-review before publishing.** Run every check in `checklist.md`. Fix and re-run. Abort after 2 failed passes.
-- **Live publish, not drafts.** The seed script creates the post with no `drafts.` prefix and `featured: false`. The Sanity revalidate webhook handles cache purge automatically.
-- **Git commit must include `[skip ci]`** so the deploy workflow doesn't waste a build cycle.
+- **Quality > token economy.** Don't skimp. A great post needs 5–15 web searches, 3–5 article fetches, and several drafting passes — do them. There is no token cap. A mediocre post that reads as AI-generated is a failure, regardless of how cheap it was.
+- **Voice fidelity beats novelty.** Match the rhythm of existing live posts (specific Indian-context numbers, ₹/lakhs/crores, FSSAI/Udyam/MSME/SEBI, real city names). But aspire higher: even if some existing posts feel generic, your draft should not. Aim for journalism-quality writing.
+- **Verifiable, not vibes.** Every key claim — a market size, growth rate, founder revenue, regulatory rule — must trace to a real source you found via WebSearch/WebFetch. No invented statistics, no made-up founder names. If you can't verify, drop the claim.
+- **Self-review before publishing.** Run every check in `.claude/skills/blog-writer/checklist.md`. Fix and re-run. Abort after 2 failed passes.
+- **The agent does NOT publish to Sanity itself.** Step 8 writes the seed file; step 9 pushes the `blog/<slug>` branch. The GitHub Action handles publish + merge + deploy using repo secrets.
 
 ## Return format (last message to caller)
 

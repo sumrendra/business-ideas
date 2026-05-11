@@ -96,6 +96,55 @@ Also `Read .claude/skills/blog-writer/publish-template.mjs` once for the new hel
 
 ---
 
+## Step 5.5 — Research the topic (mandatory, no shortcuts)
+
+A post drafted from training-data memory alone reads as AI-generated. To write something a human will trust, you must do real research now. **Do not skip this step.** Token budget is unlimited; quality is the only metric.
+
+Run **at least 6 web searches** covering different facets of the chosen theme. Example queries for "Marketing for Indian D2C brands":
+
+- `"Indian D2C brand" customer acquisition cost 2026`
+- `Mamaearth boAt early growth strategy interview`
+- `Instagram ads spend D2C India 2026`
+- `India D2C market size FICCI report 2026`
+- `D2C founder India failed lessons learned`
+- `WhatsApp business API D2C conversion rate India`
+
+Use `WebSearch` for the initial pass, then `WebFetch` to read the **3–5 most useful results in full** — founder interviews, real reports (RedSeer, Bain, Inc42, YourStory, Tracxn), regulatory pages (FSSAI/RBI/MEITY), and any government scheme documentation. Save the salient findings in working memory.
+
+Specifically collect:
+
+| What to extract | Why it matters |
+|---|---|
+| **2–4 dated, specific statistics** (with month/year + source name) | E.g. *"As of Q2 2025, Mamaearth's CAC was ₹520 per customer (Inc42 report, April 2025)."* Generic claims fail the human-test. |
+| **2–3 real Indian founders/companies** with verifiable details | E.g. *Aman Gupta (boAt)*, *Ghazal Alagh (Mamaearth)* — name, city, business, and one specific milestone. |
+| **1 contrarian or non-obvious insight** from a source | E.g. *"D2C brands in India spent 28% of revenue on Instagram in 2023; this dropped to 14% in 2025 as Performance Max stopped working."* — counterintuitive enough that a reader thinks "huh, I didn't know that." |
+| **1 government scheme or regulation** that's genuinely relevant | E.g. *FSSAI 2.0 changes for D2C food brands, ONDC seller onboarding fee waiver, RBI's PA-PG circular.* |
+| **1 fresh anecdote or quote** to weave in | Even a single line from a founder interview lands harder than 200 words of generic advice. |
+
+After research, write a short notes file:
+
+```bash
+cat > /tmp/bi-research-<slug>.md << 'EOF'
+# Research notes — <theme>
+## Sources fetched
+- <Article 1 title> — <URL>
+- <Article 2 title> — <URL>
+...
+## Stats to use
+- <stat 1 with source>
+...
+## Named entities
+- <founder/company with one-line detail>
+...
+## Anecdote
+- <one human story or quote>
+EOF
+```
+
+You'll cite these in the body — not as footnotes, but woven into sentences naturally. **A draft that doesn't use the research notes is a failed draft.** Re-research if your first pass was too generic to be useful.
+
+---
+
 ## Step 6 — Draft the post
 
 Produce these fields in memory:
@@ -217,11 +266,41 @@ Return the success block defined in `.claude/agents/blog-writer.md`.
 
 ---
 
-## Voice cheat sheet (mimic this)
+## Voice cheat sheet (aspire to this)
 
-- "India is witnessing an unprecedented entrepreneurship boom." (real opener from an existing post)
-- "Gross margins of 55–70%. FSSAI license required."
-- "Start with 2–3 clients at ₹8,000–₹15,000/month each."
-- Direct second person ("you"), present tense.
-- Specific numbers always. Vague benefits never.
-- Indian regulatory + financial idioms (lakh, crore, GST, MSME, ITR, Startup India).
+### Use freely
+
+- Direct second person ("you"), present tense, contractions OK ("don't", "it's").
+- **Specific over generic.** Always a number, name, city, or dated fact: "₹52 per pickup in Pune", not "low pickup costs". "Mamaearth's CAC in 2025 was ₹520" not "D2C brands have high CAC".
+- Indian regulatory + financial idioms (lakh, crore, GST, MSME, FSSAI, Udyam, RBI, SEBI, AYUSH, Startup India, MEITY, ONDC).
+- Short paragraphs (2–4 sentences). One idea per paragraph.
+- Concrete openers: a scene, a stat, a named person — never a thesis sentence.
+- Light internal rhythm: 1–2 short sentences after a long one. Read drafts aloud in your head.
+
+### Voice red flags — never produce these
+
+The following are dead AI tells. If your draft contains any of them, rewrite.
+
+| Banned phrase / pattern | Why |
+|---|---|
+| *"In today's fast-paced world..."* / *"In the dynamic landscape of..."* | Generic AI opener. |
+| *"It's important to note that..."* / *"It is worth mentioning..."* | Hedging filler. |
+| *"Whether you're a... or a..., this guide will..."* | Listicle SEO cliché. |
+| *"From X to Y, the possibilities are endless."* | Empty rhetoric. |
+| *"Let's dive in / explore / delve into..."* | The most reliable AI tell. |
+| *"Game-changer / revolutionize / leverage / streamline / synergy / unlock the power of"* | Buzzword soup. |
+| Three consecutive sentences that begin with the same word | Rhythm flaw. |
+| Lists where every item is exactly one sentence of similar length | Reads as auto-generated. |
+| Statistics without a year / source ("70% of Indians prefer...") | Untrustworthy. Either cite or cut. |
+| A founder name with no city / no specific milestone | Same as above. |
+| The word "ultimately" or "in conclusion" before the last paragraph | AI conclusion-marker. |
+
+### Surgically use research
+
+Weave facts from Step 5.5 into sentences. Don't dump them in a "Statistics" block. Examples of *good* integration:
+
+> By April 2025, Mamaearth's customer acquisition cost had climbed to ₹520 per buyer — up nearly 3× from its 2020 numbers — and founder Ghazal Alagh told Inc42 the brand had moved 40% of its ad spend out of Meta entirely.
+
+vs. the *bad* version a memory-only draft produces:
+
+> Customer acquisition costs in India have been rising for D2C brands. Founders are exploring new channels to reduce dependency on social media platforms.

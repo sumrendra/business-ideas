@@ -26,9 +26,24 @@ Run every check before publishing. If any fails, fix and re-run. Abort after 2 f
 - [ ] Body contains **0 to 6** inline `pLink` backlinks — count only when the link reads naturally in its sentence. Forced links are a fail.
 - [ ] Every linked slug (if any) exists in the inventory's `ideas[].slug` (no broken links)
 - [ ] No duplicate idea slug is linked more than once
-- [ ] Voice matches `scripts/seed-posts.mjs`: Indian context (₹, lakhs/crores, FSSAI/MSME/Udyam/GST where relevant), specific numbers, direct second person
-- [ ] No hedging filler ("In today's fast-paced world", "It is important to note that")
+- [ ] Voice matches the **live posts** from `/tmp/bi-samples.json`: Indian context (₹, lakhs/crores, FSSAI/MSME/Udyam/GST), specific numbers, direct second person, contractions OK
 - [ ] No emojis anywhere in the post
+
+## Research grounding (mandatory — fails if not met)
+
+- [ ] At least **3 dated, named-source statistics** in the body. Each stat must include: number + a month-or-quarter + year + source publication (e.g. *"Inc42 reported in Q3 2025 that..."*). Stats without a year fail.
+- [ ] At least **2 real Indian founders or companies** named with a verifiable detail (city + business + one milestone). Generic mentions ("a Bangalore founder") don't count.
+- [ ] At least **1 contrarian or non-obvious insight** that a memory-only draft wouldn't produce. The reader should pause and think "huh, I didn't know that."
+- [ ] At least **1 specific regulation, scheme, or institutional reference** (FSSAI rule, ONDC, RBI circular, Startup India scheme, MUDRA loan, MEITY notification, etc.)
+- [ ] `/tmp/bi-research-<slug>.md` exists and was actually used in the draft. Spot-check: pick a stat from the notes; it should appear in the body in modified prose form, not copied verbatim.
+
+## Anti-AI sniff test (run on your own draft)
+
+- [ ] **Banned phrase scan:** body does NOT contain any of these (case-insensitive): `in today's`, `fast-paced`, `dynamic landscape`, `it's important to note`, `it is worth`, `whether you're a`, `the possibilities are endless`, `let's dive in`, `let's explore`, `let's delve`, `game-changer`, `revolutionize`, `leverage`, `streamline`, `synergy`, `unlock the power`, `ultimately`, `in conclusion`, `embark on`, `navigate the complexities`, `harness the power`.
+- [ ] **Opener test:** the first sentence is a concrete scene, a specific stat, or a named person — NOT a thesis or a generic claim.
+- [ ] **Rhythm test:** no three consecutive sentences start with the same word. No five consecutive bullets are roughly the same length and form a "listicle drone".
+- [ ] **Sound test (mental read-aloud):** if you read the draft in your head, does it sound like a human who has opinions, or like a polished encyclopedia entry? If the latter — rewrite the first 3 paragraphs and the closing section with sharper voice.
+- [ ] **Hallucination guard:** every founder name, company name, statistic, and law / scheme reference in the body traces back to a real source URL in `/tmp/bi-research-<slug>.md`. If you can't trace it, delete the claim.
 
 ## FAQs
 
