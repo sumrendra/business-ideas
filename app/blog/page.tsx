@@ -9,7 +9,7 @@ import Pagination from '@/components/Pagination'
 import TagFilter from '@/components/TagFilter'
 import { Ld, breadcrumbSchema } from '@/lib/jsonld'
 
-const POSTS_PER_PAGE = 5
+const POSTS_PER_PAGE = 6
 const BASE = 'https://businessideas.live'
 
 export async function generateMetadata({ searchParams }: PageProps): Promise<Metadata> {
