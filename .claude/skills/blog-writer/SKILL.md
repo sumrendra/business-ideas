@@ -142,44 +142,52 @@ Run every check in `checklist.md`. If any fails:
 
 ---
 
-## Step 9 — Commit and push to main
+## Step 9 — Commit to a `blog/<slug>` branch and push
 
-The seed file must land on `main` so the Cloud Run deploy workflow fires and the post is part of the production history. Run this exact sequence — it preserves the caller's working branch and any uncommitted work.
+The seed file lands on a dedicated `blog/<slug>` branch cut from latest `origin/main`. A GitHub Action (`.github/workflows/auto-merge-blogs.yml`) sees the push and merges the branch into `main`, which dispatches the deploy workflow. This avoids any direct push to `main` from the agent.
 
 ```bash
 SLUG=<slug>
 ORIG_BRANCH=$(git rev-parse --abbrev-ref HEAD)
+BLOG_BRANCH="blog/$SLUG"
 
 # Stash any tracked changes so the branch switch is clean.
-# Untracked files (including the new seed script) ride along across branches — they're not tied to a branch.
+# Untracked files (the new seed script) ride along across branches automatically.
 HAS_TRACKED_CHANGES=$(git status --porcelain --untracked-files=no | wc -l | tr -d ' ')
 if [ "$HAS_TRACKED_CHANGES" != "0" ]; then
   git stash push -m "blog-writer-autoswap-$SLUG" || { echo "ABORT: stash failed"; exit 1; }
 fi
 
-# Switch to main and pull latest.
+# Cut a new branch off the latest origin/main.
 git fetch origin main || { echo "ABORT: fetch failed"; exit 1; }
-git checkout main || { echo "ABORT: checkout main failed"; exit 1; }
-git pull --ff-only origin main || { echo "ABORT: pull failed (main has diverged)"; exit 1; }
+git checkout -b "$BLOG_BRANCH" origin/main || { echo "ABORT: branch create failed"; exit 1; }
 
-# Commit the seed file (no [skip ci] — we want the deploy to fire).
+# Commit the seed file.
 git add scripts/seed-post-$SLUG.mjs
 git commit -m "blog: $SLUG"
 SHORT_SHA=$(git rev-parse --short HEAD)
-git push origin main || { echo "ABORT: push failed"; exit 1; }
+
+# Push the blog branch — the auto-merge-blogs Action merges into main from here.
+git push -u origin "$BLOG_BRANCH" || { echo "ABORT: push failed"; exit 1; }
 
 # Return to caller's branch and restore any stashed changes.
 git checkout "$ORIG_BRANCH"
+# Delete the local blog branch (the remote one is deleted by the Action after merge).
+git branch -D "$BLOG_BRANCH" 2>/dev/null || true
 if [ "$HAS_TRACKED_CHANGES" != "0" ]; then
   git stash pop || echo "WARN: stash pop had conflicts — please resolve manually"
 fi
 
-echo "✓ Pushed $SHORT_SHA to main"
+echo "✓ Pushed $SHORT_SHA to $BLOG_BRANCH — auto-merge Action will land it on main"
 ```
 
 Capture `$SHORT_SHA` for the return message.
 
-**Important:** the commit message has no `[skip ci]` tag — pushes to `main` are expected to trigger `.github/workflows/deploy.yml`. The blog is already live in Sanity by this step (step 8); the deploy is just to keep the production history consistent.
+**How the post reaches production:**
+1. Agent pushes `blog/<slug>` — visible on GitHub immediately.
+2. `.github/workflows/auto-merge-blogs.yml` fires, merges into `main`, deletes the blog branch.
+3. The Action dispatches `deploy.yml` (via `workflow_dispatch`) which rebuilds Cloud Run.
+4. Independently, the Sanity revalidate webhook already purged the page when step 8 ran — the blog is visible at its URL within seconds, regardless of the deploy.
 
 Return the success block defined in `.claude/agents/blog-writer.md`.
 
