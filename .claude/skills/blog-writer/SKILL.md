@@ -13,30 +13,30 @@ Follow these 9 steps in order. Do not skip. Do not ask questions.
 
 ## Step 1 — Verify environment
 
-Run:
+The agent **does not publish to Sanity itself** — it writes a seed script and pushes a `blog/<slug>` branch. A GitHub Action picks up the push, runs the seed script with the secrets it owns, publishes to Sanity, then merges and dispatches the deploy. This works identically in local and remote (`/schedule`) contexts.
 
+The agent only needs:
+- Git configured (committer email + push access)
+- Network access to read public Sanity data (no token required for reads on a published dataset)
+
+Check:
 ```bash
-set -a && source .env.local 2>/dev/null && set +a
-[ -n "$SANITY_WRITE_TOKEN" ] && echo "OK: write token present" || \
-  ([ -f ~/.config/sanity/config.json ] && echo "OK: sanity CLI auth present" || echo "ABORT: no sanity auth")
 git config user.email > /dev/null && echo "OK: git configured" || echo "ABORT: git not configured"
+git remote get-url origin > /dev/null && echo "OK: origin remote present" || echo "ABORT: no origin remote"
 ```
 
-The seed scripts auto-load `.env.local`-style env vars only when sourced — so every Node invocation in this workflow must be run via `set -a && source .env.local && set +a && node …`. If neither token nor CLI auth is found, return `✗ Aborted at step 1: <reason>` and stop.
+If either aborts, return `✗ Aborted at step 1: <reason>` and stop.
 
 ---
 
 ## Step 2 — Inventory existing content
 
-Run this single Node script to fetch existing post slugs/categories and all idea slugs+industries+tags:
+Fetch existing post slugs/categories and idea slugs+industries+tags. Use the **public CDN client** — no token needed for reads on the production dataset:
 
 ```bash
 node -e '
 import("@sanity/client").then(async ({ createClient }) => {
-  const { readFileSync } = await import("fs");
-  const { join } = await import("path");
-  const cfg = JSON.parse(readFileSync(join(process.env.HOME, ".config/sanity/config.json"), "utf8"));
-  const c = createClient({ projectId: "5p3rso81", dataset: "production", apiVersion: "2024-01-01", token: cfg.authToken, useCdn: false });
+  const c = createClient({ projectId: "5p3rso81", dataset: "production", apiVersion: "2024-01-01", useCdn: true });
   const posts = await c.fetch(`*[_type=="post" && defined(slug.current)]{ "slug": slug.current, title, category, tags, "coverAssetRef": cover_image.asset._ref, "coverUrl": cover_image.asset->url }`);
   const ideas = await c.fetch(`*[_type=="businessIdea" && defined(slug.current)]{ "slug": slug.current, title, industry, tags, budget_range }`);
   const catCounts = {};
@@ -79,12 +79,7 @@ The seed file shows mechanics; the **live posts** show voice and current site th
 ```bash
 node -e '
 import("@sanity/client").then(async ({ createClient }) => {
-  const { readFileSync } = await import("fs");
-  const { join } = await import("path");
-  let tk = process.env.SANITY_WRITE_TOKEN;
-  if (!tk) try { tk = JSON.parse(readFileSync(join(process.env.HOME, ".config/sanity/config.json"), "utf8")).authToken } catch {}
-  if (!tk) tk = process.env.SANITY_API_TOKEN;
-  const c = createClient({ projectId: "5p3rso81", dataset: "production", apiVersion: "2024-01-01", token: tk, useCdn: false });
+  const c = createClient({ projectId: "5p3rso81", dataset: "production", apiVersion: "2024-01-01", useCdn: true });
   // 3 most recent non-policy-pulse posts
   const samples = await c.fetch(`*[_type=="post" && defined(slug.current) && !("policy-pulse" in coalesce(tags,[]))] | order(published_at desc)[0...3]{ title, "slug": slug.current, excerpt, category, tags, body, faqs }`);
   console.log(JSON.stringify(samples, null, 2));
@@ -160,14 +155,11 @@ Run every check in `checklist.md`. If any fails:
 
 ---
 
-## Step 8 — Write and run the seed script
+## Step 8 — Write the seed script (do NOT run it)
 
-1. Copy `.claude/skills/blog-writer/publish-template.mjs` to `scripts/seed-post-<slug>.mjs` and fill it in with the drafted content.
-2. Run (with env loaded):
-   ```bash
-   set -a && source .env.local && set +a && node scripts/seed-post-<slug>.mjs
-   ```
-3. Confirm output shows `✓ Published: <title>`. If it shows `SKIP` (slug collision) or any error, abort.
+Copy `.claude/skills/blog-writer/publish-template.mjs` to `scripts/seed-post-<slug>.mjs` and fill it in with the drafted content.
+
+**Do not execute the seed script.** The GitHub Action at `.github/workflows/auto-merge-blogs.yml` will run it after step 9's push, using repo secrets `SANITY_WRITE_TOKEN` and `UNSPLASH_ACCESS_KEY` it owns. The agent has no access to those secrets and should not attempt the publish.
 
 ---
 
@@ -214,9 +206,12 @@ Capture `$SHORT_SHA` for the return message.
 
 **How the post reaches production:**
 1. Agent pushes `blog/<slug>` — visible on GitHub immediately.
-2. `.github/workflows/auto-merge-blogs.yml` fires, merges into `main`, deletes the blog branch.
-3. The Action dispatches `deploy.yml` (via `workflow_dispatch`) which rebuilds Cloud Run.
-4. Independently, the Sanity revalidate webhook already purged the page when step 8 ran — the blog is visible at its URL within seconds, regardless of the deploy.
+2. `.github/workflows/auto-merge-blogs.yml` fires:
+   - Installs deps + runs the seed script (this is where publish to Sanity happens, using repo secrets)
+   - Merges `blog/<slug>` into `main` and deletes the blog branch
+   - Dispatches `deploy.yml` to rebuild Cloud Run
+3. Total wall-clock from push to "blog live in Sanity" is ~1–2 minutes (Action cold-start + npm ci + publish).
+4. The Sanity revalidate webhook purges ISR caches the instant the publish lands — the post is visible at its URL without waiting for the Cloud Run deploy.
 
 Return the success block defined in `.claude/agents/blog-writer.md`.
 
