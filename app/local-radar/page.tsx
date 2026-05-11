@@ -457,28 +457,20 @@ export default function LocalRadarPage() {
                 <p className="text-xs font-semibold uppercase tracking-widest text-emerald-600 dark:text-emerald-400 mb-2 flex items-center gap-1.5">
                   🏭 Udyam (MSME Registration)
                 </p>
-                {result.udyamSummary?.source === 'api' ? (
+                {result.udyamSummary?.source !== 'unavailable' && result.udyamSummary?.totalCount ? (
                   <>
                     <p className="text-3xl font-bold text-slate-900 dark:text-slate-100">
-                      {result.udyamSummary.totalCount?.toLocaleString()}
+                      {result.udyamSummary.totalCount.toLocaleString()}
                     </p>
                     <p className="text-sm text-slate-600 dark:text-slate-400 mt-0.5">
-                      Udyam registrations in {result.udyamSummary.district}
+                      {result.udyamSummary.note ?? `Udyam registrations in ${result.udyamSummary.district}`}
                     </p>
                   </>
                 ) : (
                   <div>
                     <p className="text-sm text-slate-600 dark:text-slate-400">
-                      {result.udyamSummary?.note ?? 'Unavailable'}
+                      {result.udyamSummary?.note ?? 'Data unavailable for this district/sector.'}
                     </p>
-                    <a
-                      href="https://data.gov.in/user/register"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="mt-2 inline-block text-xs text-emerald-600 dark:text-emerald-400 hover:underline"
-                    >
-                      Register for free API key at data.gov.in →
-                    </a>
                   </div>
                 )}
               </div>
@@ -536,7 +528,7 @@ export default function LocalRadarPage() {
               <div className="rounded-2xl border border-slate-100 dark:border-slate-800 p-4 text-xs text-slate-400 dark:text-slate-500">
                 <p className="font-semibold text-slate-500 dark:text-slate-400 mb-2">Unlock more data:</p>
                 <ul className="space-y-1">
-                  <li>• <strong>Udyam district data:</strong> Register at data.gov.in (free) → add <code>DATA_GOV_IN_API_KEY</code> to .env.local</li>
+                  <li>• <strong>Udyam district data:</strong> Live via data.gov.in API (preprocessed summary available for major cities)</li>
                   <li>• <strong>MCA21 city-level:</strong> Run <code>node scripts/fetch-mca21.mjs</code> after downloading from mca.gov.in</li>
                   <li>• <strong>GSTN:</strong> No public bulk API available — estimates from published GSTN Annual Statistics</li>
                 </ul>
