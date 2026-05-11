@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import { notFound } from 'next/navigation'
+import { notFound, redirect } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'
 import { PortableText } from '@portabletext/react'
@@ -87,6 +87,11 @@ export default async function BlogPostPage({ params }: PageProps) {
   )
 
   if (!post) notFound()
+
+  // Policy-pulse articles live at /policy-pulse/[slug] — redirect permanently
+  if (post.tags?.includes('policy-pulse')) {
+    redirect(`/policy-pulse/${slug}`)
+  }
 
   const [relatedPosts, relatedIdeas] = await Promise.all([
     post.category
