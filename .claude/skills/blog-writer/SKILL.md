@@ -127,7 +127,7 @@ Produce these fields in memory:
 The post WILL appear on listing cards and the homepage with its `cover_image`, so it must be set. Pick **one** of these approaches in the seed script:
 
 1. **Direct URL (default — no API key required):** Pick a relevant landscape photo from Unsplash and inline its URL. The search-result URL `https://images.unsplash.com/photo-<id>?w=1600&q=80` works. To find a fresh photo, run a Bash search via the public Unsplash search page (e.g. `curl -s "https://unsplash.com/s/photos/<theme>"` and grep for `photo-` IDs), or use a relevant photo ID from `scripts/seed-post-images.mjs` if the theme matches. **Never** reuse the same photo as an existing post — fetch the existing posts' image asset URLs first and pick a different photo ID.
-2. **Unsplash search query (if `UNSPLASH_ACCESS_KEY` is in .env.local):** Set `coverImage = { query: '<theme>', alt: '<alt>' }`. The seed script hits the Unsplash search API and picks randomly from the top 5 results — fresh every run.
+2. **Unsplash search query (if `UNSPLASH_ACCESS_KEY` is in .env.local — CURRENTLY ACTIVE):** Set `coverImage = { query: '<broad theme phrase>', fallbackQueries: ['<broader phrase>', '<broadest phrase>'], alt: '<alt>' }`. The seed script hits the Unsplash search API and picks randomly from the top 5 results — fresh every run. **Keep the primary query 2–4 words and broadly photographable** (e.g. `'D2C founder packing orders'`, not `'indian d2c brand marketing first 1000 customers'`). Include 1–2 broader fallback queries in case the primary returns zero hits.
 
 Write a descriptive alt that names the subject and context (e.g. `"D2C founder packing skincare orders in a small Bangalore studio"`), not a bland label.
 

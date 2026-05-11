@@ -111,20 +111,34 @@ const post = {
 
 // ── Helpers: image fetch + upload ─────────────────────────────────────────────
 
+async function unsplashSearch(query, accessKey) {
+  const u = `https://api.unsplash.com/search/photos?query=${encodeURIComponent(query)}&per_page=10&orientation=landscape`
+  const res = await fetch(u, { headers: { Authorization: `Client-ID ${accessKey}` } })
+  if (!res.ok) throw new Error(`Unsplash search failed (${res.status}) for query "${query}"`)
+  const data = await res.json()
+  return data.results || []
+}
+
 async function resolveImageUrl(cfg) {
   if (cfg.url && !cfg.url.startsWith('__')) return { url: cfg.url, source: 'direct' }
   if (cfg.query) {
     const k = process.env.UNSPLASH_ACCESS_KEY
-    if (!k) {
-      throw new Error('coverImage.query set but UNSPLASH_ACCESS_KEY missing in env')
+    if (!k) throw new Error('coverImage.query set but UNSPLASH_ACCESS_KEY missing in env')
+
+    // Try the specific query first, then progressively broaden if it returns zero hits.
+    const queries = [cfg.query, ...(cfg.fallbackQueries || []), 'india business', 'small business']
+    let pick = null
+    let triedQuery = null
+    for (const q of queries) {
+      const results = await unsplashSearch(q, k)
+      if (results.length > 0) {
+        pick = results[Math.floor(Math.random() * Math.min(5, results.length))]
+        triedQuery = q
+        break
+      }
     }
-    const u = `https://api.unsplash.com/search/photos?query=${encodeURIComponent(cfg.query)}&per_page=10&orientation=landscape`
-    const res = await fetch(u, { headers: { Authorization: `Client-ID ${k}` } })
-    if (!res.ok) throw new Error(`Unsplash search failed: ${res.status}`)
-    const data = await res.json()
-    if (!data.results?.length) throw new Error(`No photos found for query: ${cfg.query}`)
-    const pick = data.results[Math.floor(Math.random() * Math.min(5, data.results.length))]
-    return { url: `${pick.urls.raw}&w=1600&q=80&fm=jpg`, source: 'unsplash-api', credit: pick.user?.name }
+    if (!pick) throw new Error(`No photos found for any of: ${queries.join(' | ')}`)
+    return { url: `${pick.urls.raw}&w=1600&q=80&fm=jpg`, source: `unsplash-api(${triedQuery})`, credit: pick.user?.name }
   }
   throw new Error('coverImage requires either .url or .query')
 }
