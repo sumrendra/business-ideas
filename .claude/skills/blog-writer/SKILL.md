@@ -142,15 +142,44 @@ Run every check in `checklist.md`. If any fails:
 
 ---
 
-## Step 9 — Commit and push
+## Step 9 — Commit and push to main
+
+The seed file must land on `main` so the Cloud Run deploy workflow fires and the post is part of the production history. Run this exact sequence — it preserves the caller's working branch and any uncommitted work.
 
 ```bash
-git add scripts/seed-post-<slug>.mjs
-git commit -m "blog: <slug> [skip ci]"
-git push
+SLUG=<slug>
+ORIG_BRANCH=$(git rev-parse --abbrev-ref HEAD)
+
+# Stash any tracked changes so the branch switch is clean.
+# Untracked files (including the new seed script) ride along across branches — they're not tied to a branch.
+HAS_TRACKED_CHANGES=$(git status --porcelain --untracked-files=no | wc -l | tr -d ' ')
+if [ "$HAS_TRACKED_CHANGES" != "0" ]; then
+  git stash push -m "blog-writer-autoswap-$SLUG" || { echo "ABORT: stash failed"; exit 1; }
+fi
+
+# Switch to main and pull latest.
+git fetch origin main || { echo "ABORT: fetch failed"; exit 1; }
+git checkout main || { echo "ABORT: checkout main failed"; exit 1; }
+git pull --ff-only origin main || { echo "ABORT: pull failed (main has diverged)"; exit 1; }
+
+# Commit the seed file (no [skip ci] — we want the deploy to fire).
+git add scripts/seed-post-$SLUG.mjs
+git commit -m "blog: $SLUG"
+SHORT_SHA=$(git rev-parse --short HEAD)
+git push origin main || { echo "ABORT: push failed"; exit 1; }
+
+# Return to caller's branch and restore any stashed changes.
+git checkout "$ORIG_BRANCH"
+if [ "$HAS_TRACKED_CHANGES" != "0" ]; then
+  git stash pop || echo "WARN: stash pop had conflicts — please resolve manually"
+fi
+
+echo "✓ Pushed $SHORT_SHA to main"
 ```
 
-Capture the short SHA from `git rev-parse --short HEAD` for the return message.
+Capture `$SHORT_SHA` for the return message.
+
+**Important:** the commit message has no `[skip ci]` tag — pushes to `main` are expected to trigger `.github/workflows/deploy.yml`. The blog is already live in Sanity by this step (step 8); the deploy is just to keep the production history consistent.
 
 Return the success block defined in `.claude/agents/blog-writer.md`.
 
