@@ -96,6 +96,68 @@ Also `Read .claude/skills/blog-writer/publish-template.mjs` once for the new hel
 
 ---
 
+## Step 5.5 — Research the topic (mandatory, no shortcuts)
+
+A post drafted from training-data memory alone reads as AI-generated. To write something a human will trust, you must do real research now. **Do not skip this step.** Token budget is unlimited; quality is the only metric.
+
+Run **at least 6 web searches** covering different facets of the chosen theme. Example queries for "Marketing for Indian D2C brands":
+
+- `"Indian D2C brand" customer acquisition cost 2026`
+- `Mamaearth boAt early growth strategy interview`
+- `Instagram ads spend D2C India 2026`
+- `India D2C market size FICCI report 2026`
+- `D2C founder India failed lessons learned`
+- `WhatsApp business API D2C conversion rate India`
+
+Use `WebSearch` for the initial pass, then `WebFetch` to read the **3–5 most useful results in full** — founder interviews, real reports (RedSeer, Bain, Inc42, YourStory, Tracxn), regulatory pages (FSSAI/RBI/MEITY), and any government scheme documentation. Save the salient findings in working memory.
+
+Specifically collect:
+
+| What to extract | Why it matters |
+|---|---|
+| **2–4 dated, specific statistics** (with month/year + source name) | E.g. *"As of Q2 2025, Mamaearth's CAC was ₹520 per customer (Inc42 report, April 2025)."* Generic claims fail the human-test. |
+| **2–3 real Indian founders/companies** with verifiable details | E.g. *Aman Gupta (boAt)*, *Ghazal Alagh (Mamaearth)* — name, city, business, and one specific milestone. |
+| **1 contrarian or non-obvious insight** from a source | E.g. *"D2C brands in India spent 28% of revenue on Instagram in 2023; this dropped to 14% in 2025 as Performance Max stopped working."* — counterintuitive enough that a reader thinks "huh, I didn't know that." |
+| **1 government scheme or regulation** that's genuinely relevant | E.g. *FSSAI 2.0 changes for D2C food brands, ONDC seller onboarding fee waiver, RBI's PA-PG circular.* |
+| **1 fresh anecdote or quote** to weave in | Even a single line from a founder interview lands harder than 200 words of generic advice. |
+
+After research, write a short notes file:
+
+```bash
+cat > /tmp/bi-research-<slug>.md << 'EOF'
+# Research notes — <theme>
+## Sources fetched
+- <Article 1 title> — <URL>
+- <Article 2 title> — <URL>
+...
+## Stats to use
+- <stat 1 with source>
+...
+## Named entities
+- <founder/company with one-line detail>
+...
+## Anecdote
+- <one human story or quote>
+EOF
+```
+
+You'll cite these in the body — not as footnotes, but woven into sentences naturally. **A draft that doesn't use the research notes is a failed draft.** Re-research if your first pass was too generic to be useful.
+
+### Thesis (mandatory)
+
+After research, write a **one-sentence thesis** at the top of `/tmp/bi-research-<slug>.md`. The thesis is the non-obvious claim the post will defend — what someone reading only the title and your post should walk away believing. Examples:
+
+> ✅ *"D2C in India is no longer a marketing problem — it's a logistics-and-returns problem, and the brands winning in 2026 are the ones who solved warehouse density before they solved Instagram."*
+>
+> ✅ *"FSSAI's 2025 packaging rules killed the home-kitchen tiffin model for orders over ₹40,000/month, and the winners pivoted to dark-kitchen partnerships within 90 days."*
+>
+> ❌ *"Marketing for D2C is hard but rewarding."* — not a thesis, it's a platitude.
+> ❌ *"You can start a tiffin service in India."* — descriptive, no claim.
+
+If you can't articulate a thesis, your research wasn't deep enough — go back and dig until you find a non-obvious pattern. **Every post must defend a thesis.** No thesis, no draft.
+
+---
+
 ## Step 6 — Draft the post
 
 Produce these fields in memory:
@@ -110,7 +172,7 @@ Produce these fields in memory:
 | `category` | **single** primary value from the 8 fixed categories (pick the best fit) |
 | `tags` | **5–9 lowercase tags**, must include any *other* category names that also apply (e.g. a Marketing & Growth post about D2C should also tag `entrepreneurship`, `case-studies` if relevant). This is how a post surfaces under multiple categories on the site. |
 | `reading_time` | round(word_count / 220) |
-| `body` | Portable Text, 2200–3500 words. **0–6 inline `pLink` backlinks** — only when contextually relevant. Don't force a link into a paragraph that doesn't need one. |
+| `body` | Portable Text, **1,500–6,000 words** — let the topic decide. Thin themes get 1,500–2,200; deep themes (case study, market analysis) get 3,500–6,000. Don't pad to hit a number. Must include: thesis (woven in), 8+ dated stats, 5+ named people, 2+ pull quotes, 2–4 post-to-post links, 0–6 idea backlinks, an "Updated as of" footer line. |
 | `faqs` | 4–6 entries |
 | `cover_image` | mandatory — set via `coverImage = { url, alt }` or `coverImage = { query, alt }`. See "Cover image strategy" below. |
 | `featured` | always `false` |
@@ -128,21 +190,45 @@ Write a descriptive alt that names the subject and context (e.g. `"D2C founder p
 
 ### Body structure
 
-1. Opening paragraph — set the scene, hook the reader.
-2. H2 — context section.
-3. H2 — main body section 1.
-4. H2 — main body section 2.
-5. H2 — main body section 3.
-6. H2 — "Where to go from here" or similar closing transition. **If you have backlinks to add, this is where 1–2 of them naturally fit.**
-7. H2 — closing thought / call to action.
-8. FAQs.
+The opening must follow ONE of three patterns — pick deliberately, declare your choice in working memory, then execute:
 
-Internal links use the inline `link` annotation via `pLink`:
+| Pattern | When to use | Example |
+|---|---|---|
+| **A. Scene** | When you have a vivid anecdote from research | *"At 6 AM in a Pune warehouse, Manish Sharma's team is hand-counting 2,400 returned skincare orders from the previous week. Each return costs ₹86 in reverse logistics. Last month, that line item ate 22% of net revenue."* |
+| **B. Stat shock** | When you have a number readers won't believe | *"Indian D2C brands spent an average of ₹520 to acquire one customer in Q2 2025 — up 3.2× from 2020, according to RedSeer. The 14 brands that crossed ₹100Cr ARR did it with a CAC under ₹180."* |
+| **C. What just changed** | When a recent event/regulation/data point pivots the narrative | *"In April 2025, FSSAI rule 2.6.3 reclassified home-kitchen tiffin services above ₹40,000/month as 'commercial food operators' — and the country's largest WhatsApp-only tiffin business shut down 11 days later."* |
+
+After the opener, weave the **thesis from `/tmp/bi-research-<slug>.md`** into a single paragraph by paragraph 2 or 3. The reader should know what claim you're defending before any H2.
+
+Then:
+
+1. Opening (pattern A / B / C above)
+2. Thesis paragraph
+3. H2 — context section (with at least 1 stat, 1 named entity)
+4. H2 — section 2 (with at least 1 stat, 1 named entity, 1 inline link — either `pLink` to an idea or `pLinkPost` to a related blog post)
+5. H2 — section 3
+6. H2 — section 4 (vary count by depth — case-study posts may have 6–8 H2s)
+7. **Insert a `quote(...)` pull-quote block** roughly every 700 words. Use a real, sourced quote from research notes — or a punchy single-sentence summary of a key insight.
+8. H2 — "Where to go from here" / closing transition (good place for `pLink` and `pLinkPost`)
+9. H2 — closing thought / call to action
+10. FAQs (4–6)
+11. **Footer line:** `p("Last updated: <Month YYYY>")` at the very end of body — readers trust dated content.
+
+### Linking discipline
+
+Two link types, two purposes:
+
+| Helper | Target | When to use |
+|---|---|---|
+| `pLink` | `/business-ideas/<slug>` | When the post discusses a business model that maps to a specific idea in our library |
+| `pLinkPost` | `/blog/<slug>` | When a prior blog post explores a sub-topic deeper — knowledge-graph effect |
+
+Aim for **2–4 `pLinkPost` cross-references** to prior posts that fit, plus **0–6 `pLink` backlinks** to ideas. Both must read naturally. A post that links to nothing is acceptable if nothing genuinely fits.
+
 ```js
-pLink('Many founders pair this with a ', [{ text: 'tiffin service business', slug: 'tiffin-service' }], ' to diversify revenue.')
+pLink('See the ', [{ text: 'tiffin service idea', slug: 'tiffin-service' }], ' for revenue benchmarks.')
+pLinkPost('We dug into this in ', [{ text: 'our piece on D2C unit economics', slug: 'd2c-unit-economics-india' }], '.')
 ```
-
-**Backlink guidance:** include a `pLink` only when the linked idea is genuinely relevant to the surrounding sentence. A post with 0 backlinks is acceptable if no idea fits. A post with 6 backlinks is fine if all 6 are natural. Forced linking hurts SEO and reader trust — don't do it.
 
 ---
 
@@ -152,6 +238,29 @@ Run every check in `checklist.md`. If any fails:
 - Fix in memory.
 - Re-run all checks.
 - If still failing after 2nd pass, abort with `✗ Aborted at step 7: <which check failed>`.
+
+---
+
+## Step 7.5 — Fact-check loop (mandatory)
+
+Self-review catches *form*. Fact-check catches *substance*. After the checklist passes, pick **2 random statistics** from the body and verify them independently:
+
+1. For each picked stat, identify the source URL you cited in `/tmp/bi-research-<slug>.md`.
+2. `WebFetch` that URL fresh (not cached). Confirm the page still says what you claim.
+3. If the page is gone, paywalled, or contradicts your claim — **edit the stat in the body** to match what the source actually says, or remove it entirely.
+4. Pick **1 named founder/company** from the body. Run a `WebSearch` for `"<name>" "<business>" India` and confirm they exist, are based where you said, and the milestone you cited is accurate.
+5. If any fact-check fails twice, drop the claim from the body.
+
+Document the fact-check in `/tmp/bi-research-<slug>.md`:
+
+```
+## Fact-check
+- Stat 1: ✓ Verified at <URL>
+- Stat 2: ✗ Source 404'd → claim removed
+- Founder 1: ✓ Confirmed at <URL>
+```
+
+A hallucinated stat survives self-review but fails fact-check. This is the difference between an AI post and a researched post.
 
 ---
 
@@ -217,11 +326,41 @@ Return the success block defined in `.claude/agents/blog-writer.md`.
 
 ---
 
-## Voice cheat sheet (mimic this)
+## Voice cheat sheet (aspire to this)
 
-- "India is witnessing an unprecedented entrepreneurship boom." (real opener from an existing post)
-- "Gross margins of 55–70%. FSSAI license required."
-- "Start with 2–3 clients at ₹8,000–₹15,000/month each."
-- Direct second person ("you"), present tense.
-- Specific numbers always. Vague benefits never.
-- Indian regulatory + financial idioms (lakh, crore, GST, MSME, ITR, Startup India).
+### Use freely
+
+- Direct second person ("you"), present tense, contractions OK ("don't", "it's").
+- **Specific over generic.** Always a number, name, city, or dated fact: "₹52 per pickup in Pune", not "low pickup costs". "Mamaearth's CAC in 2025 was ₹520" not "D2C brands have high CAC".
+- Indian regulatory + financial idioms (lakh, crore, GST, MSME, FSSAI, Udyam, RBI, SEBI, AYUSH, Startup India, MEITY, ONDC).
+- Short paragraphs (2–4 sentences). One idea per paragraph.
+- Concrete openers: a scene, a stat, a named person — never a thesis sentence.
+- Light internal rhythm: 1–2 short sentences after a long one. Read drafts aloud in your head.
+
+### Voice red flags — never produce these
+
+The following are dead AI tells. If your draft contains any of them, rewrite.
+
+| Banned phrase / pattern | Why |
+|---|---|
+| *"In today's fast-paced world..."* / *"In the dynamic landscape of..."* | Generic AI opener. |
+| *"It's important to note that..."* / *"It is worth mentioning..."* | Hedging filler. |
+| *"Whether you're a... or a..., this guide will..."* | Listicle SEO cliché. |
+| *"From X to Y, the possibilities are endless."* | Empty rhetoric. |
+| *"Let's dive in / explore / delve into..."* | The most reliable AI tell. |
+| *"Game-changer / revolutionize / leverage / streamline / synergy / unlock the power of"* | Buzzword soup. |
+| Three consecutive sentences that begin with the same word | Rhythm flaw. |
+| Lists where every item is exactly one sentence of similar length | Reads as auto-generated. |
+| Statistics without a year / source ("70% of Indians prefer...") | Untrustworthy. Either cite or cut. |
+| A founder name with no city / no specific milestone | Same as above. |
+| The word "ultimately" or "in conclusion" before the last paragraph | AI conclusion-marker. |
+
+### Surgically use research
+
+Weave facts from Step 5.5 into sentences. Don't dump them in a "Statistics" block. Examples of *good* integration:
+
+> By April 2025, Mamaearth's customer acquisition cost had climbed to ₹520 per buyer — up nearly 3× from its 2020 numbers — and founder Ghazal Alagh told Inc42 the brand had moved 40% of its ad spend out of Meta entirely.
+
+vs. the *bad* version a memory-only draft produces:
+
+> Customer acquisition costs in India have been rising for D2C brands. Founders are exploring new channels to reduce dependency on social media platforms.

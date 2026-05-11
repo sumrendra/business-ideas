@@ -40,17 +40,25 @@ const client = createClient({
 let _key = 0
 const key = () => `k${++_key}`
 
-const p   = (text) => ({ _type: 'block', _key: key(), style: 'normal', markDefs: [], children: [{ _type: 'span', _key: key(), text, marks: [] }] })
-const h2  = (text) => ({ _type: 'block', _key: key(), style: 'h2',     markDefs: [], children: [{ _type: 'span', _key: key(), text, marks: [] }] })
-const h3  = (text) => ({ _type: 'block', _key: key(), style: 'h3',     markDefs: [], children: [{ _type: 'span', _key: key(), text, marks: [] }] })
+const p   = (text) => ({ _type: 'block', _key: key(), style: 'normal',     markDefs: [], children: [{ _type: 'span', _key: key(), text, marks: [] }] })
+const h2  = (text) => ({ _type: 'block', _key: key(), style: 'h2',         markDefs: [], children: [{ _type: 'span', _key: key(), text, marks: [] }] })
+const h3  = (text) => ({ _type: 'block', _key: key(), style: 'h3',         markDefs: [], children: [{ _type: 'span', _key: key(), text, marks: [] }] })
 const li  = (text) => ({ _type: 'block', _key: key(), style: 'normal', listItem: 'bullet', level: 1, markDefs: [], children: [{ _type: 'span', _key: key(), text, marks: [] }] })
 const num = (text) => ({ _type: 'block', _key: key(), style: 'normal', listItem: 'number', level: 1, markDefs: [], children: [{ _type: 'span', _key: key(), text, marks: [] }] })
+const quote = (text) => ({ _type: 'block', _key: key(), style: 'blockquote', markDefs: [], children: [{ _type: 'span', _key: key(), text, marks: [] }] })
 const faq = (question, answer) => ({ question, answer })
 
-// pLink — paragraph with inline links to business ideas.
+// pLink — paragraph with inline links to business ideas (/business-ideas/<slug>).
 // Args alternate plain string / link-array / plain string / link-array / ...
 //   pLink('See the ', [{ text: 'cloud kitchen idea', slug: 'cloud-kitchen' }], ' for benchmarks.')
-const pLink = (...parts) => {
+const pLink = (...parts) => buildLinkParagraph(parts, '/business-ideas')
+
+// pLinkPost — same as pLink but links to other blog posts (/blog/<slug>).
+// Use to build a knowledge-graph effect across the blog. Cross-link 2–4 prior posts per article.
+//   pLinkPost('We covered this in more depth in ', [{ text: 'our D2C unit economics piece', slug: 'd2c-unit-economics-india' }], '.')
+const pLinkPost = (...parts) => buildLinkParagraph(parts, '/blog')
+
+function buildLinkParagraph(parts, prefix) {
   const markDefs = []
   const children = []
   for (const part of parts) {
@@ -59,7 +67,7 @@ const pLink = (...parts) => {
     } else if (Array.isArray(part)) {
       for (const { text, slug } of part) {
         const mk = key()
-        markDefs.push({ _key: mk, _type: 'link', href: `/business-ideas/${slug}` })
+        markDefs.push({ _key: mk, _type: 'link', href: `${prefix}/${slug}` })
         children.push({ _type: 'span', _key: key(), text, marks: [mk] })
       }
     }
