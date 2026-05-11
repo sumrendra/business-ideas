@@ -37,7 +37,7 @@ import("@sanity/client").then(async ({ createClient }) => {
   const { join } = await import("path");
   const cfg = JSON.parse(readFileSync(join(process.env.HOME, ".config/sanity/config.json"), "utf8"));
   const c = createClient({ projectId: "5p3rso81", dataset: "production", apiVersion: "2024-01-01", token: cfg.authToken, useCdn: false });
-  const posts = await c.fetch(`*[_type=="post" && defined(slug.current)]{ "slug": slug.current, title, category, tags }`);
+  const posts = await c.fetch(`*[_type=="post" && defined(slug.current)]{ "slug": slug.current, title, category, tags, "coverAssetRef": cover_image.asset._ref, "coverUrl": cover_image.asset->url }`);
   const ideas = await c.fetch(`*[_type=="businessIdea" && defined(slug.current)]{ "slug": slug.current, title, industry, tags, budget_range }`);
   const catCounts = {};
   for (const p of posts) catCounts[p.category||"Uncategorized"] = (catCounts[p.category||"Uncategorized"]||0)+1;
@@ -72,15 +72,32 @@ From `ideas`, pick 3–6 whose `industry` or `tags` align with the chosen theme.
 
 ---
 
-## Step 5 — Read the canonical example
+## Step 5 — Study live posts, not just the seed file
 
-`Read scripts/seed-posts.mjs` (just the first 200 lines is enough). Note:
-- The Portable Text helpers (`p`, `h2`, `h3`, `li`, `num`, `faq`)
-- The voice: direct, Indian-context, ₹ amounts, mentions of FSSAI/Udyam/MSME/SEBI etc.
-- Heading rhythm: H2 every ~250–400 words, list-heavy
-- FAQs: 4–6 per post, conversational tone, specific numbers
+The seed file shows mechanics; the **live posts** show voice and current site theme. Pull 3 recent posts from Sanity and read their full body to internalise tone, structure, and rhythm:
 
-Then `Read .claude/skills/blog-writer/publish-template.mjs` for the new helpers — it adds `pLink(text, links)` for inline-linked paragraphs.
+```bash
+node -e '
+import("@sanity/client").then(async ({ createClient }) => {
+  const { readFileSync } = await import("fs");
+  const { join } = await import("path");
+  let tk = process.env.SANITY_WRITE_TOKEN;
+  if (!tk) try { tk = JSON.parse(readFileSync(join(process.env.HOME, ".config/sanity/config.json"), "utf8")).authToken } catch {}
+  if (!tk) tk = process.env.SANITY_API_TOKEN;
+  const c = createClient({ projectId: "5p3rso81", dataset: "production", apiVersion: "2024-01-01", token: tk, useCdn: false });
+  // 3 most recent non-policy-pulse posts
+  const samples = await c.fetch(`*[_type=="post" && defined(slug.current) && !("policy-pulse" in coalesce(tags,[]))] | order(published_at desc)[0...3]{ title, "slug": slug.current, excerpt, category, tags, body, faqs }`);
+  console.log(JSON.stringify(samples, null, 2));
+});' > /tmp/bi-samples.json
+```
+
+Then `Read /tmp/bi-samples.json` and pay attention to:
+- **Voice & rhythm:** sentence length, paragraph cadence, when H2s appear, list-heavy vs prose-heavy
+- **Indian context density:** ₹/lakh/crore, named regulators (FSSAI/Udyam/MSME/SEBI/GST), city references (Bangalore/Pune/Indore)
+- **FAQ tone:** how questions are phrased, length of answers, presence of specific numbers
+- **Tag patterns:** how many, lowercase, and whether they cross-reference other category names
+
+Also `Read .claude/skills/blog-writer/publish-template.mjs` once for the new helpers — `pLink()` (inline backlinks) and the cover-image block.
 
 ---
 
@@ -95,30 +112,42 @@ Produce these fields in memory:
 | `excerpt` | ≤300 chars, compelling hook |
 | `seo_title` | ≤60 chars |
 | `seo_description` | ≤160 chars |
-| `category` | one of the 8 fixed values |
-| `tags` | 4–8 lowercase tags |
+| `category` | **single** primary value from the 8 fixed categories (pick the best fit) |
+| `tags` | **5–9 lowercase tags**, must include any *other* category names that also apply (e.g. a Marketing & Growth post about D2C should also tag `entrepreneurship`, `case-studies` if relevant). This is how a post surfaces under multiple categories on the site. |
 | `reading_time` | round(word_count / 220) |
-| `body` | Portable Text, 2200–3500 words, with **3–6 inline links** to business-ideas |
+| `body` | Portable Text, 2200–3500 words. **0–6 inline `pLink` backlinks** — only when contextually relevant. Don't force a link into a paragraph that doesn't need one. |
 | `faqs` | 4–6 entries |
+| `cover_image` | mandatory — set via `coverImage = { url, alt }` or `coverImage = { query, alt }`. See "Cover image strategy" below. |
 | `featured` | always `false` |
 | `published_at` | now (ISO) |
 | `author` | `BusinessIdeas.live` |
 
-**Body structure (mandatory):**
+### Cover image strategy
+
+The post WILL appear on listing cards and the homepage with its `cover_image`, so it must be set. Pick **one** of these approaches in the seed script:
+
+1. **Direct URL (default — no API key required):** Pick a relevant landscape photo from Unsplash and inline its URL. The search-result URL `https://images.unsplash.com/photo-<id>?w=1600&q=80` works. To find a fresh photo, run a Bash search via the public Unsplash search page (e.g. `curl -s "https://unsplash.com/s/photos/<theme>"` and grep for `photo-` IDs), or use a relevant photo ID from `scripts/seed-post-images.mjs` if the theme matches. **Never** reuse the same photo as an existing post — fetch the existing posts' image asset URLs first and pick a different photo ID.
+2. **Unsplash search query (if `UNSPLASH_ACCESS_KEY` is in .env.local):** Set `coverImage = { query: '<theme>', alt: '<alt>' }`. The seed script hits the Unsplash search API and picks randomly from the top 5 results — fresh every run.
+
+Write a descriptive alt that names the subject and context (e.g. `"D2C founder packing skincare orders in a small Bangalore studio"`), not a bland label.
+
+### Body structure
 
 1. Opening paragraph — set the scene, hook the reader.
 2. H2 — context section.
-3. H2 — main body section 1 (with at least 1 inline link to a business idea via `pLink`).
-4. H2 — main body section 2 (with at least 1 inline link).
-5. H2 — main body section 3 (with at least 1 inline link).
-6. H2 — "Where to go from here" — bullets/links to related ideas, 2+ links.
+3. H2 — main body section 1.
+4. H2 — main body section 2.
+5. H2 — main body section 3.
+6. H2 — "Where to go from here" or similar closing transition. **If you have backlinks to add, this is where 1–2 of them naturally fit.**
 7. H2 — closing thought / call to action.
 8. FAQs.
 
-Internal links use the inline `link` annotation. Format in the seed script:
+Internal links use the inline `link` annotation via `pLink`:
 ```js
 pLink('Many founders pair this with a ', [{ text: 'tiffin service business', slug: 'tiffin-service' }], ' to diversify revenue.')
 ```
+
+**Backlink guidance:** include a `pLink` only when the linked idea is genuinely relevant to the surrounding sentence. A post with 0 backlinks is acceptable if no idea fits. A post with 6 backlinks is fine if all 6 are natural. Forced linking hurts SEO and reader trust — don't do it.
 
 ---
 

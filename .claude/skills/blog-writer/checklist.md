@@ -10,18 +10,21 @@ Run every check before publishing. If any fails, fix and re-run. Abort after 2 f
 - [ ] `seo_title` is ≤60 characters
 - [ ] `seo_description` is ≤160 characters
 - [ ] `category` is exactly one of: `Entrepreneurship`, `Market Research`, `Funding & Finance`, `Marketing & Growth`, `Technology`, `Operations`, `Mindset`, `Case Studies`
-- [ ] `tags` contains 4–8 lowercase strings, all relevant
+- [ ] `tags` contains 5–9 lowercase strings, all relevant
+- [ ] At least 1 tag matches a *different* category name (lowercased, with `&` replaced) — so the post surfaces under multiple category views. E.g. a Marketing & Growth post that fits Entrepreneurship too should include `entrepreneurship` as a tag.
 - [ ] `reading_time` ≈ word_count / 220 (rounded)
 - [ ] `featured` is `false`
 - [ ] `author` is `BusinessIdeas.live`
 - [ ] `published_at` is a valid ISO datetime (current time)
+- [ ] `coverImage` block in the seed script has either a real `url` (not `__COVER_URL__`) or a real `query`, and a descriptive non-empty `alt`
+- [ ] The chosen cover photo is not already used by another post (cross-check the `existingCoverIds` list fetched at step 2)
 
 ## Body
 
 - [ ] Word count is 2,200–3,500 (count text spans only, ignore Portable Text wrappers)
 - [ ] Body has at least 5 H2 headings
-- [ ] Body contains **3 to 6** inline links to `/business-ideas/<slug>`
-- [ ] Every linked slug exists in the inventory's `ideas[].slug` (no broken links)
+- [ ] Body contains **0 to 6** inline `pLink` backlinks — count only when the link reads naturally in its sentence. Forced links are a fail.
+- [ ] Every linked slug (if any) exists in the inventory's `ideas[].slug` (no broken links)
 - [ ] No duplicate idea slug is linked more than once
 - [ ] Voice matches `scripts/seed-posts.mjs`: Indian context (₹, lakhs/crores, FSSAI/MSME/Udyam/GST where relevant), specific numbers, direct second person
 - [ ] No hedging filler ("In today's fast-paced world", "It is important to note that")
