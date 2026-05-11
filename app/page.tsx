@@ -190,7 +190,7 @@ export default async function HomePage() {
                 <h2 className="text-2xl sm:text-3xl font-bold text-white">Opportunities from the news</h2>
                 <p className="mt-1 text-sm text-slate-400">New government policies creating real business windows right now</p>
               </div>
-              <Link href="/blog?tag=policy-pulse" className="shrink-0 text-sm font-medium text-indigo-400 hover:text-indigo-300 hover:underline">
+              <Link href="/policy-pulse" className="shrink-0 text-sm font-medium text-indigo-400 hover:text-indigo-300 hover:underline">
                 View all →
               </Link>
             </div>
