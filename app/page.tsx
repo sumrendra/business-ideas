@@ -154,16 +154,16 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* ── Insights ───────────────────────────────────────────────────────── */}
+      {/* ── Blog ───────────────────────────────────────────────────────────── */}
       {recentPosts.length > 0 && (
         <section className="mx-auto max-w-7xl px-4 py-16">
           <div className="mb-8 flex items-end justify-between gap-4">
             <div>
-              <p className="text-xs font-bold uppercase tracking-widest text-amber-700 dark:text-amber-400">Insights</p>
-              <h2 className="mt-1 text-2xl sm:text-3xl font-bold text-slate-900 dark:text-slate-100">Latest articles</h2>
+              <p className="text-xs font-bold uppercase tracking-widest text-amber-700 dark:text-amber-400">Blog</p>
+              <h2 className="mt-1 text-2xl sm:text-3xl font-bold text-slate-900 dark:text-slate-100">Latest blogs</h2>
             </div>
             <Link href="/blog" className="hidden sm:inline-flex text-sm font-medium text-indigo-600 dark:text-indigo-400 hover:underline">
-              View all articles →
+              View all blogs →
             </Link>
           </div>
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
@@ -172,7 +172,7 @@ export default async function HomePage() {
             ))}
           </div>
           <div className="mt-8 text-center sm:hidden">
-            <Link href="/blog" className="btn-outline text-sm">View all articles →</Link>
+            <Link href="/blog" className="btn-outline text-sm">View all blogs →</Link>
           </div>
         </section>
       )}

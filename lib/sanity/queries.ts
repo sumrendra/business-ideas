@@ -391,7 +391,7 @@ export const POLICY_PULSE_COUNT_QUERY = groq`
 `
 
 export const RECENT_POSTS_QUERY = groq`
-  *[_type == "post" && defined(published_at)]
+  *[_type == "post" && defined(published_at) && !("policy-pulse" in tags)]
   | order(published_at desc)[0...4] {
     ${POST_CARD_FIELDS}
   }
