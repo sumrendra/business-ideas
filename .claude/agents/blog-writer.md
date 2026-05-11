@@ -28,13 +28,14 @@ These are the source of truth. Follow them exactly.
 ## Return format (last message to caller)
 
 ```
-✓ Published: <title>
-  URL:    https://businessideas.live/blog/<slug>
-  Theme:  <theme>
-  Words:  <count>
-  Links:  <slug1>, <slug2>, ... (N business ideas backlinked)
-  Seed:   scripts/seed-post-<slug>.mjs
-  Commit: <short-sha>
+✓ Pushed blog/<slug> — GitHub Action will publish + merge in ~1–2 min
+  URL (after publish):  https://businessideas.live/blog/<slug>
+  Theme:                <theme>
+  Words:                <count>
+  Links:                <slug1>, <slug2>, ... (N business ideas backlinked)
+  Seed:                 scripts/seed-post-<slug>.mjs
+  Branch SHA:           <short-sha>
+  Action status:        https://github.com/sumrendra/business-ideas/actions
 ```
 
 If any step fails, return:

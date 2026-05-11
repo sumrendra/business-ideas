@@ -1,8 +1,9 @@
-name: Auto-merge blog branches into main
+name: Publish blog post and merge to main
 
 # Fires when the blog-writer agent pushes a branch matching blog/<slug>.
-# Fast-forwards (or merges) into main, then dispatches the deploy workflow.
-# (Pushes from GITHUB_TOKEN don't trigger other workflows — hence the explicit dispatch.)
+# Sequence: install deps → run seed script (publishes to Sanity, uploads cover image)
+#         → fast-forward / merge into main → delete blog branch → dispatch deploy.
+# Secrets live in repo settings — agent never sees them, locally or remotely.
 
 on:
   push:
@@ -18,23 +19,53 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  merge:
+  publish-and-merge:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout main
+      - name: Checkout blog branch
         uses: actions/checkout@v4
         with:
-          ref: main
+          ref: ${{ github.ref_name }}
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Resolve slug + seed file
+        id: find
+        run: |
+          set -euo pipefail
+          SLUG="${GITHUB_REF_NAME#blog/}"
+          SEED_FILE="scripts/seed-post-${SLUG}.mjs"
+          if [ ! -f "$SEED_FILE" ]; then
+            echo "ERROR: $SEED_FILE not found on branch $GITHUB_REF_NAME"
+            exit 1
+          fi
+          echo "seed_file=$SEED_FILE" >> "$GITHUB_OUTPUT"
+          echo "slug=$SLUG" >> "$GITHUB_OUTPUT"
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Publish post to Sanity
+        env:
+          SANITY_WRITE_TOKEN: ${{ secrets.SANITY_WRITE_TOKEN }}
+          UNSPLASH_ACCESS_KEY: ${{ secrets.UNSPLASH_ACCESS_KEY }}
+        run: node "${{ steps.find.outputs.seed_file }}"
+
       - name: Merge blog branch into main
+        if: success()
         run: |
           set -euo pipefail
           BRANCH="${GITHUB_REF_NAME}"
           git config user.email "blog-bot@users.noreply.github.com"
           git config user.name  "blog-bot"
-          git fetch origin "$BRANCH"
+          git fetch origin main
+          git checkout main
           if git merge --ff-only "origin/$BRANCH"; then
             echo "Fast-forwarded main from $BRANCH"
           else
@@ -44,8 +75,7 @@ jobs:
 
       - name: Delete merged blog branch
         if: success()
-        run: |
-          git push origin --delete "${GITHUB_REF_NAME}" || true
+        run: git push origin --delete "${GITHUB_REF_NAME}" || true
 
       - name: Trigger deploy workflow
         if: success()
