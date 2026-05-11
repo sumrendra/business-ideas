@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import { notFound } from 'next/navigation'
+import { notFound, redirect } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'
 import { PortableText } from '@portabletext/react'
@@ -87,6 +87,11 @@ export default async function BlogPostPage({ params }: PageProps) {
   )
 
   if (!post) notFound()
+
+  // Policy-pulse articles live at /policy-pulse/[slug] — redirect permanently
+  if (post.tags?.includes('policy-pulse')) {
+    redirect(`/policy-pulse/${slug}`)
+  }
 
   const [relatedPosts, relatedIdeas] = await Promise.all([
     post.category
@@ -196,8 +201,8 @@ export default async function BlogPostPage({ params }: PageProps) {
             </Link>
           )}
 
-          {/* Title */}
-          <h1 className="text-3xl font-extrabold leading-tight text-slate-900 dark:text-slate-100 sm:text-4xl lg:text-5xl max-w-4xl">
+          {/* Title — smaller when no cover image to avoid wall-of-text effect */}
+          <h1 className={`font-bold leading-snug text-slate-900 dark:text-slate-100 max-w-3xl ${coverUrl ? 'text-3xl sm:text-4xl lg:text-5xl' : 'text-2xl sm:text-3xl'}`}>
             {post.title}
           </h1>
 

@@ -287,6 +287,13 @@ export const POST_BY_SLUG_QUERY = groq`
   }
 `
 
+export const POLICY_PULSE_SLUGS_QUERY = groq`
+  *[_type == "post" && "policy-pulse" in tags && defined(slug.current)] {
+    "slug": slug.current,
+    "lastmod": coalesce(_updatedAt, _createdAt)
+  }
+`
+
 export const POLICY_PULSE_QUERY = groq`
   *[_type == "post" && "policy-pulse" in tags && defined(published_at)]
   | order(published_at desc)[0...3] {

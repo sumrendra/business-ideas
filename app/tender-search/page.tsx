@@ -303,13 +303,10 @@ function BidHistory() {
         <>
           {/* Summary stats */}
           {results.summary.totalBids > 0 && (
-            <div className="grid grid-cols-3 sm:grid-cols-6 gap-3 mb-6">
-              <StatBox label="Total Bids" value={results.summary.totalBids.toLocaleString()} />
-              <StatBox label="Avg L1 Price" value={formatINR(results.summary.avgL1Price)} />
-              <StatBox label="Median L1 Price" value={formatINR(results.summary.medianL1Price)} />
-              <StatBox label="Lowest L1" value={formatINR(results.summary.lowestL1Price)} />
-              <StatBox label="Avg Bidders" value={results.summary.avgBidders.toFixed(1)} />
-              <StatBox label="Avg Savings" value={`${results.summary.avgSavings.toFixed(1)}%`} />
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-6">
+              <StatBox label="Total Results" value={results.summary.totalBids.toLocaleString()} />
+              <StatBox label="Sources" value="GeM · CPPP" />
+              <StatBox label="Updated" value="Daily" />
             </div>
           )}
 
@@ -329,36 +326,26 @@ function BidHistory() {
                   <tr>
                     <th className="px-4 py-3 text-left">Item / Bid No</th>
                     <th className="px-4 py-3 text-left">Ministry / Org</th>
-                    <th className="px-4 py-3 text-right">L1 Price</th>
-                    <th className="px-4 py-3 text-right">Est. Value</th>
-                    <th className="px-4 py-3 text-right">Savings</th>
-                    <th className="px-4 py-3 text-right">Bidders</th>
-                    <th className="px-4 py-3 text-left">L1 Winner</th>
-                    <th className="px-4 py-3 text-left">Date</th>
+                    <th className="px-4 py-3 text-left">Source</th>
+                    <th className="px-4 py-3 text-left">Closed</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">
                   {results.bids.map(b => (
                     <tr key={b.bidId} className="hover:bg-gray-50">
                       <td className="px-4 py-3">
-                        <div className="font-medium text-gray-900 line-clamp-1 max-w-xs">{b.itemDescription || b.category || '—'}</div>
-                        <div className="text-xs text-gray-400">{b.bidNo}</div>
+                        <div className="font-medium text-gray-900 line-clamp-2 max-w-sm">{b.itemDescription || b.category || '—'}</div>
+                        <div className="text-xs text-gray-400 mt-0.5">{b.bidNo}</div>
                       </td>
-                      <td className="px-4 py-3 text-gray-600 text-xs max-w-[160px]">
+                      <td className="px-4 py-3 text-gray-600 text-xs max-w-[200px]">
                         <div className="line-clamp-1">{b.ministry || b.organization || '—'}</div>
                         {b.state && <div className="text-gray-400">{b.state}</div>}
                       </td>
-                      <td className="px-4 py-3 text-right font-semibold text-gray-900">{formatINR(b.l1Price)}</td>
-                      <td className="px-4 py-3 text-right text-gray-500">{formatINR(b.estimatedValue)}</td>
-                      <td className="px-4 py-3 text-right">
-                        {b.savingsPercent != null ? (
-                          <span className={`font-medium ${b.savingsPercent > 0 ? 'text-emerald-600' : 'text-red-500'}`}>
-                            {b.savingsPercent > 0 ? '+' : ''}{b.savingsPercent.toFixed(1)}%
-                          </span>
-                        ) : '—'}
+                      <td className="px-4 py-3">
+                        <span className={`inline-block px-2 py-0.5 rounded text-xs font-medium ${b.bidNo?.startsWith('GEM') ? 'bg-blue-50 text-blue-700' : 'bg-gray-100 text-gray-600'}`}>
+                          {b.bidNo?.startsWith('GEM') ? 'GeM' : 'CPPP'}
+                        </span>
                       </td>
-                      <td className="px-4 py-3 text-right text-gray-600">{b.totalBidders ?? '—'}</td>
-                      <td className="px-4 py-3 text-gray-600 text-xs max-w-[140px] line-clamp-2">{b.l1SellerName || '—'}</td>
                       <td className="px-4 py-3 text-gray-400 text-xs whitespace-nowrap">{formatDate(b.bidClosingDate)}</td>
                     </tr>
                   ))}
@@ -494,7 +481,7 @@ function VendorIntel() {
 // ── Main Page ─────────────────────────────────────────────────────────────────
 const TABS = [
   { id: 'search',  label: '🔍 Tender Search',      desc: 'Live active tenders' },
-  { id: 'bids',    label: '📊 Bid History',          desc: 'Historical L1 price data' },
+  { id: 'bids',    label: '📊 Bid History',          desc: 'Closed bids from GeM & CPPP' },
   { id: 'vendors', label: '🏢 Vendor Intelligence',  desc: 'Who wins govt contracts' },
 ]
 
