@@ -101,6 +101,12 @@ const TOOLS = [
     description: 'Did the ₹500 Cr capex they announced actually get spent? Track what NSE-listed companies promised in concalls and annual reports — vs. what actually happened. Delivered, missed, or watch.',
     badge: 'New',
   },
+  {
+    href: '/unlisted-financials',
+    label: 'Unlisted Company Financials',
+    description: 'Revenue, PAT, and net worth for Indian unicorns, soonicorns, and large private companies — Zoho, Byju\'s, Razorpay, OYO, and 60+ more. Sourced from public MCA filings, no paywalls.',
+    badge: 'New',
+  },
 ]
 
 export default function ToolsPage() {
