@@ -89,6 +89,12 @@ const TOOLS = [
     description: 'Live tenders from GeM, CPPP, and MahaTenders. Search active government contracts, view historical L1 bid prices, and identify top vendors winning government work.',
     badge: 'Live',
   },
+  {
+    href: '/screener',
+    label: 'India KPI Screener',
+    description: 'Sector-specific KPIs for 75+ listed Indian companies — GNPA/NIM for banks, VNB margin for insurance, RevPAR for hotels, ANDA filings for pharma. Sort any column instantly.',
+    badge: 'New',
+  },
 ]
 
 export default function ToolsPage() {
