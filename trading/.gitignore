@@ -1,0 +1,8 @@
+.env
+.kite_token
+.bot_state.json
+trade_journal.csv
+__pycache__/
+bot/__pycache__/
+logs/
+nifty_ic_backtest.csv
