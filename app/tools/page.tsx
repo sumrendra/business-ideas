@@ -95,6 +95,12 @@ const TOOLS = [
     description: 'Sector-specific KPIs for 75+ listed Indian companies — GNPA/NIM for banks, VNB margin for insurance, RevPAR for hotels, ANDA filings for pharma. Sort any column instantly.',
     badge: 'New',
   },
+  {
+    href: '/capex-tracker',
+    label: 'Capex & Promise Tracker',
+    description: 'Did the ₹500 Cr capex they announced actually get spent? Track what NSE-listed companies promised in concalls and annual reports — vs. what actually happened. Delivered, missed, or watch.',
+    badge: 'New',
+  },
 ]
 
 export default function ToolsPage() {
