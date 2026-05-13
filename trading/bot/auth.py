@@ -53,7 +53,10 @@ def _get_request_token() -> str:
     request_token = None
 
     with sync_playwright() as p:
-        browser = p.chromium.launch(headless=True)
+        browser = p.chromium.launch(
+            headless=True,
+            args=['--no-sandbox', '--disable-dev-shm-usage'],
+        )
         page = browser.new_page()
 
         # Intercept the final redirect to 127.0.0.1 — it won't load but
@@ -69,25 +72,85 @@ def _get_request_token() -> str:
         page.on('request', handle_request)
 
         print("[auth] Launching headless browser for login...")
-        page.goto(login_url)
+        page.goto(login_url, wait_until='domcontentloaded')
+        page.screenshot(path='/tmp/kite_step1_login.png')
+        print(f"[auth] Step 1 URL: {page.url}")
 
-        # Step 1 — enter credentials
+        # Step 1 — fill credentials
+        page.wait_for_selector('input[type="text"]', timeout=15000)
         page.fill('input[type="text"]', KITE_USER_ID)
         page.fill('input[type="password"]', KITE_PASSWORD)
         page.click('button[type="submit"]')
-        page.wait_for_timeout(1500)
+        page.wait_for_timeout(2000)
+        page.screenshot(path='/tmp/kite_step2_after_password.png')
+        print(f"[auth] Step 2 URL: {page.url}")
 
-        # Step 2 — enter TOTP
-        totp_code = pyotp.TOTP(KITE_TOTP_SECRET).now()
-        page.fill('input[type="number"], input[placeholder*="TOTP"], input[placeholder*="OTP"], input[autocomplete="one-time-code"]', totp_code)
-        page.wait_for_timeout(1500)
+        # Step 2 — fill TOTP (try all possible selectors Zerodha uses)
+        totp_selectors = [
+            'input[type="number"]',
+            'input[type="text"][maxlength="6"]',
+            'input[autocomplete="one-time-code"]',
+            'input[placeholder*="OTP"]',
+            'input[placeholder*="TOTP"]',
+            'input[placeholder*="code"]',
+        ]
+        totp_filled = False
+        for sel in totp_selectors:
+            try:
+                page.wait_for_selector(sel, timeout=3000)
+                totp_code = pyotp.TOTP(KITE_TOTP_SECRET).now()
+                page.fill(sel, totp_code)
+                print(f"[auth] TOTP filled using selector: {sel}")
+                totp_filled = True
+                break
+            except Exception:
+                continue
 
-        # Step 3 — click Authorise button on consent page
-        page.wait_for_selector('button:has-text("Authorise"), button:has-text("Authorize")', timeout=8000)
-        page.click('button:has-text("Authorise"), button:has-text("Authorize")')
+        if not totp_filled:
+            page.screenshot(path='/tmp/kite_step2_totp_fail.png')
+            raise RuntimeError("Could not find TOTP input field. Screenshot saved.")
 
-        # Wait for the redirect to fire (captured by request handler above)
-        page.wait_for_timeout(3000)
+        # Submit TOTP — click the Continue button explicitly
+        page.screenshot(path='/tmp/kite_step3_before_continue.png')
+        print(f"[auth] Step 3 URL before continue: {page.url}")
+        try:
+            page.wait_for_selector(
+                'button:has-text("Continue"), button[type="submit"]',
+                timeout=5000,
+            )
+            page.click('button:has-text("Continue"), button[type="submit"]')
+            print("[auth] Clicked Continue button after TOTP")
+        except Exception:
+            # Fallback: press Enter if button not found
+            print("[auth] Continue button not found, pressing Enter")
+            page.keyboard.press('Enter')
+
+        # Wait for the consent page to fully load (networkidle catches React hydration)
+        try:
+            page.wait_for_load_state('networkidle', timeout=15000)
+        except Exception:
+            pass  # not critical — just ensures SPA has settled
+
+        page.screenshot(path='/tmp/kite_step3_after_totp.png')
+        print(f"[auth] Step 3 URL after continue: {page.url}")
+
+        # Step 3 — click Authorise on Kite Connect consent page
+        try:
+            page.wait_for_selector(
+                'button:has-text("Authorise"), button:has-text("Authorize")',
+                timeout=30000,
+            )
+            page.screenshot(path='/tmp/kite_step4_authorise.png')
+            page.click('button:has-text("Authorise"), button:has-text("Authorize")')
+        except Exception:
+            page.screenshot(path='/tmp/kite_step4_authorise_fail.png')
+            raise RuntimeError(
+                f"Timed out waiting for Authorise button at URL: {page.url} "
+                "— screenshots saved to /tmp/kite_step*.png"
+            )
+
+        # Wait for the redirect to 127.0.0.1 (captured by request handler)
+        page.wait_for_timeout(4000)
         browser.close()
 
     if not request_token:
