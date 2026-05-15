@@ -11,19 +11,6 @@ import SortDropdown from '@/components/SortDropdown'
 
 const IDEAS_PER_PAGE = 5
 
-export const metadata: Metadata = {
-  title: 'Browse Business Ideas in India – Filter by Budget, Sector & Difficulty',
-  description:
-    'Explore 500+ business ideas in India filtered by investment, category, scalability, and profit potential. Find the right opportunity for you.',
-  alternates: { canonical: 'https://businessideas.live/business-ideas/' },
-  openGraph: {
-    title: 'Browse Business Ideas in India – Filter by Budget, Sector & Difficulty',
-    description: 'Explore 500+ business ideas filtered by investment, category, scalability, and profit potential.',
-    url: 'https://businessideas.live/business-ideas/',
-    type: 'website',
-  },
-}
-
 const collectionPageSchema = {
   '@context': 'https://schema.org',
   '@type': 'CollectionPage',
@@ -67,6 +54,24 @@ interface PageProps {
     search?: string
     page?: string
   }>
+}
+
+export async function generateMetadata({ searchParams }: PageProps): Promise<Metadata> {
+  const sp = await searchParams
+  const isFiltered = !!(sp.industry || sp.budget || sp.saturation || sp.difficulty || sp.tags || sp.search || sp.sort)
+  return {
+    title: 'Browse Business Ideas in India – Filter by Budget, Sector & Difficulty',
+    description:
+      'Explore 500+ business ideas in India filtered by investment, category, scalability, and profit potential. Find the right opportunity for you.',
+    alternates: { canonical: 'https://businessideas.live/business-ideas/' },
+    robots: isFiltered ? { index: false, follow: true } : undefined,
+    openGraph: {
+      title: 'Browse Business Ideas in India – Filter by Budget, Sector & Difficulty',
+      description: 'Explore 500+ business ideas filtered by investment, category, scalability, and profit potential.',
+      url: 'https://businessideas.live/business-ideas/',
+      type: 'website',
+    },
+  }
 }
 
 export default async function IdeasPage({ searchParams }: PageProps) {

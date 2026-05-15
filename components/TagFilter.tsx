@@ -31,6 +31,7 @@ export default function TagFilter({ allTags, activeTag, activeCategory }: TagFil
         <Link
           key={tag}
           href={tagUrl(tag, activeTag, activeCategory)}
+          rel="nofollow"
           className={`badge text-xs transition-colors cursor-pointer ${
             activeTag === tag
               ? 'bg-indigo-600 text-white'
