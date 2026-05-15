@@ -4,6 +4,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { PortableText } from '@portabletext/react'
 import { client } from '@/lib/sanity/client'
+import { LANDING_PAGES } from '@/app/blogs/[slug]/config'
 import { POST_BY_SLUG_QUERY, POST_SLUGS_QUERY, RELATED_POSTS_QUERY } from '@/lib/sanity/queries'
 import { urlFor } from '@/lib/sanity/image'
 import type { Post } from '@/lib/sanity/types'
@@ -39,13 +40,18 @@ function extractHeadings(body: unknown[]): TocHeading[] {
 
 export async function generateStaticParams() {
   const slugs = await client.fetch<{ slug: string }[]>(POST_SLUGS_QUERY)
-  return slugs.map(({ slug }) => ({ slug }))
+  return slugs
+    .filter(({ slug }) => !LANDING_PAGES[slug])
+    .map(({ slug }) => ({ slug }))
 }
 
 const BASE = 'https://businessideas.live'
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params
+  if (LANDING_PAGES[slug]) {
+    return { alternates: { canonical: `${BASE}/blogs/${slug}` } }
+  }
   const post = await client.fetch<Post | null>(POST_BY_SLUG_QUERY, { slug })
   if (!post) return {}
   const title = post.seo_title || post.title
@@ -80,6 +86,12 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 export default async function BlogPostPage({ params }: PageProps) {
   const { slug } = await params
+
+  // Programmatic landing pages live at /blogs/[slug] — redirect duplicates
+  if (LANDING_PAGES[slug]) {
+    redirect(`/blogs/${slug}`)
+  }
+
   const post = await client.fetch<Post | null>(
     POST_BY_SLUG_QUERY,
     { slug },
