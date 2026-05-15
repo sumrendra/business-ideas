@@ -5,6 +5,7 @@ export const metadata: Metadata = {
   description:
     'Scan your local market for gaps and underserved demand. Get hyperlocal business opportunity scores by category, competition density, and foot-traffic signals.',
   alternates: { canonical: 'https://businessideas.live/local-radar' },
+  robots: { index: false, follow: true },
   openGraph: {
     title: 'Local Market Radar — Hyperlocal Business Opportunity Scanner',
     description: 'Find underserved local demand and business gaps in your area with real market signals.',

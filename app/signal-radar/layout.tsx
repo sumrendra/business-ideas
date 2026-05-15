@@ -5,6 +5,7 @@ export const metadata: Metadata = {
   description:
     'Detect early-stage market signals — rising search trends, new regulations, and demographic shifts — that point to emerging business opportunities in India.',
   alternates: { canonical: 'https://businessideas.live/signal-radar' },
+  robots: { index: false, follow: true },
   openGraph: {
     title: 'Market Signal Radar — Spot Emerging Opportunities Early',
     description: 'Catch rising trends, regulatory shifts, and demand signals before they become crowded markets.',

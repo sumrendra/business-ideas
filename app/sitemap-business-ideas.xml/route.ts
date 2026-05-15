@@ -23,14 +23,9 @@ ${url(`${BASE}/policy-pulse`, '0.9', 'daily', today)}
 ${url(`${BASE}/incentives`, '0.8', 'weekly', today)}
 ${url(`${BASE}/funding-radar`, '0.8', 'weekly', today)}
 ${url(`${BASE}/funding-calculators`, '0.8', 'weekly', today)}
-${url(`${BASE}/hyperlocal-opportunity`, '0.7', 'weekly', today)}
-${url(`${BASE}/competitor-intel`, '0.7', 'weekly', today)}
 ${url(`${BASE}/compliance-map`, '0.7', 'weekly', today)}
-${url(`${BASE}/sector-pulse`, '0.7', 'weekly', today)}
 ${url(`${BASE}/export-finder`, '0.7', 'weekly', today)}
-${url(`${BASE}/signal-radar`, '0.7', 'weekly', today)}
 ${url(`${BASE}/supply-chain`, '0.7', 'weekly', today)}
-${url(`${BASE}/local-radar`, '0.7', 'weekly', today)}
 ${url(`${BASE}/dpiit-lookup`, '0.7', 'weekly', today)}
 </urlset>`
 

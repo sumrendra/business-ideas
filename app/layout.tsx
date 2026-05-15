@@ -11,7 +11,7 @@ export const metadata: Metadata = {
   metadataBase: new URL('https://businessideas.live'),
   title: {
     default: 'Business Suggestions in India – Low Investment, High Profit & Startup Guides 2026 | Business Ideas',
-    template: '%s | businessideas.live',
+    template: '%s',
   },
   description:
     'Discover 300+ business ideas in India with filters by investment, profit, and difficulty. Get cost, setup steps, and funding options to start today. Business ideas for small business. Enquire Today',

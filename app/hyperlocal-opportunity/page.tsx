@@ -9,6 +9,7 @@ export const metadata: Metadata = {
   title: 'Hyperlocal Opportunity — Demand vs Supply Gap Map for Indian Cities | businessideas.live',
   description: `Interactive heatmap showing where search demand outpaces business supply across ${CITIES.length} Indian cities and ${CATEGORIES.length} categories. Powered by Google Trends, Maps & Udyam data.`,
   alternates: { canonical: `${BASE}/hyperlocal-opportunity` },
+  robots: { index: false, follow: true },
   openGraph: {
     title: 'Hyperlocal Opportunity Map | businessideas.live',
     description: 'See demand heatmaps, supply clusters, and gap zones for any Indian city — all on one interactive map.',
