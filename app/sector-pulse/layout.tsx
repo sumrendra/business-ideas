@@ -5,6 +5,7 @@ export const metadata: Metadata = {
   description:
     'Track growth rates, funding activity, and saturation levels across Indian business sectors. Identify which industries are heating up and which are cooling down.',
   alternates: { canonical: 'https://businessideas.live/sector-pulse' },
+  robots: { index: false, follow: true },
   openGraph: {
     title: 'India Sector Pulse — Real-Time Business Sector Growth Tracker',
     description: 'Live growth metrics, funding signals, and saturation scores for every major Indian business sector.',

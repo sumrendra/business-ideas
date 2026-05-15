@@ -5,6 +5,7 @@ export const metadata: Metadata = {
   description:
     'Analyse competitors in any Indian business sector. Get pricing, positioning, market share, and gap analysis to find where you can win.',
   alternates: { canonical: 'https://businessideas.live/competitor-intel' },
+  robots: { index: false, follow: true },
   openGraph: {
     title: 'Competitor Intelligence Tool — Know Your Competition Before You Launch',
     description: 'Deep-dive competitor research for Indian markets: pricing, positioning, gaps, and win strategies.',
