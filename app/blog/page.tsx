@@ -27,11 +27,13 @@ export async function generateMetadata({ searchParams }: PageProps): Promise<Met
   const sp = await searchParams
   const page = Math.max(1, parseInt(sp.page ?? '1', 10))
   const canonical = page > 1 ? `${BASE}/blog?page=${page}` : `${BASE}/blog`
+  const isFiltered = !!(sp.category || sp.tag || sp.sort)
   return {
     title: 'Blogs — Startup Guides & Market Insights for Indian Entrepreneurs',
     description:
       'Guides, market insights, and entrepreneurship articles to help you evaluate and launch your next business idea in India.',
     alternates: { canonical },
+    robots: isFiltered ? { index: false, follow: true } : undefined,
     openGraph: {
       title: 'Blogs — Startup Guides & Market Insights | businessideas.live',
       description:
@@ -163,6 +165,7 @@ export default async function BlogPage({ searchParams }: PageProps) {
                   <Link
                     key={cat}
                     href={catUrl(cat)}
+                    rel="nofollow"
                     className={`flex w-full items-center justify-between rounded-lg px-3 py-1.5 text-sm transition-colors text-left ${
                       sp.category === cat
                         ? 'bg-indigo-600 text-white font-medium'
