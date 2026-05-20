@@ -26,6 +26,7 @@ export async function POST(request: NextRequest) {
 
   if (_type === 'businessIdea') {
     revalidateTag('business-ideas')
+    revalidateTag('search-index')
     revalidatePath('/business-ideas')
     revalidatePath('/')
     if (slug?.current) {
@@ -35,6 +36,7 @@ export async function POST(request: NextRequest) {
 
   if (_type === 'post') {
     revalidateTag('posts')
+    revalidateTag('search-index')
     revalidatePath('/blog')
     revalidatePath('/')
     if (slug?.current) {

@@ -5,7 +5,7 @@ import { client } from '@/lib/sanity/client'
 import { FEATURED_IDEAS_QUERY, RECENT_POSTS_QUERY, POLICY_PULSE_QUERY, SECTOR_COUNTS_QUERY } from '@/lib/sanity/queries'
 import IdeaCard from '@/components/IdeaCard'
 import BlogCard from '@/components/BlogCard'
-import SearchBox from '@/components/SearchBox'
+import HeroSearch from '@/components/HeroSearch'
 import TrendingSectors from '@/components/TrendingSectors'
 import SponsoredBanner from '@/components/SponsoredBanner'
 import PartnersStrip from '@/components/PartnersStrip'
@@ -66,7 +66,7 @@ export default async function HomePage() {
             curated for Indian entrepreneurs.
           </p>
           <div className="mt-8">
-            <SearchBox className="max-w-xl mx-auto" />
+            <HeroSearch className="max-w-xl mx-auto" />
           </div>
 
           {/* IA split: Opportunities vs Insights */}

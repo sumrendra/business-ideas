@@ -4,6 +4,8 @@ import './globals.css'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import ThemeProvider from '@/components/ThemeProvider'
+import { SearchProvider } from '@/components/search/SearchProvider'
+import { GlobalSearchPalette } from '@/components/search/GlobalSearch'
 
 const GA_ID = 'G-47YBE53LVP'
 
@@ -114,9 +116,12 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteSchema) }}
         />
         <ThemeProvider>
-          <Navbar />
-          <main className="flex-1">{children}</main>
-          <Footer />
+          <SearchProvider>
+            <Navbar />
+            <main className="flex-1">{children}</main>
+            <Footer />
+            <GlobalSearchPalette />
+          </SearchProvider>
         </ThemeProvider>
       </body>
     </html>

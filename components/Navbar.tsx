@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import ThemeToggle from './ThemeToggle'
+import SearchTrigger from './search/SearchTrigger'
 
 const NAV_LINKS = [
   { href: '/business-ideas',          label: 'Opportunities' },
@@ -44,8 +45,9 @@ export default function Navbar() {
           ))}
         </div>
 
-        {/* Right cluster: CTA + theme toggle */}
+        {/* Right cluster: search + CTA + theme toggle */}
         <div className="flex items-center gap-2 shrink-0">
+          <SearchTrigger />
           <Link
             href="/get-funded"
             className="hidden sm:inline-flex items-center rounded-lg bg-indigo-600 px-3.5 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 transition-colors"

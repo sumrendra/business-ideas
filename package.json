@@ -24,6 +24,8 @@
     "@sanity/image-url": "^1.0.2",
     "@sanity/vision": "^3.62.3",
     "@types/pg": "^8.20.0",
+    "cmdk": "^1.1.1",
+    "fuse.js": "^7.3.0",
     "google-trends-api": "^4.9.2",
     "h3-js": "^4.4.0",
     "maplibre-gl": "^5.24.0",

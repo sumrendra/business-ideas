@@ -4,7 +4,7 @@ import { IDEAS_PAGE_QUERY, IDEAS_COUNT_QUERY, IDEA_TAGS_QUERY } from '@/lib/sani
 import type { Idea } from '@/lib/sanity/types'
 import IdeaListCard from '@/components/IdeaListCard'
 import FilterSidebar from '@/components/FilterSidebar'
-import SearchBox from '@/components/SearchBox'
+import HeroSearch from '@/components/HeroSearch'
 import SponsoredBanner from '@/components/SponsoredBanner'
 import Pagination from '@/components/Pagination'
 import SortDropdown from '@/components/SortDropdown'
@@ -165,7 +165,7 @@ export default async function IdeasPage({ searchParams }: PageProps) {
             Filter by budget, sector, complexity &amp; market stage · Updated weekly for the Indian market
           </p>
           <div className="mt-4 flex gap-3">
-            <SearchBox placeholder="Search by keyword, sector or city..." className="max-w-md flex-1" />
+            <HeroSearch placeholder="Search by keyword, sector or city..." className="max-w-md flex-1" />
             <a href="/get-funded" className="btn-primary shrink-0 hidden sm:inline-flex">Enquire →</a>
           </div>
         </div>

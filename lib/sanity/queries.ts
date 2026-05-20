@@ -419,3 +419,58 @@ export const ALL_POSTS_FOR_LINKING_QUERY = groq`
     tags
   }
 `
+
+// ─── Global Search Index ──────────────────────────────────────────────────────
+
+export const SEARCH_IDEAS_INDEX_QUERY = groq`
+  *[_type == "businessIdea" && defined(slug.current) && defined(published_at)] {
+    "slug": slug.current,
+    title,
+    industry,
+    tags,
+    budget_range,
+    difficulty_level,
+    featured,
+    "cover": cover_image.asset->url
+  }
+`
+
+export const SEARCH_POSTS_INDEX_QUERY = groq`
+  *[_type == "post" && defined(slug.current) && defined(published_at)] {
+    "slug": slug.current,
+    title,
+    category,
+    tags,
+    featured,
+    "cover": cover_image.asset->url
+  }
+`
+
+export const SEARCH_DEEP_QUERY = groq`
+  {
+    "ideas": *[
+      _type == "businessIdea"
+      && defined(slug.current)
+      && defined(published_at)
+      && [title, description, industry, tags[]] match $q
+    ] | order(featured desc, published_at desc)[0...8] {
+      "slug": slug.current,
+      title,
+      industry,
+      tags,
+      "cover": cover_image.asset->url
+    },
+    "posts": *[
+      _type == "post"
+      && defined(slug.current)
+      && defined(published_at)
+      && [title, excerpt, category, tags[]] match $q
+    ] | order(featured desc, published_at desc)[0...6] {
+      "slug": slug.current,
+      title,
+      category,
+      tags,
+      "cover": cover_image.asset->url
+    }
+  }
+`

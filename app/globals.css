@@ -92,3 +92,62 @@
     @apply bg-slate-100 dark:bg-slate-800 rounded px-1 py-0.5 text-sm font-mono text-slate-700 dark:text-slate-200;
   }
 }
+
+/* ─── Global search (cmdk) ──────────────────────────────────────────── */
+
+[cmdk-group-heading] {
+  @apply px-3 pb-1 pt-3 text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500;
+}
+
+[cmdk-group]:first-child [cmdk-group-heading] {
+  @apply pt-1;
+}
+
+[cmdk-input] {
+  @apply outline-none;
+}
+
+[cmdk-item][data-disabled='true'] {
+  @apply pointer-events-none opacity-50;
+}
+
+[cmdk-list] {
+  scroll-padding-block: 0.5rem;
+}
+
+@keyframes bi-search-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes bi-search-pop-in {
+  from { opacity: 0; transform: translateY(-4px) scale(0.98); }
+  to   { opacity: 1; transform: translateY(0)    scale(1); }
+}
+
+.bi-search-overlay {
+  animation: bi-search-fade-in 140ms ease-out;
+}
+
+.bi-search-content {
+  animation: bi-search-pop-in 180ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* ─── Incentives state rail edge fade ─────────────────────────────── */
+/* Use a mask so chips fade naturally instead of being covered by an overlay div. */
+.bi-state-rail {
+  -webkit-mask-image: linear-gradient(
+    to right,
+    transparent 0,
+    black 16px,
+    black calc(100% - 16px),
+    transparent 100%
+  );
+          mask-image: linear-gradient(
+    to right,
+    transparent 0,
+    black 16px,
+    black calc(100% - 16px),
+    transparent 100%
+  );
+}
