@@ -446,6 +446,186 @@ export const SEARCH_POSTS_INDEX_QUERY = groq`
   }
 `
 
+// ─── Startups ─────────────────────────────────────────────────────────────────
+
+const STARTUP_CARD_FIELDS = groq`
+  _id,
+  name,
+  legal_name,
+  "slug": slug.current,
+  tagline,
+  short_description,
+  industry,
+  sub_industry,
+  business_model,
+  stage,
+  status,
+  hq_city,
+  hq_state,
+  founded_year,
+  total_funding_raised,
+  latest_valuation,
+  tags,
+  featured,
+  verified,
+  published_at,
+  last_updated_at,
+  "logo": logo { asset->{ url }, alt },
+  "cover_image": cover_image { asset->{ url }, alt }
+`
+
+const FOUNDER_CARD_FIELDS = groq`
+  _id,
+  name,
+  "slug": slug.current,
+  short_bio,
+  hometown,
+  background,
+  linkedin_url,
+  "photo": photo { asset->{ url }, alt }
+`
+
+/**
+ * STARTUPS_QUERY — filtered listing for /startups.
+ *
+ * All filter params are nullable and "" = no filter, mirroring IDEAS_QUERY.
+ * Funding range is matched by min/max bounds (pass null on $fundingMax to mean "no upper limit").
+ * $city is matched case-insensitively against hq_city.
+ */
+export const STARTUPS_QUERY = groq`
+  *[
+    _type == "startup"
+    && defined(slug.current)
+    && defined(published_at)
+    && ($industry == "" || industry == $industry)
+    && ($stage    == "" || stage    == $stage)
+    && ($status   == "" || status   == $status)
+    && ($model    == "" || business_model == $model)
+    && ($city     == "" || lower(coalesce(hq_city, "")) == lower($city))
+    && ($foundedFrom == 0 || coalesce(founded_year, 0) >= $foundedFrom)
+    && ($foundedTo   == 0 || coalesce(founded_year, 9999) <= $foundedTo)
+    && (count($tags) == 0 || count(tags[@ in $tags]) > 0)
+    && (
+      $fundingMin == 0
+        || coalesce(total_funding_raised, 0) >= $fundingMin
+    )
+    && (
+      $fundingMax == 0
+        || coalesce(total_funding_raised, 0) <= $fundingMax
+    )
+    && ($search == "" || [name, legal_name, tagline, short_description, industry, sub_industry, tags[]] match $search)
+  ] | order(featured desc, coalesce(last_updated_at, published_at) desc) [$from..$to] {
+    ${STARTUP_CARD_FIELDS}
+  }
+`
+
+export const STARTUPS_COUNT_QUERY = groq`
+  count(*[
+    _type == "startup"
+    && defined(slug.current)
+    && defined(published_at)
+    && ($industry == "" || industry == $industry)
+    && ($stage    == "" || stage    == $stage)
+    && ($status   == "" || status   == $status)
+    && ($model    == "" || business_model == $model)
+    && ($city     == "" || lower(coalesce(hq_city, "")) == lower($city))
+    && ($foundedFrom == 0 || coalesce(founded_year, 0) >= $foundedFrom)
+    && ($foundedTo   == 0 || coalesce(founded_year, 9999) <= $foundedTo)
+    && (count($tags) == 0 || count(tags[@ in $tags]) > 0)
+    && ($fundingMin == 0 || coalesce(total_funding_raised, 0) >= $fundingMin)
+    && ($fundingMax == 0 || coalesce(total_funding_raised, 0) <= $fundingMax)
+    && ($search == "" || [name, legal_name, tagline, short_description, industry, sub_industry, tags[]] match $search)
+  ])
+`
+
+export const STARTUP_BY_SLUG_QUERY = groq`
+  *[_type == "startup" && slug.current == $slug][0] {
+    ${STARTUP_CARD_FIELDS},
+    _updatedAt,
+    cin,
+    website,
+    long_story,
+    milestones,
+    financials,
+    funding_rounds,
+    key_executives,
+    board,
+    seo_title,
+    seo_description,
+    "og_image": og_image { asset->{ url } },
+    data_sources,
+    "founders": founders[]-> {
+      ${FOUNDER_CARD_FIELDS}
+    },
+    "competitors": competitors[]-> {
+      _id,
+      name,
+      "slug": slug.current,
+      tagline,
+      industry,
+      stage,
+      "logo": logo { asset->{ url }, alt }
+    },
+    "related_ideas": related_ideas[]-> {
+      _id,
+      title,
+      "slug": slug.current,
+      industry,
+      "cover_image": cover_image { asset->{ url }, alt }
+    },
+    "parent_company": parent_company-> {
+      _id,
+      name,
+      "slug": slug.current
+    }
+  }
+`
+
+export const STARTUP_SLUGS_QUERY = groq`
+  *[_type == "startup" && defined(slug.current)] {
+    "slug": slug.current,
+    "lastmod": coalesce(_updatedAt, last_updated_at, _createdAt)
+  }
+`
+
+export const STARTUP_TAGS_QUERY = groq`
+  array::unique(*[_type == "startup" && defined(tags)].tags[])
+`
+
+export const STARTUP_CITIES_QUERY = groq`
+  array::unique(*[_type == "startup" && defined(hq_city)].hq_city)
+`
+
+/** Recently updated startups — homepage / sidebar surface. */
+export const RECENT_STARTUPS_QUERY = groq`
+  *[_type == "startup" && defined(published_at)]
+  | order(coalesce(last_updated_at, published_at) desc)[0...6] {
+    ${STARTUP_CARD_FIELDS}
+  }
+`
+
+export const FOUNDER_BY_SLUG_QUERY = groq`
+  *[_type == "startupFounder" && slug.current == $slug][0] {
+    ${FOUNDER_CARD_FIELDS},
+    _updatedAt,
+    long_bio,
+    twitter_handle,
+    personal_site,
+    verified,
+    data_sources,
+    "startups": *[_type == "startup" && references(^._id)] | order(coalesce(last_updated_at, published_at) desc) {
+      ${STARTUP_CARD_FIELDS}
+    }
+  }
+`
+
+export const FOUNDER_SLUGS_QUERY = groq`
+  *[_type == "startupFounder" && defined(slug.current)] {
+    "slug": slug.current,
+    "lastmod": coalesce(_updatedAt, last_updated_at, _createdAt)
+  }
+`
+
 export const SEARCH_DEEP_QUERY = groq`
   {
     "ideas": *[

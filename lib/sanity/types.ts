@@ -200,3 +200,163 @@ export const BLOG_CATEGORIES = [
   'Mindset',
   'Case Studies',
 ]
+
+// ── Startups ──────────────────────────────────────────────────────────────────
+
+export interface StartupFounder {
+  _id: string
+  name: string
+  slug: string
+  short_bio?: string
+  long_bio?: unknown[]
+  photo?: CoverImage | null
+  linkedin_url?: string
+  twitter_handle?: string
+  personal_site?: string
+  background?: string[]
+  hometown?: string
+  verified?: boolean
+  data_sources?: { _key?: string; source?: string; url?: string; last_fetched?: string }[]
+  last_updated_at?: string
+}
+
+export interface FinancialSnapshot {
+  _key?: string
+  fiscal_year: string
+  revenue?: number
+  profit?: number
+  ebitda?: number
+  burn_monthly?: number
+  employee_count?: number
+  valuation?: number
+  currency?: string
+  source?: string
+  source_url?: string
+}
+
+export interface FundingRound {
+  _key?: string
+  date: string
+  round_type?: string
+  amount?: number
+  amount_usd?: number
+  lead_investor?: string
+  all_investors?: string[]
+  valuation_at_round?: number
+  source_url?: string
+}
+
+export interface StartupMilestone {
+  _key?: string
+  date?: string
+  title: string
+  description?: string
+  source_url?: string
+}
+
+export interface Startup {
+  _id: string
+  name: string
+  legal_name?: string
+  slug: string
+  cin?: string
+  logo?: CoverImage | null
+  cover_image?: CoverImage | null
+  website?: string
+  founded_year?: number
+  hq_city?: string
+  hq_state?: string
+  country?: string
+
+  industry?: string
+  sub_industry?: string
+  business_model?: string
+  stage?: string                     // funding stage (see STARTUP_STAGE_LABELS)
+  status?: string                    // operating status (see STARTUP_STATUS_LABELS)
+
+  founders?: StartupFounder[]        // dereferenced via GROQ ->
+  key_executives?: { _key?: string; name: string; title?: string; linkedin_url?: string }[]
+  board?: { _key?: string; name: string; role?: string; din?: string }[]
+
+  tagline?: string
+  short_description?: string
+  long_story?: unknown[]
+  milestones?: StartupMilestone[]
+
+  financials?: FinancialSnapshot[]
+  total_funding_raised?: number
+  latest_valuation?: number
+  funding_rounds?: FundingRound[]
+
+  tags?: string[]
+  competitors?: { _id: string; name: string; slug: string; logo?: CoverImage | null }[]
+  related_ideas?: { _id: string; title: string; slug: string }[]
+  parent_company?: { _id: string; name: string; slug: string } | null
+
+  seo_title?: string
+  seo_description?: string
+  og_image?: CoverImage | null
+
+  data_sources?: { _key?: string; source: string; url?: string; last_fetched?: string }[]
+  verified?: boolean
+  featured?: boolean
+  last_updated_at?: string
+  published_at?: string
+  _updatedAt?: string
+}
+
+// Funding stages — note "Series A" overlaps the existing STAGE_LABELS keys for
+// businessIdea, but the value namespace is distinct so they don't collide.
+export const STARTUP_STAGE_LABELS: Record<string, string> = {
+  bootstrapped:  'Bootstrapped',
+  pre_seed:      'Pre-seed',
+  seed:          'Seed',
+  series_a:      'Series A',
+  series_b:      'Series B',
+  series_c:      'Series C',
+  series_d_plus: 'Series D+',
+  unicorn:       'Unicorn',
+  ipo:           'IPO',
+  listed:        'Listed',
+}
+
+export const STARTUP_STAGE_OPTIONS = Object.entries(STARTUP_STAGE_LABELS)
+  .map(([value, label]) => ({ value, label }))
+
+export const STARTUP_STATUS_LABELS: Record<string, string> = {
+  active:    'Active',
+  acquired:  'Acquired',
+  shut_down: 'Shut Down',
+  stealth:   'Stealth',
+}
+
+export const STARTUP_STATUS_OPTIONS = Object.entries(STARTUP_STATUS_LABELS)
+  .map(([value, label]) => ({ value, label }))
+
+export const BUSINESS_MODEL_LABELS: Record<string, string> = {
+  b2b_saas:         'B2B SaaS',
+  b2c_subscription: 'B2C Subscription',
+  d2c:              'D2C Brand',
+  marketplace:      'Marketplace',
+  ecommerce:        'E-commerce',
+  fintech_lending:  'Fintech (Lending)',
+  fintech_payments: 'Fintech (Payments)',
+  aggregator:       'Aggregator',
+  service:          'Service / Agency',
+  hardware:         'Hardware / IoT',
+  media:            'Media / Content',
+  other:            'Other',
+}
+
+export const BUSINESS_MODEL_OPTIONS = Object.entries(BUSINESS_MODEL_LABELS)
+  .map(([value, label]) => ({ value, label }))
+
+// Funding-band buckets used by the listing filter.
+// Values in INR; null = no upper bound.
+export const FUNDING_RANGE_OPTIONS = [
+  { value: 'bootstrapped', label: 'Bootstrapped',     min: 0,            max: 0 },
+  { value: 'under_1cr',    label: 'Under ₹1 Cr',      min: 1,            max: 1_00_00_000 },
+  { value: '1cr_10cr',     label: '₹1 Cr – ₹10 Cr',   min: 1_00_00_000,  max: 10_00_00_000 },
+  { value: '10cr_100cr',   label: '₹10 Cr – ₹100 Cr', min: 10_00_00_000, max: 100_00_00_000 },
+  { value: '100cr_plus',   label: '₹100 Cr+',         min: 100_00_00_000, max: null as number | null },
+] as const

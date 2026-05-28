@@ -8,6 +8,9 @@ export async function GET() {
     'sitemap-blogs.xml',
     'sitemap-ideas.xml',
     'sitemap-categories.xml',
+    // Append-only: new segment for the Startup Database. Adding to the index
+    // does NOT change any existing canonical URL — it only adds /startups/* URLs.
+    'sitemap-startups.xml',
   ]
 
   const entries = sitemaps.map(s => `  <sitemap>

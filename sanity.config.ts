@@ -28,6 +28,15 @@ export default defineConfig({
               .title('User Feedback')
               .schemaType('feedback')
               .child(S.documentTypeList('feedback').title('User Feedback')),
+            S.divider(),
+            S.listItem()
+              .title('Startups')
+              .schemaType('startup')
+              .child(S.documentTypeList('startup').title('Startups')),
+            S.listItem()
+              .title('Founders')
+              .schemaType('startupFounder')
+              .child(S.documentTypeList('startupFounder').title('Founders')),
           ]),
     }),
     visionTool(),
