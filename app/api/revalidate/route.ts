@@ -44,5 +44,24 @@ export async function POST(request: NextRequest) {
     }
   }
 
+  if (_type === 'startup') {
+    revalidateTag('startups')
+    revalidatePath('/startups')
+    if (slug?.current) {
+      revalidateTag(`startup:${slug.current}`)
+      revalidatePath(`/startups/${slug.current}`)
+    }
+  }
+
+  if (_type === 'startupFounder') {
+    revalidateTag('startup-founders')
+    // Founders show up on startup pages too — bust the broad tag.
+    revalidateTag('startups')
+    if (slug?.current) {
+      revalidateTag(`founder:${slug.current}`)
+      revalidatePath(`/founders/${slug.current}`)
+    }
+  }
+
   return NextResponse.json({ revalidated: true, type: _type })
 }
