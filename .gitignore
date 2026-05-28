@@ -30,3 +30,11 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 feedback.jsonl
+
+# Claude / Impeccable / agent tooling — installed per-dev via `npx skills add`
+.agents/
+.claude/skills/
+
+# Ingestion caches (HTTP downloads, PDFs)
+scripts/ingest-startups/_cache/
+scripts/ingest-startups/.cache/
