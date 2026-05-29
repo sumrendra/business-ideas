@@ -269,25 +269,26 @@ const PT_COMPONENTS: PortableTextComponents = {
     link: ({ value, children }) => {
       const href: string = value?.href ?? '#'
       if (href.startsWith('/') || href.startsWith('#')) {
-        return <Link href={href} className="text-indigo-600 dark:text-indigo-400 hover:underline">{children}</Link>
+        return <Link href={href} className="text-brand-600 hover:underline">{children}</Link>
       }
-      return <a href={href} target="_blank" rel="noopener noreferrer" className="text-indigo-600 dark:text-indigo-400 hover:underline">{children}</a>
+      return <a href={href} target="_blank" rel="noopener noreferrer" className="text-brand-600 hover:underline">{children}</a>
     },
   },
 }
 
+// Difficulty is a risk signal → semantic scale (green easy → red expert)
 const DIFFICULTY_COLOR: Record<string, string> = {
-  beginner:     'bg-green-100 text-green-700',
-  intermediate: 'bg-yellow-100 text-yellow-700',
-  advanced:     'bg-orange-100 text-orange-700',
-  expert:       'bg-red-100 text-red-700',
+  beginner:     'bg-positive/10 text-positive',
+  intermediate: 'bg-caution/10 text-caution',
+  advanced:     'bg-caution/10 text-caution',
+  expert:       'bg-alert/10 text-alert',
 }
 
 const SATURATION_COLOR: Record<string, string> = {
-  concept:     'border-slate-300 dark:border-slate-600 text-slate-500 dark:text-slate-400',
-  validated:   'border-slate-300 dark:border-slate-600 text-slate-500 dark:text-slate-400',
-  competitive: 'border-slate-300 dark:border-slate-600 text-slate-500 dark:text-slate-400',
-  proven:      'border-slate-300 dark:border-slate-600 text-slate-500 dark:text-slate-400',
+  concept:     'border-line dark:border-line-dark text-ink-soft dark:text-paper-dark',
+  validated:   'border-line dark:border-line-dark text-ink-soft dark:text-paper-dark',
+  competitive: 'border-line dark:border-line-dark text-ink-soft dark:text-paper-dark',
+  proven:      'border-line dark:border-line-dark text-ink-soft dark:text-paper-dark',
 }
 
 export default async function IdeaPage({ params }: PageProps) {
@@ -322,19 +323,19 @@ export default async function IdeaPage({ params }: PageProps) {
 
         <div className="mx-auto max-w-6xl px-4 py-12">
           {/* Breadcrumb */}
-          <nav className="mb-6 text-sm text-slate-500 dark:text-slate-400">
-            <Link href="/" className="hover:text-indigo-600 dark:hover:text-indigo-400">Home</Link>
+          <nav className="mb-6 text-sm text-ink-soft dark:text-paper-dark">
+            <Link href="/" className="hover:text-brand-600">Home</Link>
             <span className="mx-2">/</span>
-            <Link href="/business-ideas" className="hover:text-indigo-600 dark:hover:text-indigo-400">Business Ideas</Link>
+            <Link href="/business-ideas" className="hover:text-brand-600">Business Ideas</Link>
             <span className="mx-2">/</span>
-            <span className="text-slate-700 dark:text-slate-300">{cat.h1}</span>
+            <span className="text-ink dark:text-paper-dark">{cat.h1}</span>
           </nav>
 
           {/* Header */}
           <header className="mb-10 max-w-3xl">
-            <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100 sm:text-4xl">{cat.h1}</h1>
-            <p className="mt-4 text-lg text-slate-600 dark:text-slate-300 leading-relaxed">{cat.intro}</p>
-            <p className="mt-3 text-sm text-slate-400 dark:text-slate-500">{ideas.length} validated ideas</p>
+            <h1 className="text-3xl font-bold text-ink dark:text-paper-dark sm:text-4xl">{cat.h1}</h1>
+            <p className="mt-4 text-lg text-ink-soft dark:text-paper-dark leading-relaxed">{cat.intro}</p>
+            <p className="mt-3 text-sm text-ink-soft dark:text-paper-dark"><span className="tabular-nums">{ideas.length}</span> validated ideas</p>
           </header>
 
           {/* Ideas grid */}
@@ -343,13 +344,13 @@ export default async function IdeaPage({ params }: PageProps) {
               {ideas.map(idea => <IdeaCard key={idea._id} idea={idea} />)}
             </div>
           ) : (
-            <p className="text-slate-400 py-12 text-center">More ideas in this category coming soon.</p>
+            <p className="text-ink-soft dark:text-paper-dark py-12 text-center">More ideas in this category coming soon.</p>
           )}
 
           {/* Cross-links to other categories */}
           {cat.related.length > 0 && (
-            <div className="mt-16 border-t border-slate-200 dark:border-slate-800 pt-10">
-              <p className="mb-4 text-sm font-semibold uppercase tracking-widest text-slate-500 dark:text-slate-400">Browse More Categories</p>
+            <div className="mt-16 border-t border-line dark:border-line-dark pt-10">
+              <p className="mb-4 text-sm font-semibold uppercase tracking-widest text-ink-soft dark:text-paper-dark">Browse More Categories</p>
               <div className="flex flex-wrap gap-3">
                 {cat.related.map(r => {
                   const rc = SEO_CATEGORIES[r]
@@ -357,7 +358,7 @@ export default async function IdeaPage({ params }: PageProps) {
                     <Link
                       key={r}
                       href={`/business-ideas/${r}`}
-                      className="rounded-full border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-4 py-2 text-sm text-slate-700 dark:text-slate-300 hover:border-indigo-300 hover:text-indigo-700 dark:hover:border-indigo-700 dark:hover:text-indigo-300 transition-colors"
+                      className="rounded-full border border-line dark:border-line-dark bg-surface dark:bg-surface-dark px-4 py-2 text-sm text-ink-soft dark:text-paper-dark hover:border-brand-600 hover:text-brand-700 dark:hover:text-brand-600 transition-colors"
                     >
                       {rc.h1.replace(' (2026)', '')}
                     </Link>
@@ -365,7 +366,7 @@ export default async function IdeaPage({ params }: PageProps) {
                 })}
                 <Link
                   href="/business-ideas"
-                  className="rounded-full border border-indigo-200 dark:border-indigo-800 bg-indigo-50 dark:bg-indigo-950/40 px-4 py-2 text-sm font-medium text-indigo-700 dark:text-indigo-300 hover:bg-indigo-100 dark:hover:bg-indigo-900/40 transition-colors"
+                  className="rounded-full border border-brand-600/30 bg-brand-600/10 px-4 py-2 text-sm font-medium text-brand-700 dark:text-brand-600 hover:bg-brand-600/20 transition-colors"
                 >
                   View All Ideas →
                 </Link>
@@ -375,23 +376,23 @@ export default async function IdeaPage({ params }: PageProps) {
 
           {/* FAQ */}
           <section className="mt-16 max-w-3xl">
-            <h2 className="mb-6 text-2xl font-bold text-slate-900 dark:text-slate-100">Frequently Asked Questions</h2>
+            <h2 className="mb-6 text-2xl font-bold text-ink dark:text-paper-dark">Frequently Asked Questions</h2>
             <div className="space-y-3">
               {cat.faqs.map((faq, i) => (
                 <details
                   key={i}
-                  className="group rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 backdrop-blur-md overflow-hidden open:bg-white dark:open:bg-slate-900 transition-colors"
+                  className="group rounded-2xl border border-line dark:border-line-dark bg-surface dark:bg-surface-dark overflow-hidden transition-colors"
                 >
-                  <summary className="flex cursor-pointer items-center justify-between gap-4 px-5 py-4 text-sm sm:text-base font-medium text-slate-800 dark:text-slate-100 marker:content-none hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors">
+                  <summary className="flex cursor-pointer items-center justify-between gap-4 px-5 py-4 text-sm sm:text-base font-medium text-ink dark:text-paper-dark marker:content-none hover:bg-surface-sunk dark:hover:bg-surface-dark-raised transition-colors">
                     <span>{faq.q}</span>
                     <svg
-                      className="shrink-0 h-5 w-5 text-slate-400 dark:text-slate-500 transition-transform group-open:rotate-180"
+                      className="shrink-0 h-5 w-5 text-ink-soft dark:text-paper-dark transition-transform group-open:rotate-180"
                       fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"
                     >
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                     </svg>
                   </summary>
-                  <p className="px-5 pb-5 pt-4 text-sm text-slate-600 dark:text-slate-400 leading-relaxed border-t border-slate-100 dark:border-slate-800">
+                  <p className="px-5 pb-5 pt-4 text-sm text-ink-soft dark:text-paper-dark leading-relaxed border-t border-line dark:border-line-dark">
                     {faq.a}
                   </p>
                 </details>
@@ -531,18 +532,18 @@ export default async function IdeaPage({ params }: PageProps) {
       {howToLd && <Ld data={howToLd} />}
     <article className="mx-auto max-w-7xl px-4 py-10">
       {/* Breadcrumb */}
-      <nav className="mb-6 text-sm text-slate-500 dark:text-slate-400">
-        <Link href="/" className="hover:text-indigo-600 dark:hover:text-indigo-400">Home</Link>
+      <nav className="mb-6 text-sm text-ink-soft dark:text-paper-dark">
+        <Link href="/" className="hover:text-brand-600">Home</Link>
         <span className="mx-2">/</span>
-        <Link href="/business-ideas" className="hover:text-indigo-600 dark:hover:text-indigo-400">Ideas</Link>
+        <Link href="/business-ideas" className="hover:text-brand-600">Ideas</Link>
         {idea.industry && INDUSTRY_SLUG[idea.industry] && (
           <>
             <span className="mx-2">/</span>
-            <Link href={`/business-ideas/${INDUSTRY_SLUG[idea.industry]}`} className="hover:text-indigo-600 dark:hover:text-indigo-400">{idea.industry}</Link>
+            <Link href={`/business-ideas/${INDUSTRY_SLUG[idea.industry]}`} className="hover:text-brand-600">{idea.industry}</Link>
           </>
         )}
         <span className="mx-2">/</span>
-        <span className="truncate text-slate-700 dark:text-slate-300">{idea.title}</span>
+        <span className="truncate text-ink dark:text-paper-dark">{idea.title}</span>
       </nav>
 
       {/* Cover Image */}
@@ -563,12 +564,12 @@ export default async function IdeaPage({ params }: PageProps) {
       <header className="mb-8 max-w-4xl">
         <div className="mb-3 flex flex-wrap gap-2">
           {idea.featured && (
-            <span className="badge border border-slate-300 dark:border-slate-600 text-slate-500 dark:text-slate-400 bg-transparent">Featured</span>
+            <span className="badge border border-line dark:border-line-dark text-ink-soft dark:text-paper-dark bg-transparent">Featured</span>
           )}
           {idea.industry && INDUSTRY_SLUG[idea.industry] ? (
-            <Link href={`/business-ideas/${INDUSTRY_SLUG[idea.industry]}`} className="badge border border-slate-300 dark:border-slate-600 text-slate-500 dark:text-slate-400 bg-transparent text-xs hover:border-indigo-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">{idea.industry}</Link>
+            <Link href={`/business-ideas/${INDUSTRY_SLUG[idea.industry]}`} className="badge border border-line dark:border-line-dark text-ink-soft dark:text-paper-dark bg-transparent text-xs hover:border-brand-600 hover:text-brand-600 transition-colors">{idea.industry}</Link>
           ) : (
-            <span className="badge border border-slate-300 dark:border-slate-600 text-slate-500 dark:text-slate-400 bg-transparent text-xs">{idea.industry}</span>
+            <span className="badge border border-line dark:border-line-dark text-ink-soft dark:text-paper-dark bg-transparent text-xs">{idea.industry}</span>
           )}
           {idea.market_saturation && (
             <span className={`badge text-xs border bg-transparent ${SATURATION_COLOR[idea.market_saturation]}`}>
@@ -576,21 +577,21 @@ export default async function IdeaPage({ params }: PageProps) {
             </span>
           )}
         </div>
-        <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100 sm:text-4xl">{idea.title}</h1>
-        <p className="mt-3 text-lg text-slate-600 dark:text-slate-400">{idea.description}</p>
+        <h1 className="text-3xl font-bold text-ink dark:text-paper-dark sm:text-4xl">{idea.title}</h1>
+        <p className="mt-3 text-lg text-ink-soft dark:text-paper-dark">{idea.description}</p>
 
         {/* Author + meta + share */}
         <div className="mt-5 flex flex-wrap items-center justify-between gap-4">
           {/* Author + timestamps */}
           <div className="flex items-center gap-3">
-            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-indigo-600 text-white text-xs font-bold select-none">
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-brand-600 text-white text-xs font-bold select-none">
               BI
             </div>
             <div>
-              <p className="text-sm font-medium text-slate-800 dark:text-slate-200 leading-tight">
+              <p className="text-sm font-medium text-ink dark:text-paper-dark leading-tight">
                 BusinessIdeas.live Research
               </p>
-              <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-slate-400 dark:text-slate-500 leading-tight mt-0.5">
+              <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-ink-soft dark:text-paper-dark leading-tight mt-0.5">
                 {publishedDate && <time dateTime={idea.published_at}>{publishedDate}</time>}
                 {updatedDate && updatedDate !== publishedDate && (
                   <>
@@ -624,28 +625,28 @@ export default async function IdeaPage({ params }: PageProps) {
       {/* ── At a Glance metrics ─────────────────────────────────────────────── */}
       {hasNewMetrics && (
         <section className="mb-10">
-          <h2 className="mb-3 text-[11px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500">At a glance</h2>
+          <h2 className="mb-3 text-[11px] font-bold uppercase tracking-widest text-ink-soft dark:text-paper-dark">At a glance</h2>
           <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3">
             {idea.monthly_revenue_range && (
-              <GlanceCard label="Monthly Revenue" value={idea.monthly_revenue_range} accent="green" />
+              <GlanceCard label="Monthly Revenue" value={idea.monthly_revenue_range} accent="positive" />
             )}
             {idea.time_to_first_revenue && (
-              <GlanceCard label="Time to First Revenue" value={idea.time_to_first_revenue} accent="blue" />
+              <GlanceCard label="Time to First Revenue" value={idea.time_to_first_revenue} accent="neutral" />
             )}
             {idea.breakeven_timeline && (
-              <GlanceCard label="Break-even" value={idea.breakeven_timeline} accent="amber" />
+              <GlanceCard label="Break-even" value={idea.breakeven_timeline} accent="caution" />
             )}
             {idea.setup_cost_range && (
-              <GlanceCard label="Setup Cost" value={idea.setup_cost_range} accent="slate" />
+              <GlanceCard label="Setup Cost" value={idea.setup_cost_range} accent="neutral" />
             )}
             {idea.gross_margin && (
-              <GlanceCard label="Gross Margin" value={idea.gross_margin} accent="indigo" />
+              <GlanceCard label="Gross Margin" value={idea.gross_margin} accent="positive" />
             )}
             {idea.difficulty_level && (
               <GlanceCard
                 label="Difficulty"
                 value={DIFFICULTY_LABELS[idea.difficulty_level] || idea.difficulty_level}
-                accent={idea.difficulty_level === 'beginner' ? 'green' : idea.difficulty_level === 'intermediate' ? 'amber' : 'red'}
+                accent={idea.difficulty_level === 'beginner' ? 'positive' : idea.difficulty_level === 'intermediate' ? 'caution' : 'alert'}
               />
             )}
           </div>
@@ -654,22 +655,22 @@ export default async function IdeaPage({ params }: PageProps) {
 
       {/* ── Step 1 to Start ──────────────────────────────────────────────────── */}
       {idea.first_step && (
-        <div className="mb-10 flex gap-4 rounded-2xl border border-green-200 dark:border-green-900/60 bg-green-50 dark:bg-green-950/30 p-5">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-green-500 text-white text-xl font-bold">
+        <div className="mb-10 flex gap-4 rounded-2xl border border-brand-600/20 bg-brand-600/10 p-5">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-brand-600 text-white text-xl font-bold tabular-nums">
             1
           </div>
           <div>
-            <p className="text-xs font-bold uppercase tracking-widest text-green-700 dark:text-green-400 mb-1">Start Here — This Week</p>
-            <p className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed">{idea.first_step}</p>
+            <p className="text-xs font-bold uppercase tracking-widest text-brand-700 dark:text-brand-600 mb-1">Start Here — This Week</p>
+            <p className="text-sm text-ink-soft dark:text-paper-dark leading-relaxed">{idea.first_step}</p>
           </div>
         </div>
       )}
 
       {/* Demand Signal */}
       {idea.demand_signal && (
-        <div className="mb-10 rounded-xl border border-indigo-100 dark:border-indigo-900/60 bg-indigo-50 dark:bg-indigo-950/30 px-5 py-3">
-          <span className="text-xs font-bold uppercase tracking-wide text-indigo-500 dark:text-indigo-400">Market Demand Signal</span>
-          <p className="mt-0.5 text-sm font-medium text-slate-800 dark:text-slate-200">{idea.demand_signal}</p>
+        <div className="mb-10 rounded-xl border border-brand-600/20 bg-brand-600/10 px-5 py-3">
+          <span className="text-xs font-bold uppercase tracking-wide text-brand-600">Market Demand Signal</span>
+          <p className="mt-0.5 text-sm font-medium text-ink dark:text-paper-dark">{idea.demand_signal}</p>
         </div>
       )}
 
@@ -698,13 +699,13 @@ export default async function IdeaPage({ params }: PageProps) {
       )}
 
       {/* ── Download Report CTA (mid-page) ───────────────────────────────────── */}
-      <div className="my-12 overflow-hidden rounded-2xl bg-gradient-to-br from-indigo-600 to-indigo-800 p-8 text-white">
+      <div className="my-12 overflow-hidden rounded-2xl bg-brand-700 p-8 text-white">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <p className="text-xs font-bold uppercase tracking-widest text-indigo-300 mb-1">Free Download</p>
+            <p className="text-xs font-bold uppercase tracking-widest text-white/70 mb-1">Free Download</p>
             <h3 className="text-xl font-bold">Get the Full Launch Kit for this Idea</h3>
-            <p className="mt-1 text-sm text-indigo-200">
-              Detailed financial model · Supplier &amp; vendor contacts · 90-day checklist · City-wise demand data
+            <p className="mt-1 text-sm text-white/80">
+              Detailed financial model · Supplier &amp; vendor contacts · <span className="tabular-nums">90</span>-day checklist · City-wise demand data
             </p>
           </div>
           <DownloadReportButton idea={idea} />
@@ -723,8 +724,8 @@ export default async function IdeaPage({ params }: PageProps) {
         <Section id="things-to-note" title="Things to Be Mindful Of">
           <ul className="space-y-2">
             {idea.things_to_note.map((item, i) => (
-              <li key={i} className="flex items-start gap-2 text-slate-700 dark:text-slate-300">
-                <span className="mt-1 h-2 w-2 shrink-0 rounded-full bg-amber-400" />
+              <li key={i} className="flex items-start gap-2 text-ink-soft dark:text-paper-dark">
+                <span className="mt-1 h-2 w-2 shrink-0 rounded-full bg-caution" aria-hidden />
                 {item}
               </li>
             ))}
@@ -742,8 +743,8 @@ export default async function IdeaPage({ params }: PageProps) {
       {/* ── Unit Economics ─────────────────────────────────────────────────────── */}
       {idea.unit_economics && Object.values(idea.unit_economics).some(Boolean) && (
         <section className="mb-10">
-          <h2 id="unit-economics" className="mb-1 text-xl font-bold text-slate-900 dark:text-slate-100 scroll-mt-24">Unit Economics</h2>
-          <p className="mb-4 text-sm text-slate-500 dark:text-slate-400">Real benchmarks from Indian operators in this space</p>
+          <h2 id="unit-economics" className="mb-1 text-xl font-bold text-ink dark:text-paper-dark scroll-mt-24">Unit Economics</h2>
+          <p className="mb-4 text-sm text-ink-soft dark:text-paper-dark">Real benchmarks from Indian operators in this space</p>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
             {[
               { label: 'Customer Acq. Cost', value: idea.unit_economics.cac,
@@ -759,23 +760,23 @@ export default async function IdeaPage({ params }: PageProps) {
               { label: 'CAC Payback', value: idea.unit_economics.payback_period,
                 tip: 'How long until a customer\'s payments cover what you spent to acquire them. Under 12 months is strong. Shorter payback = faster you can reinvest in growth.' },
             ].filter(r => r.value).map(row => (
-              <div key={row.label} className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800/60 p-4">
+              <div key={row.label} className="rounded-xl border border-line dark:border-line-dark bg-surface dark:bg-surface-dark p-4">
                 <div className="flex items-center gap-1.5 mb-1">
-                  <p className="text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">{row.label}</p>
+                  <p className="text-xs font-semibold uppercase tracking-wide text-ink-soft dark:text-paper-dark">{row.label}</p>
                   <div className="group relative">
-                    <span className="flex h-3.5 w-3.5 items-center justify-center rounded-full border border-slate-300 dark:border-slate-600 text-[9px] font-bold text-slate-400 dark:text-slate-500 cursor-default select-none leading-none">i</span>
-                    <div className="pointer-events-none absolute bottom-full left-1/2 z-50 mb-2 w-56 -translate-x-1/2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-2.5 text-xs text-slate-600 dark:text-slate-300 shadow-lg opacity-0 transition-opacity group-hover:opacity-100 group-hover:pointer-events-auto">
-                      <div className="absolute left-1/2 top-full -translate-x-1/2 border-4 border-transparent border-t-white dark:border-t-slate-900" />
+                    <span className="flex h-3.5 w-3.5 items-center justify-center rounded-full border border-line dark:border-line-dark text-[9px] font-bold text-ink-soft dark:text-paper-dark cursor-default select-none leading-none">i</span>
+                    <div className="pointer-events-none absolute bottom-full left-1/2 z-50 mb-2 w-56 -translate-x-1/2 rounded-lg border border-line dark:border-line-dark bg-surface dark:bg-surface-dark px-3 py-2.5 text-xs text-ink-soft dark:text-paper-dark shadow-lg opacity-0 transition-opacity group-hover:opacity-100 group-hover:pointer-events-auto">
+                      <div className="absolute left-1/2 top-full -translate-x-1/2 border-4 border-transparent border-t-surface dark:border-t-surface-dark" />
                       {row.tip}
                     </div>
                   </div>
                 </div>
-                <p className="text-sm font-bold text-slate-800 dark:text-slate-200">{row.value}</p>
+                <p className="text-base font-bold tabular-nums text-ink dark:text-paper-dark">{row.value}</p>
               </div>
             ))}
           </div>
           {idea.unit_economics.context && (
-            <p className="mt-3 text-xs text-slate-400 dark:text-slate-500 italic">{idea.unit_economics.context}</p>
+            <p className="mt-3 text-xs text-ink-soft dark:text-paper-dark italic">{idea.unit_economics.context}</p>
           )}
         </section>
       )}
@@ -785,8 +786,8 @@ export default async function IdeaPage({ params }: PageProps) {
         const kw = idea.google_trends_keyword || deriveTrendsKeyword(idea.title)
         return (
           <section className="mb-10">
-            <h2 id="search-demand" className="mb-1 text-xl font-bold text-slate-900 dark:text-slate-100 scroll-mt-24">Search Demand Trend</h2>
-            <p className="mb-3 text-sm text-slate-500 dark:text-slate-400">Google Trends — India — past 5 years</p>
+            <h2 id="search-demand" className="mb-1 text-xl font-bold text-ink dark:text-paper-dark scroll-mt-24">Search Demand Trend</h2>
+            <p className="mb-3 text-sm text-ink-soft dark:text-paper-dark">Google Trends — India — past <span className="tabular-nums">5</span> years</p>
             <TrendsChart
               keyword={kw}
               trendsUrl={`https://trends.google.com/trends/explore?q=${encodeURIComponent(kw)}&geo=IN&date=today%205-y`}
@@ -798,42 +799,37 @@ export default async function IdeaPage({ params }: PageProps) {
       {/* ── Indian Competitors ─────────────────────────────────────────────────── */}
       {((idea.competitors && idea.competitors.length > 0) || idea.industry) && (
         <section className="mb-10">
-          <h2 id="competitors" className="mb-1 text-xl font-bold text-slate-900 dark:text-slate-100 scroll-mt-24">Indian Competitors &amp; Players</h2>
-          <p className="mb-4 text-sm text-slate-500 dark:text-slate-400">Know your competition before you start</p>
+          <h2 id="competitors" className="mb-1 text-xl font-bold text-ink dark:text-paper-dark scroll-mt-24">Indian Competitors &amp; Players</h2>
+          <p className="mb-4 text-sm text-ink-soft dark:text-paper-dark">Know your competition before you start</p>
 
           {idea.competitors && idea.competitors.length > 0 && (
             <>
-              <p className="mb-2 text-[11px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500">Key players</p>
-              <div className="overflow-hidden rounded-xl border border-slate-200 dark:border-slate-700 mb-6">
+              <p className="mb-2 text-[11px] font-bold uppercase tracking-widest text-ink-soft dark:text-paper-dark">Key players</p>
+              <div className="overflow-hidden rounded-xl border border-line dark:border-line-dark mb-6">
                 <table className="w-full text-sm">
-                  <thead className="bg-slate-50 dark:bg-slate-800 text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">
+                  <thead className="bg-surface-sunk dark:bg-surface-dark-raised text-xs font-semibold uppercase tracking-wide text-ink-soft dark:text-paper-dark">
                     <tr>
                       <th className="px-4 py-3 text-left">Company</th>
                       <th className="px-4 py-3 text-left hidden sm:table-cell">City</th>
-                      <th className="px-4 py-3 text-left hidden md:table-cell">Funding</th>
+                      <th className="px-4 py-3 text-right hidden md:table-cell">Funding</th>
                       <th className="px-4 py-3 text-left">Scale / Revenue Signal</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                  <tbody className="divide-y divide-line dark:divide-line-dark">
                     {idea.competitors.map((c) => (
-                      <tr key={c._key ?? c.name} className="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors">
+                      <tr key={c._key ?? c.name} className="hover:bg-surface-sunk dark:hover:bg-surface-dark-raised transition-colors">
                         <td className="px-4 py-3">
-                          <div className="font-semibold text-slate-800 dark:text-slate-200">{c.name}</div>
+                          <div className="font-semibold text-ink dark:text-paper-dark">{c.name}</div>
                           {c.type && (
-                            <span className={`mt-0.5 inline-block rounded-full px-2 py-0.5 text-xs font-medium ${
-                              c.type === 'Funded' ? 'bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300' :
-                              c.type === 'Listed' ? 'bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300' :
-                              c.type === 'MNC' ? 'bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300' :
-                              'bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-300'
-                            }`}>{c.type}</span>
+                            <span className="mt-0.5 inline-block rounded-full border border-line dark:border-line-dark px-2 py-0.5 text-xs font-medium text-ink-soft dark:text-paper-dark">{c.type}</span>
                           )}
                         </td>
-                        <td className="px-4 py-3 text-slate-500 dark:text-slate-400 hidden sm:table-cell">{c.city || '—'}</td>
-                        <td className="px-4 py-3 text-slate-600 dark:text-slate-400 hidden md:table-cell">{c.funding_raised || '—'}</td>
+                        <td className="px-4 py-3 text-ink-soft dark:text-paper-dark hidden sm:table-cell">{c.city || '—'}</td>
+                        <td className="px-4 py-3 text-ink-soft dark:text-paper-dark tabular-nums text-right hidden md:table-cell">{c.funding_raised || '—'}</td>
                         <td className="px-4 py-3">
-                          <p className="text-slate-700 dark:text-slate-300">{c.revenue_signal || c.description || '—'}</p>
+                          <p className="text-ink-soft dark:text-paper-dark">{c.revenue_signal || c.description || '—'}</p>
                           {c.differentiator && (
-                            <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">{c.differentiator}</p>
+                            <p className="text-xs text-ink-soft dark:text-paper-dark mt-0.5">{c.differentiator}</p>
                           )}
                         </td>
                       </tr>
@@ -857,32 +853,32 @@ export default async function IdeaPage({ params }: PageProps) {
       {/* ── Regulatory Table ───────────────────────────────────────────────────── */}
       {idea.regulatory_table && idea.regulatory_table.length > 0 && (
         <section className="mb-10">
-          <h2 id="regulatory" className="mb-1 text-xl font-bold text-slate-900 dark:text-slate-100 scroll-mt-24">Licenses &amp; Regulatory Requirements</h2>
-          <p className="mb-4 text-sm text-slate-500 dark:text-slate-400">Exact costs and timelines — not estimates</p>
-          <div className="overflow-hidden rounded-xl border border-slate-200 dark:border-slate-700">
+          <h2 id="regulatory" className="mb-1 text-xl font-bold text-ink dark:text-paper-dark scroll-mt-24">Licenses &amp; Regulatory Requirements</h2>
+          <p className="mb-4 text-sm text-ink-soft dark:text-paper-dark">Exact costs and timelines — not estimates</p>
+          <div className="overflow-hidden rounded-xl border border-line dark:border-line-dark">
             <table className="w-full text-sm">
-              <thead className="bg-slate-50 dark:bg-slate-800 text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">
+              <thead className="bg-surface-sunk dark:bg-surface-dark-raised text-xs font-semibold uppercase tracking-wide text-ink-soft dark:text-paper-dark">
                 <tr>
                   <th className="px-4 py-3 text-left">License / Registration</th>
                   <th className="px-4 py-3 text-left hidden sm:table-cell">Authority</th>
-                  <th className="px-4 py-3 text-left">Cost (₹)</th>
+                  <th className="px-4 py-3 text-right">Cost (₹)</th>
                   <th className="px-4 py-3 text-left hidden md:table-cell">Time</th>
                   <th className="px-4 py-3 text-left hidden lg:table-cell">Portal</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+              <tbody className="divide-y divide-line dark:divide-line-dark">
                 {idea.regulatory_table.map((reg, ri) => (
-                  <tr key={reg._key ?? ri} className="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors">
+                  <tr key={reg._key ?? ri} className="hover:bg-surface-sunk dark:hover:bg-surface-dark-raised transition-colors">
                     <td className="px-4 py-3">
-                      <div className="font-medium text-slate-800 dark:text-slate-200">{reg.name}</div>
-                      <span className={`text-xs font-medium ${reg.mandatory ? 'text-red-500 dark:text-red-400' : 'text-slate-400 dark:text-slate-500'}`}>
+                      <div className="font-medium text-ink dark:text-paper-dark">{reg.name}</div>
+                      <span className={`text-xs font-medium ${reg.mandatory ? 'text-alert' : 'text-ink-soft dark:text-paper-dark'}`}>
                         {reg.mandatory ? 'Mandatory' : 'Optional'}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-slate-500 dark:text-slate-400 hidden sm:table-cell">{reg.authority || '—'}</td>
-                    <td className="px-4 py-3 font-semibold text-slate-800 dark:text-slate-200">{reg.cost || '—'}</td>
-                    <td className="px-4 py-3 text-slate-500 dark:text-slate-400 hidden md:table-cell">{reg.processing_time || '—'}</td>
-                    <td className="px-4 py-3 text-slate-500 dark:text-slate-400 hidden lg:table-cell">{reg.portal || '—'}</td>
+                    <td className="px-4 py-3 text-ink-soft dark:text-paper-dark hidden sm:table-cell">{reg.authority || '—'}</td>
+                    <td className="px-4 py-3 font-semibold tabular-nums text-right text-ink dark:text-paper-dark">{reg.cost || '—'}</td>
+                    <td className="px-4 py-3 text-ink-soft dark:text-paper-dark tabular-nums hidden md:table-cell">{reg.processing_time || '—'}</td>
+                    <td className="px-4 py-3 text-ink-soft dark:text-paper-dark hidden lg:table-cell">{reg.portal || '—'}</td>
                   </tr>
                 ))}
               </tbody>
@@ -894,15 +890,15 @@ export default async function IdeaPage({ params }: PageProps) {
       {/* ── Case Study ─────────────────────────────────────────────────────────── */}
       {idea.case_study?.founder_name && (
         <section className="mb-10">
-          <h2 id="founder-story" className="mb-4 text-xl font-bold text-slate-900 dark:text-slate-100 scroll-mt-24">Real Founder Story</h2>
-          <div className="rounded-2xl border border-indigo-100 dark:border-indigo-900/60 bg-indigo-50/50 dark:bg-indigo-950/30 p-6">
+          <h2 id="founder-story" className="mb-4 text-xl font-bold text-ink dark:text-paper-dark scroll-mt-24">Real Founder Story</h2>
+          <div className="rounded-2xl border border-brand-600/20 bg-brand-600/[0.06] dark:bg-brand-600/10 p-6">
             <div className="mb-4 flex flex-wrap items-start gap-4">
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-indigo-600 text-lg font-bold text-white">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-brand-600 text-lg font-bold text-white">
                 {idea.case_study.founder_name.charAt(0)}
               </div>
               <div>
-                <p className="font-bold text-slate-900 dark:text-slate-100 text-base">{idea.case_study.founder_name}</p>
-                <p className="text-sm text-slate-500 dark:text-slate-400">
+                <p className="font-bold text-ink dark:text-paper-dark text-base">{idea.case_study.founder_name}</p>
+                <p className="text-sm text-ink-soft dark:text-paper-dark">
                   {[idea.case_study.business_name, idea.case_study.city, idea.case_study.started_year]
                     .filter(Boolean).join(' · ')}
                 </p>
@@ -911,14 +907,14 @@ export default async function IdeaPage({ params }: PageProps) {
                 <div className="ml-auto flex gap-4">
                   {idea.case_study.revenue_6m && (
                     <div className="text-right">
-                      <p className="text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">Month 6</p>
-                      <p className="text-sm font-bold text-green-700 dark:text-green-400">{idea.case_study.revenue_6m}</p>
+                      <p className="text-xs font-semibold uppercase tracking-wide text-ink-soft dark:text-paper-dark">Month <span className="tabular-nums">6</span></p>
+                      <p className="text-base font-bold tabular-nums text-positive">{idea.case_study.revenue_6m}</p>
                     </div>
                   )}
                   {idea.case_study.revenue_12m && (
                     <div className="text-right">
-                      <p className="text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">Month 12</p>
-                      <p className="text-sm font-bold text-green-700 dark:text-green-400">{idea.case_study.revenue_12m}</p>
+                      <p className="text-xs font-semibold uppercase tracking-wide text-ink-soft dark:text-paper-dark">Month <span className="tabular-nums">12</span></p>
+                      <p className="text-base font-bold tabular-nums text-positive">{idea.case_study.revenue_12m}</p>
                     </div>
                   )}
                 </div>
@@ -926,26 +922,26 @@ export default async function IdeaPage({ params }: PageProps) {
             </div>
 
             {idea.case_study.team_size && (
-              <p className="mb-4 text-xs text-slate-500 dark:text-slate-400">Team size: {idea.case_study.team_size}</p>
+              <p className="mb-4 text-xs text-ink-soft dark:text-paper-dark">Team size: <span className="tabular-nums">{idea.case_study.team_size}</span></p>
             )}
 
             {idea.case_study.key_insight && (
-              <div className="mb-4 rounded-xl border-l-4 border-indigo-400 bg-white dark:bg-slate-800/60 p-4">
-                <p className="text-xs font-bold uppercase tracking-wide text-indigo-600 dark:text-indigo-400 mb-1">What Worked</p>
-                <p className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed">{idea.case_study.key_insight}</p>
+              <div className="mb-4 rounded-xl border-l-4 border-brand-600 bg-surface dark:bg-surface-dark p-4">
+                <p className="text-xs font-bold uppercase tracking-wide text-brand-700 dark:text-brand-600 mb-1">What Worked</p>
+                <p className="text-sm text-ink-soft dark:text-paper-dark leading-relaxed">{idea.case_study.key_insight}</p>
               </div>
             )}
 
             {idea.case_study.biggest_mistake && (
-              <div className="rounded-xl border-l-4 border-amber-400 bg-white dark:bg-slate-800/60 p-4">
-                <p className="text-xs font-bold uppercase tracking-wide text-amber-600 dark:text-amber-400 mb-1">Biggest Mistake</p>
-                <p className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed">{idea.case_study.biggest_mistake}</p>
+              <div className="rounded-xl border-l-4 border-caution bg-surface dark:bg-surface-dark p-4">
+                <p className="text-xs font-bold uppercase tracking-wide text-caution mb-1">Biggest Mistake</p>
+                <p className="text-sm text-ink-soft dark:text-paper-dark leading-relaxed">{idea.case_study.biggest_mistake}</p>
               </div>
             )}
 
             {idea.case_study.source_url && (
               <a href={idea.case_study.source_url} target="_blank" rel="noopener noreferrer"
-                className="mt-4 inline-block text-xs font-medium text-indigo-600 hover:underline">
+                className="mt-4 inline-block text-xs font-medium text-brand-600 hover:underline">
                 Read full story ↗
               </a>
             )}
@@ -956,11 +952,11 @@ export default async function IdeaPage({ params }: PageProps) {
       {/* Licenses Required */}
       {idea.licenses_required && idea.licenses_required.length > 0 && (
         <section className="mb-10">
-          <h2 className="mb-3 text-xl font-bold text-slate-900 dark:text-slate-100">Licenses &amp; Registrations</h2>
+          <h2 className="mb-3 text-xl font-bold text-ink dark:text-paper-dark">Licenses &amp; Registrations</h2>
           <div className="flex flex-wrap gap-2">
             {idea.licenses_required.map((lic) => (
-              <span key={lic} className="flex items-center gap-1.5 rounded-full border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-1.5 text-sm text-slate-700 dark:text-slate-300">
-                <span className="text-green-500">✓</span>
+              <span key={lic} className="flex items-center gap-1.5 rounded-full border border-line dark:border-line-dark bg-surface dark:bg-surface-dark px-3 py-1.5 text-sm text-ink-soft dark:text-paper-dark">
+                <span className="text-positive" aria-hidden>✓</span>
                 {lic}
               </span>
             ))}
@@ -971,15 +967,15 @@ export default async function IdeaPage({ params }: PageProps) {
       {/* Pros & Cons */}
       {((idea.pros && idea.pros.length > 0) || (idea.cons && idea.cons.length > 0)) && (
         <section className="mb-10">
-          <h2 id="pros-cons" className="mb-4 text-xl font-bold text-slate-900 dark:text-slate-100 scroll-mt-24">Pros &amp; Cons</h2>
+          <h2 id="pros-cons" className="mb-4 text-xl font-bold text-ink dark:text-paper-dark scroll-mt-24">Pros &amp; Cons</h2>
           <div className="grid gap-4 sm:grid-cols-2">
             {idea.pros && idea.pros.length > 0 && (
-              <div className="rounded-xl border border-green-100 dark:border-green-900/60 bg-green-50 dark:bg-green-950/30 p-4">
-                <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-green-600 dark:text-green-400">Pros</p>
+              <div className="rounded-xl border border-positive/20 bg-positive/[0.06] dark:bg-positive/10 p-4">
+                <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-positive">Pros</p>
                 <ul className="space-y-2">
                   {idea.pros.map((item, i) => (
-                    <li key={i} className="flex items-start gap-2 text-sm text-slate-700 dark:text-slate-300">
-                      <span className="mt-0.5 text-green-500">✓</span>
+                    <li key={i} className="flex items-start gap-2 text-sm text-ink-soft dark:text-paper-dark">
+                      <span className="mt-0.5 text-positive" aria-hidden>✓</span>
                       {item}
                     </li>
                   ))}
@@ -987,12 +983,12 @@ export default async function IdeaPage({ params }: PageProps) {
               </div>
             )}
             {idea.cons && idea.cons.length > 0 && (
-              <div className="rounded-xl border border-red-100 dark:border-red-900/60 bg-red-50 dark:bg-red-950/30 p-4">
-                <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-red-600 dark:text-red-400">Cons</p>
+              <div className="rounded-xl border border-alert/20 bg-alert/[0.06] dark:bg-alert/10 p-4">
+                <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-alert">Cons</p>
                 <ul className="space-y-2">
                   {idea.cons.map((item, i) => (
-                    <li key={i} className="flex items-start gap-2 text-sm text-slate-700 dark:text-slate-300">
-                      <span className="mt-0.5 text-red-400">✕</span>
+                    <li key={i} className="flex items-start gap-2 text-sm text-ink-soft dark:text-paper-dark">
+                      <span className="mt-0.5 text-alert" aria-hidden>✕</span>
                       {item}
                     </li>
                   ))}
@@ -1005,46 +1001,46 @@ export default async function IdeaPage({ params }: PageProps) {
 
       {/* Proof Points */}
       {idea.proof_points && idea.proof_points.length > 0 && (
-        <section className="mt-10 border-t border-slate-100 pt-8">
-          <h2 id="proof" className="mb-6 text-xl font-bold text-slate-900 dark:text-slate-100 scroll-mt-24">Real-World Proof</h2>
+        <section className="mt-10 border-t border-line dark:border-line-dark pt-8">
+          <h2 id="proof" className="mb-6 text-xl font-bold text-ink dark:text-paper-dark scroll-mt-24">Real-World Proof</h2>
           <div className="space-y-4">
             {idea.proof_points.map((pp) => (
               <div
                 key={pp._key}
                 className={`rounded-xl border p-5 ${
                   pp.type === 'Case Study'
-                    ? 'border-indigo-100 dark:border-indigo-900/60 bg-indigo-50 dark:bg-indigo-950/30'
+                    ? 'border-brand-600/20 bg-brand-600/[0.06] dark:bg-brand-600/10'
                     : pp.type === 'Government Source'
-                    ? 'border-green-100 dark:border-green-900/60 bg-green-50 dark:bg-green-950/30'
-                    : 'border-amber-100 dark:border-amber-900/60 bg-amber-50 dark:bg-amber-950/30'
+                    ? 'border-positive/20 bg-positive/[0.06] dark:bg-positive/10'
+                    : 'border-caution/20 bg-caution/[0.06] dark:bg-caution/10'
                 }`}
               >
                 <div className="mb-2 flex flex-wrap items-center gap-2">
                   <span className={`rounded-full px-2.5 py-0.5 text-xs font-bold uppercase tracking-wide ${
                     pp.type === 'Case Study'
-                      ? 'bg-indigo-200 dark:bg-indigo-900 text-indigo-800 dark:text-indigo-300'
+                      ? 'bg-brand-600/15 text-brand-700 dark:text-brand-600'
                       : pp.type === 'Government Source'
-                      ? 'bg-green-200 dark:bg-green-900 text-green-800 dark:text-green-300'
-                      : 'bg-amber-200 dark:bg-amber-900 text-amber-800 dark:text-amber-300'
+                      ? 'bg-positive/15 text-positive'
+                      : 'bg-caution/15 text-caution'
                   }`}>
                     {pp.type}
                   </span>
-                  <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">{pp.source}</span>
-                  {pp.founder && <span className="text-xs text-slate-500 dark:text-slate-400">· {pp.founder}</span>}
+                  <span className="text-xs font-semibold text-ink-soft dark:text-paper-dark">{pp.source}</span>
+                  {pp.founder && <span className="text-xs text-ink-soft dark:text-paper-dark">· {pp.founder}</span>}
                 </div>
                 {pp.url ? (
                   <a href={pp.url} target="_blank" rel="noopener noreferrer"
-                    className="font-semibold text-slate-800 dark:text-slate-200 hover:text-indigo-700 dark:hover:text-indigo-400 hover:underline leading-snug">
+                    className="font-semibold text-ink dark:text-paper-dark hover:text-brand-700 dark:hover:text-brand-600 hover:underline leading-snug">
                     {pp.headline} ↗
                   </a>
                 ) : (
-                  <p className="font-semibold text-slate-800 dark:text-slate-200 leading-snug">{pp.headline}</p>
+                  <p className="font-semibold text-ink dark:text-paper-dark leading-snug">{pp.headline}</p>
                 )}
                 {pp.key_stat && (
-                  <p className="mt-2 text-sm font-medium text-slate-700 dark:text-slate-300">— {pp.key_stat}</p>
+                  <p className="mt-2 text-sm font-medium text-ink-soft dark:text-paper-dark">— {pp.key_stat}</p>
                 )}
                 {pp.quote && (
-                  <blockquote className="mt-2 border-l-2 border-slate-300 dark:border-slate-600 pl-3 text-sm italic text-slate-600 dark:text-slate-400">
+                  <blockquote className="mt-2 border-l-2 border-line dark:border-line-dark pl-3 text-sm italic text-ink-soft dark:text-paper-dark">
                     "{pp.quote}"
                   </blockquote>
                 )}
@@ -1056,25 +1052,25 @@ export default async function IdeaPage({ params }: PageProps) {
 
       {/* Sector cross-link strip */}
       {idea.industry && (
-        <div className="mt-10 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/60 px-5 py-4 flex flex-wrap items-center justify-between gap-3">
+        <div className="mt-10 rounded-xl border border-line dark:border-line-dark bg-surface-sunk dark:bg-surface-dark-raised px-5 py-4 flex flex-wrap items-center justify-between gap-3">
           <div>
-            <p className="text-xs font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-0.5">Explore more</p>
-            <p className="text-sm font-semibold text-slate-800 dark:text-slate-200">
-              Browse all <span className="text-indigo-600 dark:text-indigo-400">{idea.industry}</span> business ideas
+            <p className="text-xs font-bold uppercase tracking-widest text-ink-soft dark:text-paper-dark mb-0.5">Explore more</p>
+            <p className="text-sm font-semibold text-ink dark:text-paper-dark">
+              Browse all <span className="text-brand-600">{idea.industry}</span> business ideas
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
             {INDUSTRY_SLUG[idea.industry] && (
               <Link
                 href={`/business-ideas/${INDUSTRY_SLUG[idea.industry]}`}
-                className="inline-flex items-center rounded-lg bg-indigo-600 px-3.5 py-1.5 text-sm font-semibold text-white hover:bg-indigo-500 transition-colors"
+                className="inline-flex items-center rounded-lg bg-brand-600 px-3.5 py-1.5 text-sm font-semibold text-white hover:bg-brand-700 transition-colors"
               >
                 Browse {idea.industry} ideas →
               </Link>
             )}
             <Link
               href={`/business-ideas?industry=${encodeURIComponent(idea.industry)}`}
-              className="inline-flex items-center rounded-lg border border-slate-300 dark:border-slate-600 px-3.5 py-1.5 text-sm font-medium text-slate-600 dark:text-slate-300 hover:border-indigo-400 hover:text-indigo-600 transition-colors"
+              className="inline-flex items-center rounded-lg border border-line dark:border-line-dark px-3.5 py-1.5 text-sm font-medium text-ink-soft dark:text-paper-dark hover:border-brand-600 hover:text-brand-600 transition-colors"
             >
               Filter by industry
             </Link>
@@ -1084,14 +1080,14 @@ export default async function IdeaPage({ params }: PageProps) {
 
       {/* Tags */}
       {idea.tags?.length > 0 && (
-        <div className="mt-10 border-t border-slate-100 pt-6">
-          <p className="mb-2 text-sm font-medium text-slate-500">Tags</p>
+        <div className="mt-10 border-t border-line dark:border-line-dark pt-6">
+          <p className="mb-2 text-sm font-medium text-ink-soft dark:text-paper-dark">Tags</p>
           <div className="flex flex-wrap gap-2">
             {idea.tags.map((tag) => (
               <Link
                 key={tag}
                 href={`/business-ideas?tags=${encodeURIComponent(tag)}`}
-                className="badge bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-indigo-100 dark:hover:bg-indigo-900/40 hover:text-indigo-700 dark:hover:text-indigo-300 transition-colors"
+                className="badge bg-surface-sunk dark:bg-surface-dark-raised text-ink-soft dark:text-paper-dark hover:bg-brand-600/10 hover:text-brand-700 dark:hover:text-brand-600 transition-colors"
               >
                 {tag}
               </Link>
@@ -1120,16 +1116,16 @@ export default async function IdeaPage({ params }: PageProps) {
 
       {/* People Also Viewed */}
       {peopleAlsoViewed.length > 0 && (
-        <section className="mt-16 border-t border-slate-100 dark:border-slate-800 pt-12">
+        <section className="mt-16 border-t border-line dark:border-line-dark pt-12">
           <div className="flex items-end justify-between gap-4 mb-6">
             <div>
-              <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100">People Also Viewed</h2>
-              <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">Similar ideas other founders are exploring</p>
+              <h2 className="text-xl font-bold text-ink dark:text-paper-dark">People Also Viewed</h2>
+              <p className="mt-1 text-sm text-ink-soft dark:text-paper-dark">Similar ideas other founders are exploring</p>
             </div>
             {idea.industry && INDUSTRY_SLUG[idea.industry] && (
               <Link
                 href={`/business-ideas/${INDUSTRY_SLUG[idea.industry]}`}
-                className="hidden sm:inline-flex shrink-0 text-sm font-medium text-indigo-600 dark:text-indigo-400 hover:underline"
+                className="hidden sm:inline-flex shrink-0 text-sm font-medium text-brand-600 hover:underline"
               >
                 All {idea.industry} ideas →
               </Link>
@@ -1151,9 +1147,9 @@ export default async function IdeaPage({ params }: PageProps) {
 
     {/* Related blog posts */}
     {relatedPosts.length > 0 && (
-      <section className="border-t border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/60 py-14">
+      <section className="border-t border-line dark:border-line-dark bg-surface-sunk dark:bg-surface-dark py-14">
         <div className="mx-auto max-w-4xl px-4">
-          <h2 className="mb-8 text-xl font-bold text-slate-900 dark:text-slate-100">Guides &amp; Resources</h2>
+          <h2 className="mb-8 text-xl font-bold text-ink dark:text-paper-dark">Guides &amp; Resources</h2>
           <div className="grid gap-6 sm:grid-cols-3">
             {relatedPosts.map(post => {
               const imgUrl = post.cover_image
@@ -1161,15 +1157,15 @@ export default async function IdeaPage({ params }: PageProps) {
                 : null
               return (
                 <Link key={post._id} href={`/blog/${post.slug}`}
-                  className="group flex flex-col rounded-xl border border-slate-200 bg-white overflow-hidden hover:shadow-md transition-shadow">
+                  className="group flex flex-col rounded-xl border border-line dark:border-line-dark bg-surface dark:bg-surface-dark-raised overflow-hidden transition-shadow hover:shadow-[0_6px_24px_-8px_rgba(22,24,29,0.12)]">
                   {imgUrl && (
                     <div className="relative h-40 w-full overflow-hidden">
                       <Image src={imgUrl} alt={post.cover_image?.alt || post.title} fill className="object-cover group-hover:scale-105 transition-transform duration-300" />
                     </div>
                   )}
                   <div className="p-4">
-                    <p className="text-xs font-semibold uppercase tracking-wide text-indigo-600 mb-1">{post.category}</p>
-                    <p className="text-sm font-semibold text-slate-800 line-clamp-2 group-hover:text-indigo-700 transition-colors">{post.title}</p>
+                    <p className="text-xs font-semibold uppercase tracking-wide text-brand-600 mb-1">{post.category}</p>
+                    <p className="text-sm font-semibold text-ink dark:text-paper-dark line-clamp-2 group-hover:text-brand-700 dark:group-hover:text-brand-600 transition-colors">{post.title}</p>
                   </div>
                 </Link>
               )
@@ -1184,21 +1180,28 @@ export default async function IdeaPage({ params }: PageProps) {
 
 // ── Sub-components ────────────────────────────────────────────────────────────
 
+// Semantic accents only — the colored left edge carries the meaning of the figure.
 const ACCENT_LEFT: Record<string, string> = {
-  green:  'border-l-emerald-400',
-  blue:   'border-l-blue-400',
-  amber:  'border-l-amber-400',
-  indigo: 'border-l-indigo-400',
-  red:    'border-l-rose-400',
-  slate:  'border-l-slate-300 dark:border-l-slate-600',
+  positive: 'border-l-positive',
+  caution:  'border-l-caution',
+  alert:    'border-l-alert',
+  neutral:  'border-l-line dark:border-l-line-dark',
+}
+
+const ACCENT_VALUE: Record<string, string> = {
+  positive: 'text-positive',
+  caution:  'text-caution',
+  alert:    'text-alert',
+  neutral:  'text-ink dark:text-paper-dark',
 }
 
 function GlanceCard({ label, value, accent }: { label: string; value: string; accent: string }) {
-  const left = ACCENT_LEFT[accent] || ACCENT_LEFT.slate
+  const left = ACCENT_LEFT[accent] || ACCENT_LEFT.neutral
+  const valueColor = ACCENT_VALUE[accent] || ACCENT_VALUE.neutral
   return (
-    <div className={`rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 border-l-4 ${left} px-4 py-3.5`}>
-      <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-1.5">{label}</p>
-      <p className="text-sm font-semibold text-slate-800 dark:text-slate-100 leading-snug">{value}</p>
+    <div className={`rounded-lg border border-line dark:border-line-dark bg-surface dark:bg-surface-dark border-l-4 ${left} px-4 py-3.5`}>
+      <p className="text-[10px] font-bold uppercase tracking-widest text-ink-soft dark:text-paper-dark mb-1.5">{label}</p>
+      <p className={`text-base font-bold tabular-nums leading-snug ${valueColor}`}>{value}</p>
     </div>
   )
 }
@@ -1206,7 +1209,7 @@ function GlanceCard({ label, value, accent }: { label: string; value: string; ac
 function Section({ id, title, children }: { id?: string; title: string; children: React.ReactNode }) {
   return (
     <section className="mb-8">
-      <h2 id={id} className="mb-3 text-xl font-bold text-slate-900 dark:text-slate-100 scroll-mt-24">{title}</h2>
+      <h2 id={id} className="mb-3 text-xl font-bold text-ink dark:text-paper-dark scroll-mt-24">{title}</h2>
       <div className="prose-content">{children}</div>
     </section>
   )
@@ -1288,30 +1291,30 @@ function IdeaSources({ idea }: { idea: Idea }) {
   if (all.length === 0) return null
 
   return (
-    <details className="group mt-10 border-t border-slate-100 dark:border-slate-800 pt-6">
-      <summary className="flex cursor-pointer list-none items-center gap-2 text-sm font-semibold text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition-colors select-none">
+    <details className="group mt-10 border-t border-line dark:border-line-dark pt-6">
+      <summary className="flex cursor-pointer list-none items-center gap-2 text-sm font-semibold text-ink-soft dark:text-paper-dark hover:text-ink dark:hover:text-paper-dark transition-colors select-none">
         <svg className="h-4 w-4 shrink-0 transition-transform group-open:rotate-90" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
         </svg>
         Sources &amp; References
-        <span className="ml-1 rounded-full bg-slate-100 dark:bg-slate-800 px-2 py-0.5 text-xs font-medium text-slate-500 dark:text-slate-400">{all.length}</span>
+        <span className="ml-1 rounded-full bg-surface-sunk dark:bg-surface-dark-raised px-2 py-0.5 text-xs font-medium tabular-nums text-ink-soft dark:text-paper-dark">{all.length}</span>
       </summary>
 
       <ol className="mt-4 space-y-2.5">
         {all.map((src, i) => (
-          <li key={i} className="flex gap-3 text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
-            <span className="shrink-0 font-mono text-[11px] text-slate-300 dark:text-slate-600 pt-0.5">[{i + 1}]</span>
+          <li key={i} className="flex gap-3 text-xs text-ink-soft dark:text-paper-dark leading-relaxed">
+            <span className="shrink-0 font-mono text-[11px] tabular-nums text-ink-soft/60 dark:text-paper-dark/50 pt-0.5">[{i + 1}]</span>
             <span>
               {src.url ? (
                 <a href={src.url} target="_blank" rel="noopener noreferrer"
-                  className="font-medium text-slate-700 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 hover:underline">
+                  className="font-medium text-ink dark:text-paper-dark hover:text-brand-600 hover:underline">
                   {src.label} ↗
                 </a>
               ) : (
-                <span className="font-medium text-slate-700 dark:text-slate-300">{src.label}</span>
+                <span className="font-medium text-ink dark:text-paper-dark">{src.label}</span>
               )}
               {src.description && (
-                <span className="text-slate-400 dark:text-slate-500"> — {src.description}</span>
+                <span className="text-ink-soft dark:text-paper-dark"> — {src.description}</span>
               )}
             </span>
           </li>
@@ -1323,11 +1326,11 @@ function IdeaSources({ idea }: { idea: Idea }) {
 
 function TagGroup({ label, items }: { label: string; items: string[]; color?: string }) {
   return (
-    <div className="rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-4 py-3.5">
-      <p className="mb-2.5 text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500">{label}</p>
+    <div className="rounded-lg border border-line dark:border-line-dark bg-surface dark:bg-surface-dark px-4 py-3.5">
+      <p className="mb-2.5 text-[10px] font-bold uppercase tracking-widest text-ink-soft dark:text-paper-dark">{label}</p>
       <div className="flex flex-wrap gap-1.5">
         {items.map((item) => (
-          <span key={item} className="inline-flex items-center rounded-full border border-slate-200 dark:border-slate-700 px-2.5 py-0.5 text-xs font-medium text-slate-600 dark:text-slate-400">
+          <span key={item} className="inline-flex items-center rounded-full border border-line dark:border-line-dark px-2.5 py-0.5 text-xs font-medium text-ink-soft dark:text-paper-dark">
             {item}
           </span>
         ))}

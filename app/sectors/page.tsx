@@ -93,12 +93,12 @@ export default async function SectorsPage() {
     <Ld data={breadcrumb} />
     <div className="mx-auto max-w-7xl px-4 py-14">
       <header className="mb-10 max-w-3xl">
-        <p className="text-xs font-bold uppercase tracking-widest text-indigo-600 dark:text-indigo-400">Sectors</p>
-        <h1 className="mt-2 text-3xl sm:text-4xl font-bold text-slate-900 dark:text-slate-100">
+        <p className="text-xs font-bold uppercase tracking-widest text-brand-600">Sectors</p>
+        <h1 className="mt-2 text-3xl sm:text-4xl font-bold text-ink dark:text-paper-dark">
           Browse business ideas by sector
         </h1>
-        <p className="mt-3 text-lg text-slate-600 dark:text-slate-400">
-          {SECTORS.length} industries · {totalIdeas} validated ideas, all tailored for the Indian market.
+        <p className="mt-3 text-lg text-ink-soft dark:text-paper-dark">
+          <span className="tabular-nums">{SECTORS.length}</span> industries · <span className="tabular-nums">{totalIdeas}</span> validated ideas, all tailored for the Indian market.
         </p>
       </header>
 
@@ -114,7 +114,7 @@ export default async function SectorsPage() {
             <Link
               key={s.display}
               href={href}
-              className="group relative aspect-[5/3] overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-100 dark:bg-slate-900 hover:border-indigo-300 dark:hover:border-indigo-700 transition-colors"
+              className="group relative aspect-[5/3] overflow-hidden rounded-2xl border border-line dark:border-line-dark bg-surface-sunk dark:bg-surface-dark transition-all hover:border-brand-600 hover:shadow-[0_6px_24px_-8px_rgba(22,24,29,0.12)]"
             >
               {/* Background — Sanity cover if exists, else generated sector hero */}
               <Image
@@ -131,14 +131,14 @@ export default async function SectorsPage() {
               />
 
               {/* Dark gradient overlay so text stays legible on any image */}
-              <div className="absolute inset-0 bg-gradient-to-t from-slate-950/85 via-slate-950/35 to-slate-950/10" />
+              <div className="absolute inset-0 bg-gradient-to-t from-ink/85 via-ink/35 to-ink/10" />
 
               {/* Content */}
               <div className="absolute inset-0 flex flex-col justify-between p-5">
                 <div className="flex justify-end">
                   {count > 0 && (
                     <span className="rounded-full bg-white/15 backdrop-blur-md px-2.5 py-1 text-[11px] font-semibold text-white border border-white/15">
-                      {count} {count === 1 ? 'idea' : 'ideas'}
+                      <span className="tabular-nums">{count}</span> {count === 1 ? 'idea' : 'ideas'}
                     </span>
                   )}
                 </div>

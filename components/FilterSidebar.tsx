@@ -71,13 +71,13 @@ export default function FilterSidebar({ allTags, activeFilters }: FilterSidebarP
     activeFilters.tags.length > 0
 
   return (
-    <div className="space-y-3 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-5 shadow-sm">
-      <div className="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-slate-800">
-        <h2 className="font-semibold text-slate-900 dark:text-slate-100">Filters</h2>
+    <div className="space-y-3 rounded-2xl border border-line dark:border-line-dark bg-surface dark:bg-surface-dark p-5">
+      <div className="flex items-center justify-between pb-2 border-b border-line dark:border-line-dark">
+        <h2 className="font-semibold text-ink dark:text-paper-dark">Filters</h2>
         {hasActiveFilters && (
           <button
             onClick={clearAll}
-            className="text-xs text-red-500 hover:text-red-700 font-medium transition-colors"
+            className="text-xs text-alert hover:underline font-medium transition-colors"
           >
             Clear all
           </button>
@@ -131,24 +131,32 @@ export default function FilterSidebar({ allTags, activeFilters }: FilterSidebarP
       {sortedTags.length > 0 && (
         <FilterGroup title="Tags" defaultOpen={activeFilters.tags.length > 0}>
           <div className="flex flex-wrap gap-1.5">
-            {visibleTags.map((tag) => (
-              <button
-                key={tag}
-                onClick={() => toggleTag(tag)}
-                className={`badge text-xs transition-colors cursor-pointer ${
-                  activeFilters.tags.includes(tag)
-                    ? 'bg-indigo-600 text-white'
-                    : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-indigo-100 dark:hover:bg-indigo-900/40 hover:text-indigo-700 dark:hover:text-indigo-300'
-                }`}
-              >
-                {tag}
-              </button>
-            ))}
+            {visibleTags.map((tag) => {
+              const isActive = activeFilters.tags.includes(tag)
+              return (
+                <button
+                  key={tag}
+                  onClick={() => toggleTag(tag)}
+                  className={`inline-flex min-h-[32px] items-center gap-1 rounded-full px-3 py-1 text-xs font-medium transition-colors cursor-pointer ${
+                    isActive
+                      ? 'bg-brand-600/10 text-brand-700 dark:text-brand-600'
+                      : 'bg-surface-sunk dark:bg-surface-dark-raised text-ink-soft dark:text-paper-dark hover:bg-brand-600/10 hover:text-brand-700 dark:hover:text-brand-600'
+                  }`}
+                >
+                  {isActive && (
+                    <svg className="h-3 w-3 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3} aria-hidden>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                    </svg>
+                  )}
+                  {tag}
+                </button>
+              )
+            })}
           </div>
           {sortedTags.length > TAGS_VISIBLE && (
             <button
               onClick={() => setShowAllTags((v) => !v)}
-              className="mt-2 text-xs font-medium text-indigo-600 hover:underline"
+              className="mt-2 text-xs font-medium text-brand-600 hover:underline"
             >
               {showAllTags
                 ? 'Show less ▲'
@@ -171,13 +179,13 @@ function FilterGroup({
   children: React.ReactNode
 }) {
   return (
-    <details open={defaultOpen} className="group border-b border-slate-100 dark:border-slate-800 pb-3 last:border-b-0 last:pb-0">
+    <details open={defaultOpen} className="group border-b border-line dark:border-line-dark pb-3 last:border-b-0 last:pb-0">
       <summary className="flex cursor-pointer items-center justify-between list-none mb-2 select-none">
-        <span className="text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500 group-hover:text-slate-600 dark:group-hover:text-slate-300 transition-colors">
+        <span className="text-xs font-semibold uppercase tracking-wide text-ink-soft dark:text-paper-dark group-hover:text-ink dark:group-hover:text-paper-dark transition-colors">
           {title}
         </span>
         <svg
-          className="h-4 w-4 text-slate-400 transition-transform duration-200 group-open:rotate-180"
+          className="h-4 w-4 text-ink-soft dark:text-paper-dark transition-transform duration-200 group-open:rotate-180"
           fill="none"
           viewBox="0 0 24 24"
           stroke="currentColor"
@@ -195,14 +203,20 @@ function FilterButton({ label, active, onClick }: { label: string; active: boole
   return (
     <button
       onClick={onClick}
-      className={`flex w-full items-center justify-between rounded-lg px-3 py-1.5 text-sm transition-colors text-left ${
+      className={`flex min-h-[36px] w-full items-center justify-between rounded-lg px-3 py-1.5 text-sm transition-colors text-left ${
         active
-          ? 'bg-indigo-600 text-white font-medium'
-          : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-slate-100'
+          ? 'bg-brand-600/10 text-brand-700 dark:text-brand-600 font-medium'
+          : 'text-ink-soft dark:text-paper-dark hover:bg-surface-sunk dark:hover:bg-surface-dark-raised hover:text-ink dark:hover:text-paper-dark'
       }`}
     >
-      {label}
-      {active && <span className="ml-2 text-xs opacity-75">✓</span>}
+      <span className="flex items-center gap-1.5">
+        {active && (
+          <svg className="h-3.5 w-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3} aria-hidden>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+          </svg>
+        )}
+        {label}
+      </span>
     </button>
   )
 }

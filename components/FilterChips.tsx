@@ -17,12 +17,12 @@ export default function FilterChips() {
     <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
       {GROUPS.map((group) => (
         <div key={group} className="flex items-center gap-2">
-          <span className="text-xs font-semibold text-slate-500">{group}:</span>
+          <span className="text-xs font-semibold text-ink-soft dark:text-paper-dark">{group}:</span>
           {CHIPS.filter((c) => c.group === group).map((chip) => (
             <Link
               key={chip.label}
               href={chip.href}
-              className="rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-medium text-slate-700 hover:border-indigo-300 hover:bg-indigo-50 hover:text-indigo-700 transition-colors"
+              className="inline-flex min-h-[32px] items-center rounded-full bg-surface-sunk dark:bg-surface-dark-raised px-3 py-1.5 text-xs font-medium text-ink-soft dark:text-paper-dark transition-colors hover:bg-brand-600/10 hover:text-brand-700 dark:hover:text-brand-600"
             >
               {chip.label}
             </Link>

@@ -27,24 +27,32 @@ export default function TagFilter({ allTags, activeTag, activeCategory }: TagFil
 
   return (
     <div className="flex flex-wrap gap-1.5">
-      {visible.map((tag) => (
-        <Link
-          key={tag}
-          href={tagUrl(tag, activeTag, activeCategory)}
-          rel="nofollow"
-          className={`badge text-xs transition-colors cursor-pointer ${
-            activeTag === tag
-              ? 'bg-indigo-600 text-white'
-              : 'bg-slate-100 text-slate-600 hover:bg-indigo-100 hover:text-indigo-700'
-          }`}
-        >
-          {tag}
-        </Link>
-      ))}
+      {visible.map((tag) => {
+        const isActive = activeTag === tag
+        return (
+          <Link
+            key={tag}
+            href={tagUrl(tag, activeTag, activeCategory)}
+            rel="nofollow"
+            className={`inline-flex min-h-[32px] items-center gap-1 rounded-full px-3 py-1 text-xs font-medium transition-colors cursor-pointer ${
+              isActive
+                ? 'bg-brand-600/10 text-brand-700 dark:text-brand-600'
+                : 'bg-surface-sunk dark:bg-surface-dark-raised text-ink-soft dark:text-paper-dark hover:bg-brand-600/10 hover:text-brand-700 dark:hover:text-brand-600'
+            }`}
+          >
+            {isActive && (
+              <svg className="h-3 w-3 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3} aria-hidden>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+              </svg>
+            )}
+            {tag}
+          </Link>
+        )
+      })}
       {sorted.length > MAX_VISIBLE && (
         <button
           onClick={() => setExpanded(e => !e)}
-          className="badge text-xs bg-slate-50 text-slate-400 border border-slate-200 hover:text-slate-600 transition-colors cursor-pointer"
+          className="inline-flex min-h-[32px] items-center rounded-full border border-line dark:border-line-dark bg-surface dark:bg-surface-dark px-3 py-1 text-xs font-medium text-ink-soft dark:text-paper-dark hover:text-ink dark:hover:text-paper-dark transition-colors cursor-pointer"
         >
           {expanded ? 'Show less' : `+${sorted.length - MAX_VISIBLE} more`}
         </button>
