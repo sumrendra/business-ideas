@@ -70,10 +70,10 @@ function direction(values: number[]): { label: 'Growing' | 'Stable' | 'Declining
 }
 
 const DIR_STYLE = {
-  Growing:   'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400',
-  Stable:    'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400',
-  Declining: 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400',
-  Seasonal:  'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400',
+  Growing:   'bg-positive/10 text-positive',
+  Stable:    'bg-brand-600/10 text-brand-600',
+  Declining: 'bg-alert/10 text-alert',
+  Seasonal:  'bg-caution/10 text-caution',
 }
 
 function LineChart({ values, labels }: { values: number[]; labels: string[] }) {
@@ -136,7 +136,7 @@ function LineChart({ values, labels }: { values: number[]; labels: string[] }) {
               width="80" height="26"
               className="opacity-0 group-hover/pt:opacity-100 pointer-events-none transition-opacity overflow-visible"
             >
-              <div className="bg-slate-800 text-white text-[10px] px-1.5 py-0.5 rounded whitespace-nowrap w-fit">
+              <div className="bg-ink dark:bg-surface-dark-raised text-paper dark:text-paper-dark text-[10px] px-1.5 py-0.5 rounded whitespace-nowrap w-fit tabular-nums">
                 {v}/100 · {labels[i]}
               </div>
             </foreignObject>
@@ -148,7 +148,7 @@ function LineChart({ values, labels }: { values: number[]; labels: string[] }) {
         {values.map((_, i) => (
           <div key={i} className="flex-1 flex justify-center">
             {i % 12 === 0 && (
-              <span className="text-[9px] text-slate-400 dark:text-slate-600 leading-none">
+              <span className="text-[9px] text-ink-soft/60 dark:text-paper-dark/40 leading-none tabular-nums">
                 {labels[i]?.split(' ')[1]}
               </span>
             )}
@@ -194,18 +194,18 @@ export default function TrendsChart({ keyword, trendsUrl }: Props) {
   // ── Loading skeleton ─────────────────────────────────────────────────────
   if (loading) {
     return (
-      <div className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 overflow-hidden animate-pulse">
+      <div className="rounded-2xl border border-line dark:border-line-dark bg-surface dark:bg-surface-dark overflow-hidden animate-pulse">
         <div className="flex items-center gap-3 px-5 pt-4 pb-2">
-          <div className="h-7 w-7 rounded-md bg-slate-200 dark:bg-slate-700" />
-          <div className="h-4 w-48 rounded bg-slate-200 dark:bg-slate-700" />
-          <div className="ml-auto h-6 w-20 rounded-full bg-slate-200 dark:bg-slate-700" />
+          <div className="h-7 w-7 rounded-md bg-surface-sunk dark:bg-surface-dark-raised" />
+          <div className="h-4 w-48 rounded bg-surface-sunk dark:bg-surface-dark-raised" />
+          <div className="ml-auto h-6 w-20 rounded-full bg-surface-sunk dark:bg-surface-dark-raised" />
         </div>
         <div className="px-5 pb-4">
-          <div className="w-full bg-slate-100 dark:bg-slate-800 rounded" style={{ height: 80 }} />
+          <div className="w-full bg-surface-sunk dark:bg-surface-dark-raised rounded" style={{ height: 80 }} />
         </div>
-        <div className="border-t border-slate-100 dark:border-slate-800 px-5 py-2.5 flex gap-5">
-          <div className="h-3 w-24 rounded bg-slate-200 dark:bg-slate-700" />
-          <div className="h-3 w-24 rounded bg-slate-200 dark:bg-slate-700" />
+        <div className="border-t border-line dark:border-line-dark px-5 py-2.5 flex gap-5">
+          <div className="h-3 w-24 rounded bg-surface-sunk dark:bg-surface-dark-raised" />
+          <div className="h-3 w-24 rounded bg-surface-sunk dark:bg-surface-dark-raised" />
         </div>
       </div>
     )
@@ -214,7 +214,7 @@ export default function TrendsChart({ keyword, trendsUrl }: Props) {
   // ── Error / no data state ────────────────────────────────────────────────
   if (error || !data || !data.values.length || data.rateLimited) {
     return (
-      <div className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 overflow-hidden">
+      <div className="rounded-2xl border border-line dark:border-line-dark bg-surface dark:bg-surface-dark overflow-hidden">
         <div className="flex items-center gap-2 px-5 pt-4 pb-3 flex-wrap">
           <GeoSelector geo={geo} setGeo={setGeo} />
           <div className="ml-auto">
@@ -222,7 +222,7 @@ export default function TrendsChart({ keyword, trendsUrl }: Props) {
           </div>
         </div>
         <div className="px-5 pb-6 text-center space-y-3">
-          <p className="text-sm text-slate-500 dark:text-slate-400">
+          <p className="text-sm text-ink-soft dark:text-paper-dark/70">
             {(error || data?.rateLimited)
               ? 'Google Trends is temporarily rate-limited.'
               : `Not enough search data for ${geoLabel}.`}
@@ -230,12 +230,12 @@ export default function TrendsChart({ keyword, trendsUrl }: Props) {
           <div className="flex items-center justify-center gap-3">
             <button
               onClick={() => setRetryKey(k => k + 1)}
-              className="rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-medium px-3 py-1.5 transition-colors"
+              className="rounded-md bg-brand-600 hover:bg-brand-700 text-white text-xs font-semibold px-4 py-2 min-h-[44px] sm:min-h-0 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-surface-dark"
             >
               Retry
             </button>
             <Link href={fallbackTrendsUrl} target="_blank" rel="noopener noreferrer"
-              className="text-xs text-indigo-600 dark:text-indigo-400 font-medium hover:underline">
+              className="text-xs text-brand-600 dark:text-brand-600 font-semibold hover:underline">
               View on Google Trends →
             </Link>
           </div>
@@ -256,12 +256,12 @@ export default function TrendsChart({ keyword, trendsUrl }: Props) {
   const regionLabel = geo === 'IN' ? 'Search demand by state' : 'Search demand by city'
 
   return (
-    <div className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 overflow-hidden">
+    <div className="rounded-2xl border border-line dark:border-line-dark bg-surface dark:bg-surface-dark overflow-hidden">
 
       {/* Header */}
       <div className="flex items-start justify-between gap-3 px-5 pt-4 pb-2 flex-wrap">
         <div className="flex items-center gap-2.5 min-w-0">
-          <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-blue-50 dark:bg-blue-900/30">
+          <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-surface-sunk dark:bg-surface-dark-raised">
             <svg className="h-4 w-4" viewBox="0 0 24 24">
               <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
               <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
@@ -270,8 +270,8 @@ export default function TrendsChart({ keyword, trendsUrl }: Props) {
             </svg>
           </div>
           <div className="min-w-0">
-            <span className="text-xs font-semibold text-slate-700 dark:text-slate-200 truncate">"{bestKeyword}"</span>
-            <span className="ml-1.5 text-xs text-slate-400 dark:text-slate-500">· {locationLabel}</span>
+            <span className="text-xs font-semibold text-ink dark:text-paper-dark truncate">"{bestKeyword}"</span>
+            <span className="ml-1.5 text-xs text-ink-soft/70 dark:text-paper-dark/50">· {locationLabel}</span>
           </div>
         </div>
         <div className="flex items-center gap-2 shrink-0 flex-wrap">
@@ -279,7 +279,7 @@ export default function TrendsChart({ keyword, trendsUrl }: Props) {
             {arrow} {dir}
           </span>
           <Link href={bestTrendsUrl} target="_blank" rel="noopener noreferrer"
-            className="text-slate-400 hover:text-indigo-500 transition-colors" title="Open in Google Trends">
+            className="text-ink-soft/60 dark:text-paper-dark/50 hover:text-brand-600 transition-colors" title="Open in Google Trends">
             <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
                 d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
@@ -303,51 +303,51 @@ export default function TrendsChart({ keyword, trendsUrl }: Props) {
 
       {/* Seasonal insight */}
       {seasonalInsight && (
-        <div className="mx-5 mb-3 flex items-start gap-2 rounded-lg bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/40 px-3 py-2">
-          <span className="text-amber-500 text-sm mt-px shrink-0">◐</span>
-          <p className="text-xs text-amber-700 dark:text-amber-300 leading-snug">{seasonalInsight}</p>
+        <div className="mx-5 mb-3 flex items-start gap-2 rounded-lg bg-caution/10 border border-caution/30 px-3 py-2">
+          <span className="text-caution text-sm mt-px shrink-0">◐</span>
+          <p className="text-xs text-caution leading-snug">{seasonalInsight}</p>
         </div>
       )}
 
       {/* Stats row */}
-      <div className="flex flex-wrap items-center gap-x-5 gap-y-1 border-t border-slate-100 dark:border-slate-800 px-5 py-2.5">
+      <div className="flex flex-wrap items-center gap-x-5 gap-y-1 border-t border-line dark:border-line-dark px-5 py-2.5">
         <div>
-          <span className="text-xs text-slate-400">Interest now </span>
-          <span className="text-xs font-bold text-slate-700 dark:text-slate-200">{current}/100</span>
+          <span className="text-xs text-ink-soft/70 dark:text-paper-dark/50">Interest now </span>
+          <span className="text-xs font-bold text-ink dark:text-paper-dark tabular-nums">{current}/100</span>
         </div>
         <div>
-          <span className="text-xs text-slate-400">12-month change </span>
-          <span className={`text-xs font-bold ${changePct >= 0 ? 'text-green-600' : 'text-red-500'}`}>
+          <span className="text-xs text-ink-soft/70 dark:text-paper-dark/50">12-month change </span>
+          <span className={`text-xs font-bold tabular-nums ${changePct >= 0 ? 'text-positive' : 'text-alert'}`}>
             {changePct >= 0 ? '+' : ''}{changePct}%
           </span>
         </div>
         <div className="ml-auto flex items-center gap-2">
           {stale && (
-            <span className="text-[10px] text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/40 rounded-full px-2 py-0.5">
+            <span className="text-[10px] text-caution bg-caution/10 border border-caution/30 rounded-full px-2 py-0.5">
               cached · live unavailable
             </span>
           )}
           {allTried.length > 1 && allTried[0] !== bestKeyword && (
-            <span className="text-[10px] text-slate-400">Best of {allTried.length} variants</span>
+            <span className="text-[10px] text-ink-soft/60 dark:text-paper-dark/40 tabular-nums">Best of {allTried.length} variants</span>
           )}
         </div>
       </div>
 
       {/* Regional breakdown */}
       {cities.length > 0 && (
-        <div className="border-t border-slate-100 dark:border-slate-800 px-5 py-3">
-          <p className="text-[11px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wide mb-2">
+        <div className="border-t border-line dark:border-line-dark px-5 py-3">
+          <p className="text-[11px] font-bold text-ink-soft/70 dark:text-paper-dark/50 uppercase tracking-[0.12em] mb-2">
             {regionLabel}
           </p>
           <div className="grid grid-cols-2 gap-x-6 gap-y-1.5">
             {cities.map(c => (
               <div key={c.name} className="flex items-center gap-2">
-                <span className="text-xs text-slate-600 dark:text-slate-400 w-24 truncate shrink-0">{c.name}</span>
-                <div className="flex-1 bg-slate-100 dark:bg-slate-800 rounded-full h-1.5">
-                  <div className="bg-indigo-400 dark:bg-indigo-500 h-1.5 rounded-full"
+                <span className="text-xs text-ink-soft dark:text-paper-dark/70 w-24 truncate shrink-0">{c.name}</span>
+                <div className="flex-1 bg-surface-sunk dark:bg-surface-dark-raised rounded-full h-1.5">
+                  <div className="bg-brand-600 h-1.5 rounded-full"
                     style={{ width: `${(c.value / cityMax) * 100}%` }} />
                 </div>
-                <span className="text-[10px] text-slate-400 dark:text-slate-500 w-6 text-right shrink-0">{c.value}</span>
+                <span className="text-[10px] text-ink-soft/70 dark:text-paper-dark/50 w-6 text-right shrink-0 tabular-nums">{c.value}</span>
               </div>
             ))}
           </div>
@@ -359,37 +359,43 @@ export default function TrendsChart({ keyword, trendsUrl }: Props) {
 
 function GeoSelector({ geo, setGeo }: { geo: string; setGeo: (g: string) => void }) {
   return (
-    <select
-      value={geo}
-      onChange={e => setGeo(e.target.value)}
-      className="rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-2 py-1 text-xs text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-1 focus:ring-indigo-400"
-    >
-      <option value="IN">All India</option>
-      <optgroup label="States">
-        {INDIA_STATES.map(s => (
-          <option key={s.code} value={s.code}>{s.name}</option>
-        ))}
-      </optgroup>
-    </select>
+    <label className="flex flex-col gap-1">
+      <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-ink-soft/70 dark:text-paper-dark/50">Region</span>
+      <select
+        value={geo}
+        onChange={e => setGeo(e.target.value)}
+        className="rounded-md border border-line dark:border-line-dark bg-surface dark:bg-surface-dark-raised px-2 py-1.5 text-xs text-ink dark:text-paper-dark focus:outline-none focus:border-brand-600 focus-visible:ring-2 focus-visible:ring-brand-600/40"
+      >
+        <option value="IN">All India</option>
+        <optgroup label="States">
+          {INDIA_STATES.map(s => (
+            <option key={s.code} value={s.code}>{s.name}</option>
+          ))}
+        </optgroup>
+      </select>
+    </label>
   )
 }
 
 function PeriodSelector({ period, setPeriod }: { period: Period; setPeriod: (p: Period) => void }) {
   return (
-    <div className="flex rounded-lg border border-slate-200 dark:border-slate-700 overflow-hidden text-xs">
-      {(['1y', '2y', '5y'] as Period[]).map(p => (
-        <button
-          key={p}
-          onClick={() => setPeriod(p)}
-          className={`px-2.5 py-1 font-medium transition-colors ${
-            period === p
-              ? 'bg-indigo-600 text-white'
-              : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700'
-          }`}
-        >
-          {p.toUpperCase()}
-        </button>
-      ))}
-    </div>
+    <label className="flex flex-col gap-1">
+      <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-ink-soft/70 dark:text-paper-dark/50">Period</span>
+      <div className="flex rounded-md border border-line dark:border-line-dark overflow-hidden text-xs">
+        {(['1y', '2y', '5y'] as Period[]).map(p => (
+          <button
+            key={p}
+            onClick={() => setPeriod(p)}
+            className={`px-3 py-1.5 font-semibold tabular-nums transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-brand-600 ${
+              period === p
+                ? 'bg-brand-600 text-white'
+                : 'bg-surface dark:bg-surface-dark-raised text-ink-soft dark:text-paper-dark/70 hover:bg-surface-sunk dark:hover:bg-line-dark'
+            }`}
+          >
+            {p.toUpperCase()}
+          </button>
+        ))}
+      </div>
+    </label>
   )
 }

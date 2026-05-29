@@ -15,17 +15,17 @@ interface ScanResult {
 }
 
 const RATING_BAR = {
-  high:      { width: '85%', cls: 'bg-emerald-400 dark:bg-emerald-500' },
-  medium:    { width: '60%', cls: 'bg-amber-400 dark:bg-amber-500' },
-  low:       { width: '35%', cls: 'bg-slate-400 dark:bg-slate-500' },
-  saturated: { width: '15%', cls: 'bg-red-400 dark:bg-red-500' },
+  high:      { width: '85%', cls: 'bg-positive' },
+  medium:    { width: '60%', cls: 'bg-caution' },
+  low:       { width: '35%', cls: 'bg-ink-soft/50 dark:bg-paper-dark/40' },
+  saturated: { width: '15%', cls: 'bg-alert' },
 }
 
 const RATING_STYLE = {
-  high:      'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300',
-  medium:    'bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300',
-  low:       'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400',
-  saturated: 'bg-red-100 text-red-700 dark:bg-red-950/40 dark:text-red-400',
+  high:      'bg-positive/10 text-positive',
+  medium:    'bg-caution/10 text-caution',
+  low:       'bg-surface-sunk text-ink-soft dark:bg-surface-dark-raised dark:text-paper-dark/70',
+  saturated: 'bg-alert/10 text-alert',
 }
 
 function MoatBar({ supply, demand }: { supply: number; demand: number }) {
@@ -33,19 +33,19 @@ function MoatBar({ supply, demand }: { supply: number; demand: number }) {
   const gapOpportunity   = Math.max(0, demand - supply)
   return (
     <div className="space-y-1.5">
-      <div className="flex justify-between text-[10px] text-slate-400 dark:text-slate-500">
+      <div className="flex justify-between text-[10px] text-ink-soft/70 dark:text-paper-dark/50">
         <span>Incumbent strength</span>
-        <span>{incumbentStrength}/100</span>
+        <span className="tabular-nums">{incumbentStrength}/100</span>
       </div>
-      <div className="h-2 rounded-full bg-slate-100 dark:bg-slate-800">
-        <div className="h-full rounded-full bg-rose-400 dark:bg-rose-500 transition-all duration-500" style={{ width: `${incumbentStrength}%` }} />
+      <div className="h-2 rounded-full bg-surface-sunk dark:bg-line-dark">
+        <div className="h-full rounded-full bg-alert transition-all duration-500" style={{ width: `${incumbentStrength}%` }} />
       </div>
-      <div className="flex justify-between text-[10px] text-slate-400 dark:text-slate-500 mt-2">
+      <div className="flex justify-between text-[10px] text-ink-soft/70 dark:text-paper-dark/50 mt-2">
         <span>Gap opportunity</span>
-        <span>{gapOpportunity}/100</span>
+        <span className="tabular-nums">{gapOpportunity}/100</span>
       </div>
-      <div className="h-2 rounded-full bg-slate-100 dark:bg-slate-800">
-        <div className="h-full rounded-full bg-emerald-400 dark:bg-emerald-500 transition-all duration-500" style={{ width: `${gapOpportunity}%` }} />
+      <div className="h-2 rounded-full bg-surface-sunk dark:bg-line-dark">
+        <div className="h-full rounded-full bg-positive transition-all duration-500" style={{ width: `${gapOpportunity}%` }} />
       </div>
     </div>
   )
@@ -53,7 +53,7 @@ function MoatBar({ supply, demand }: { supply: number; demand: number }) {
 
 function EntryDifficulty({ gapScore }: { gapScore: number }) {
   const difficulty = gapScore >= 40 ? 'Easy' : gapScore >= 20 ? 'Moderate' : gapScore >= 5 ? 'Hard' : 'Very Hard'
-  const color = gapScore >= 40 ? 'text-emerald-600 dark:text-emerald-400' : gapScore >= 20 ? 'text-amber-600 dark:text-amber-400' : 'text-red-500 dark:text-red-400'
+  const color = gapScore >= 40 ? 'text-positive' : gapScore >= 20 ? 'text-caution' : 'text-alert'
   const dots = gapScore >= 40 ? 1 : gapScore >= 20 ? 2 : gapScore >= 5 ? 3 : 4
   return (
     <div className="flex items-center gap-2">
@@ -104,31 +104,31 @@ export default function CompetitorIntelPage() {
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-14">
-      <nav className="mb-6 text-sm text-slate-500 dark:text-slate-400">
-        <Link href="/" className="hover:text-indigo-600 dark:hover:text-indigo-400">Home</Link>
+      <nav className="mb-6 text-sm text-ink-soft dark:text-paper-dark/60">
+        <Link href="/" className="hover:text-brand-600 dark:hover:text-brand-600">Home</Link>
         <span className="mx-2">/</span>
-        <Link href="/tools" className="hover:text-indigo-600 dark:hover:text-indigo-400">Tools</Link>
+        <Link href="/tools" className="hover:text-brand-600 dark:hover:text-brand-600">Tools</Link>
         <span className="mx-2">/</span>
-        <span className="text-slate-700 dark:text-slate-300">Competitor Intelligence</span>
+        <span className="text-ink dark:text-paper-dark">Competitor Intelligence</span>
       </nav>
 
       <header className="mb-8">
-        <p className="text-xs font-bold uppercase tracking-widest text-indigo-600 dark:text-indigo-400">Competitive Analysis</p>
-        <h1 className="mt-2 text-3xl sm:text-4xl font-bold text-slate-900 dark:text-slate-100">Competitor Intelligence</h1>
-        <p className="mt-2 max-w-2xl text-slate-500 dark:text-slate-400">
+        <p className="text-xs font-bold uppercase tracking-[0.12em] text-brand-600 dark:text-brand-600">Competitive Analysis</p>
+        <h1 className="mt-2 text-3xl sm:text-4xl font-bold text-ink dark:text-paper-dark">Competitor Intelligence</h1>
+        <p className="mt-2 max-w-2xl text-ink-soft dark:text-paper-dark/70">
           Scan all 15 business categories in any Indian city simultaneously. See incumbent density, demand strength, gap scores, and entry difficulty — data from Google Trends and Google Maps Places API.
         </p>
       </header>
 
       {/* Scan control */}
-      <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 mb-8">
+      <div className="rounded-2xl border border-line dark:border-line-dark bg-surface dark:bg-surface-dark p-6 mb-8">
         <div className="flex flex-wrap gap-4 items-end">
           <div className="flex-1 min-w-[180px]">
-            <label className="block text-xs font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-2">Select City</label>
+            <label className="block text-xs font-bold uppercase tracking-[0.12em] text-ink-soft dark:text-paper-dark/60 mb-2">Select City</label>
             <select
               value={cityId}
               onChange={e => { setCityId(e.target.value); setResults([]) }}
-              className="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-2.5 text-sm text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="w-full rounded-md border border-line dark:border-line-dark bg-surface dark:bg-surface-dark-raised px-3 py-2.5 min-h-[44px] text-sm text-ink dark:text-paper-dark focus:outline-none focus:border-brand-600 focus-visible:ring-2 focus-visible:ring-brand-600/40"
             >
               {CITIES.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
             </select>
@@ -136,25 +136,25 @@ export default function CompetitorIntelPage() {
           <button
             onClick={scan}
             disabled={loading}
-            className="rounded-xl bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white font-semibold py-2.5 px-8 text-sm transition-colors whitespace-nowrap"
+            className="rounded-md bg-brand-600 hover:bg-brand-700 disabled:opacity-50 text-white font-semibold py-2.5 px-8 min-h-[44px] text-sm transition-colors whitespace-nowrap focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-surface-dark"
           >
             {loading ? '⚡ Scanning 15 categories…' : '⚡ Scan All Categories'}
           </button>
         </div>
-        <p className="mt-3 text-xs text-slate-400 dark:text-slate-500">
+        <p className="mt-3 text-xs text-ink-soft/70 dark:text-paper-dark/50 tabular-nums">
           Runs 15 parallel scans — takes 15–30 seconds. Uses typed search + multilingual keyword classification + umbrella type matching for accurate supply counts.
         </p>
       </div>
 
       {error && (
-        <div className="mb-6 rounded-xl border border-red-200 dark:border-red-900 bg-red-50 dark:bg-red-950/20 p-4 text-sm text-red-600 dark:text-red-400">{error}</div>
+        <div className="mb-6 rounded-xl border border-alert/30 bg-alert/10 p-4 text-sm text-alert">{error}</div>
       )}
 
       {loading && (
-        <div className="py-16 flex flex-col items-center gap-4 text-slate-500 dark:text-slate-400">
-          <div className="w-10 h-10 border-4 border-indigo-500/30 border-t-indigo-500 rounded-full animate-spin" />
+        <div className="py-16 flex flex-col items-center gap-4 text-ink-soft dark:text-paper-dark/60">
+          <div className="w-10 h-10 border-4 border-brand-600/30 border-t-brand-600 rounded-full animate-spin" />
           <p className="text-sm">Fetching Google Trends + Places data for all 15 categories in parallel…</p>
-          <p className="text-xs text-slate-400">Usually completes in 20–35 seconds</p>
+          <p className="text-xs text-ink-soft/70 dark:text-paper-dark/50 tabular-nums">Usually completes in 20–35 seconds</p>
         </div>
       )}
 
@@ -168,23 +168,23 @@ export default function CompetitorIntelPage() {
               { label: 'Saturated markets', value: saturated.toString() },
               { label: 'Avg gap score', value: Math.round(results.reduce((s, r) => s + r.gapScore, 0) / results.length).toString() },
             ].map(s => (
-              <div key={s.label} className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-4">
-                <p className="text-[11px] uppercase tracking-wider text-slate-400 dark:text-slate-500">{s.label}</p>
-                <p className="mt-1 text-xl font-bold text-slate-900 dark:text-slate-100 truncate">{s.value}</p>
+              <div key={s.label} className="rounded-xl border border-line dark:border-line-dark bg-surface dark:bg-surface-dark p-4">
+                <p className="text-[11px] uppercase tracking-[0.12em] text-ink-soft/70 dark:text-paper-dark/50">{s.label}</p>
+                <p className="mt-1 text-xl font-bold text-ink dark:text-paper-dark truncate tabular-nums">{s.value}</p>
               </div>
             ))}
           </div>
 
           {/* Top picks */}
           {topOpportunity.length > 0 && (
-            <div className="mb-8 rounded-2xl border border-emerald-200 dark:border-emerald-900 bg-emerald-50 dark:bg-emerald-950/10 p-5">
-              <p className="text-xs font-bold uppercase tracking-widest text-emerald-600 dark:text-emerald-500 mb-4">Best Entry Opportunities in {city}</p>
+            <div className="mb-8 rounded-2xl border border-positive/30 bg-positive/[0.06] p-5">
+              <p className="text-xs font-bold uppercase tracking-[0.12em] text-positive mb-4">Best Entry Opportunities in {city}</p>
               <div className="grid sm:grid-cols-3 gap-4">
                 {topOpportunity.map(r => (
-                  <div key={r.id} className="rounded-xl bg-white dark:bg-slate-900 border border-emerald-100 dark:border-emerald-900/50 p-4">
+                  <div key={r.id} className="rounded-xl bg-surface dark:bg-surface-dark border border-line dark:border-line-dark p-4">
                     <p className="text-2xl mb-2">{r.icon}</p>
-                    <p className="font-bold text-slate-900 dark:text-slate-100 text-sm">{r.label}</p>
-                    <p className="text-xs text-emerald-600 dark:text-emerald-400 mt-1 font-semibold">Gap Score: {r.gapScore}</p>
+                    <p className="font-bold text-ink dark:text-paper-dark text-sm">{r.label}</p>
+                    <p className="text-xs text-positive mt-1 font-semibold tabular-nums">Gap Score: {r.gapScore}</p>
                     <EntryDifficulty gapScore={r.gapScore} />
                   </div>
                 ))}
@@ -194,7 +194,7 @@ export default function CompetitorIntelPage() {
 
           {/* Sort control */}
           <div className="flex items-center gap-3 mb-4">
-            <span className="text-xs text-slate-400 dark:text-slate-500">Sort by:</span>
+            <span className="text-xs text-ink-soft/70 dark:text-paper-dark/50 uppercase tracking-[0.12em]">Sort by:</span>
             {[
               { key: 'gap',    label: 'Gap Score' },
               { key: 'supply', label: 'Competitor Count' },
@@ -203,7 +203,7 @@ export default function CompetitorIntelPage() {
               <button
                 key={s.key}
                 onClick={() => setSortBy(s.key as 'gap' | 'supply' | 'demand')}
-                className={`text-xs px-3 py-1.5 rounded-lg font-medium transition-colors ${sortBy === s.key ? 'bg-indigo-100 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300'}`}
+                className={`text-xs px-3 py-2 min-h-[44px] rounded-md font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 ${sortBy === s.key ? 'bg-brand-600/10 text-brand-600' : 'text-ink-soft dark:text-paper-dark/60 hover:text-ink dark:hover:text-paper-dark'}`}
               >
                 {s.label}
               </button>
