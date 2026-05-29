@@ -105,13 +105,13 @@ const SECTOR_COLS: Record<string, ColDef[]> = {
 // ─── Cell colour ──────────────────────────────────────────────────────────────
 
 function cellColor(col: ColDef, value: number | null | undefined): string {
-  if (value == null) return 'text-slate-400 dark:text-slate-500'
+  if (value == null) return 'text-ink-soft/50 dark:text-paper-dark/40'
   const [good, ok] = col.thresholds ?? [Infinity, Infinity]
   const isGood = col.direction === 'up' ? value >= good : value <= good
   const isOk   = col.direction === 'up' ? value >= ok   : value <= ok
-  if (isGood) return 'text-emerald-600 dark:text-emerald-400 font-semibold'
-  if (isOk)   return 'text-amber-600 dark:text-amber-400'
-  return 'text-rose-600 dark:text-rose-400'
+  if (isGood) return 'text-positive font-semibold'
+  if (isOk)   return 'text-caution'
+  return 'text-alert'
 }
 
 function fmtMarketCap(v: number | null): string {
@@ -140,47 +140,47 @@ function ScreenerTable({ companies, cols }: { companies: Company[]; cols: ColDef
   const arrow = (key: string) => sortKey === key ? (sortDir === 'asc' ? ' ↑' : ' ↓') : ''
 
   return (
-    <div className="overflow-x-auto rounded-2xl border border-slate-200 dark:border-slate-800">
+    <div className="overflow-x-auto rounded-2xl border border-line dark:border-line-dark">
       <table className="w-full text-sm">
         <thead>
-          <tr className="border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/60">
-            <th className="px-4 py-3 text-left font-semibold text-slate-700 dark:text-slate-300 whitespace-nowrap sticky left-0 bg-slate-50 dark:bg-slate-900/60 z-10">
+          <tr className="border-b border-line dark:border-line-dark bg-surface-sunk dark:bg-surface-dark-raised">
+            <th className="px-4 py-3 text-left font-semibold text-ink dark:text-paper-dark whitespace-nowrap sticky left-0 bg-surface-sunk dark:bg-surface-dark-raised z-10">
               Company
             </th>
             <th
               onClick={() => toggleSort('market_cap_cr')}
-              className="px-4 py-3 text-right font-semibold text-slate-500 dark:text-slate-400 whitespace-nowrap cursor-pointer hover:text-indigo-600 dark:hover:text-indigo-400 select-none"
+              className="px-4 py-3 text-right font-semibold text-ink-soft dark:text-paper-dark/70 whitespace-nowrap cursor-pointer hover:text-brand-600 dark:hover:text-brand-600 select-none"
             >
-              Mkt Cap{arrow('market_cap_cr')}
+              Mkt Cap<span className="text-brand-600">{arrow('market_cap_cr')}</span>
             </th>
             {cols.map(col => (
               <th
                 key={col.key}
                 onClick={() => toggleSort(col.key)}
-                className="px-4 py-3 text-right font-semibold text-slate-500 dark:text-slate-400 whitespace-nowrap cursor-pointer hover:text-indigo-600 dark:hover:text-indigo-400 select-none"
+                className="px-4 py-3 text-right font-semibold text-ink-soft dark:text-paper-dark/70 whitespace-nowrap cursor-pointer hover:text-brand-600 dark:hover:text-brand-600 select-none"
               >
-                {col.label}{col.unit ? ` (${col.unit})` : ''}{arrow(col.key)}
+                {col.label}{col.unit ? ` (${col.unit})` : ''}<span className="text-brand-600">{arrow(col.key)}</span>
               </th>
             ))}
           </tr>
         </thead>
-        <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+        <tbody className="divide-y divide-line dark:divide-line-dark">
           {sorted.map(c => (
-            <tr key={c.ticker} className="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors">
-              <td className="px-4 py-3 sticky left-0 bg-white dark:bg-slate-900 group-hover:bg-slate-50 z-10">
-                <div className="font-semibold text-slate-900 dark:text-slate-100 whitespace-nowrap">
+            <tr key={c.ticker} className="hover:bg-surface-sunk dark:hover:bg-surface-dark-raised/60 transition-colors">
+              <td className="px-4 py-3 sticky left-0 bg-surface dark:bg-surface-dark z-10">
+                <div className="font-semibold text-ink dark:text-paper-dark whitespace-nowrap">
                   {c.name}
                 </div>
-                <div className="text-xs text-slate-400 dark:text-slate-500 mt-0.5 flex items-center gap-1.5">
-                  <span className="font-mono">{c.ticker}</span>
+                <div className="text-xs text-ink-soft/60 dark:text-paper-dark/50 mt-0.5 flex items-center gap-1.5">
+                  <span className="font-mono tabular-nums">{c.ticker}</span>
                   {c.sub_sector && (
-                    <span className="rounded bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 text-[10px] capitalize">
+                    <span className="rounded bg-surface-sunk dark:bg-surface-dark-raised px-1.5 py-0.5 text-[10px] capitalize">
                       {c.sub_sector.replace('_', ' ')}
                     </span>
                   )}
                 </div>
               </td>
-              <td className="px-4 py-3 text-right text-slate-500 dark:text-slate-400 whitespace-nowrap">
+              <td className="px-4 py-3 text-right text-ink-soft dark:text-paper-dark/70 whitespace-nowrap tabular-nums">
                 {fmtMarketCap(c.market_cap_cr)}
               </td>
               {cols.map(col => {
@@ -204,11 +204,11 @@ function ScreenerTable({ companies, cols }: { companies: Company[]; cols: ColDef
 
 function Legend() {
   return (
-    <div className="flex items-center gap-4 text-xs text-slate-500 dark:text-slate-400">
-      <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-emerald-500 inline-block" />Good</span>
-      <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-amber-500 inline-block" />Average</span>
-      <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-rose-500 inline-block" />Weak</span>
-      <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-slate-300 inline-block" />N/A</span>
+    <div className="flex items-center gap-4 text-xs text-ink-soft dark:text-paper-dark/70">
+      <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-positive inline-block" />Good</span>
+      <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-caution inline-block" />Average</span>
+      <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-alert inline-block" />Weak</span>
+      <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-line dark:bg-line-dark inline-block" />N/A</span>
     </div>
   )
 }
@@ -244,22 +244,22 @@ export default function ScreenerPage() {
   const sectorLabel = SECTORS.find(s => s.id === sector)?.label ?? sector
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-14">
+    <div className="mx-auto max-w-7xl px-4 py-14 text-ink dark:text-paper-dark">
       {/* Breadcrumb */}
-      <nav className="mb-6 text-sm text-slate-500 dark:text-slate-400">
-        <Link href="/" className="hover:text-indigo-600 dark:hover:text-indigo-400">Home</Link>
+      <nav className="mb-6 text-sm text-ink-soft dark:text-paper-dark/70">
+        <Link href="/" className="hover:text-brand-600 dark:hover:text-brand-600">Home</Link>
         <span className="mx-2">/</span>
-        <Link href="/tools" className="hover:text-indigo-600 dark:hover:text-indigo-400">Tools</Link>
+        <Link href="/tools" className="hover:text-brand-600 dark:hover:text-brand-600">Tools</Link>
         <span className="mx-2">/</span>
-        <span className="text-slate-700 dark:text-slate-300">KPI Screener</span>
+        <span className="text-ink dark:text-paper-dark">KPI Screener</span>
       </nav>
 
       <header className="mb-8">
-        <p className="text-xs font-bold uppercase tracking-widest text-indigo-600 dark:text-indigo-400">Tools</p>
-        <h1 className="mt-2 text-3xl sm:text-4xl font-bold text-slate-900 dark:text-slate-100">
+        <p className="text-xs font-bold uppercase tracking-widest text-brand-600">Tools</p>
+        <h1 className="mt-2 text-3xl sm:text-4xl font-bold text-ink dark:text-paper-dark">
           India KPI Screener
         </h1>
-        <p className="mt-3 max-w-2xl text-lg text-slate-600 dark:text-slate-400">
+        <p className="mt-3 max-w-2xl text-lg text-ink-soft dark:text-paper-dark/70">
           Sector-specific KPIs for listed Indian companies — the metrics that actually matter, not just PE and ROE.
           Sort any column to rank instantly.
         </p>
@@ -271,10 +271,10 @@ export default function ScreenerPage() {
           <button
             key={s.id}
             onClick={() => setSector(s.id)}
-            className={`flex items-center gap-1.5 rounded-full px-4 py-1.5 text-sm font-semibold transition-colors ${
+            className={`flex items-center gap-1.5 rounded-full px-4 py-2 min-h-[44px] text-sm font-semibold transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 focus-visible:ring-offset-2 ${
               sector === s.id
-                ? 'bg-indigo-600 text-white'
-                : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
+                ? 'bg-brand-600 text-white hover:bg-brand-700'
+                : 'bg-surface-sunk dark:bg-surface-dark-raised text-ink-soft dark:text-paper-dark/70 hover:bg-line dark:hover:bg-line-dark'
             }`}
           >
             <span>{s.icon}</span>
@@ -286,8 +286,8 @@ export default function ScreenerPage() {
       {/* Column legend */}
       <div className="mb-4 flex items-center justify-between flex-wrap gap-3">
         <div>
-          <p className="text-xs text-slate-500 dark:text-slate-400">
-            <strong className="text-slate-700 dark:text-slate-300">{companies.length} companies</strong>
+          <p className="text-xs text-ink-soft dark:text-paper-dark/70">
+            <strong className="text-ink dark:text-paper-dark tabular-nums">{companies.length} companies</strong>
             {quarter && <> · Data: {quarter} · Source: Annual Reports / Quarterly Results</>}
           </p>
         </div>
@@ -296,7 +296,7 @@ export default function ScreenerPage() {
 
       {/* KPI glossary for current sector */}
       {sector === 'banks' && (
-        <div className="mb-5 flex flex-wrap gap-x-5 gap-y-1 text-xs text-slate-400 dark:text-slate-500">
+        <div className="mb-5 flex flex-wrap gap-x-5 gap-y-1 text-xs text-ink-soft/70 dark:text-paper-dark/50">
           <span><b>GNPA</b> Gross NPA ratio</span>
           <span><b>NNPA</b> Net NPA ratio</span>
           <span><b>NIM</b> Net interest margin</span>
@@ -306,21 +306,21 @@ export default function ScreenerPage() {
         </div>
       )}
       {sector === 'nbfcs' && (
-        <div className="mb-5 flex flex-wrap gap-x-5 gap-y-1 text-xs text-slate-400 dark:text-slate-500">
+        <div className="mb-5 flex flex-wrap gap-x-5 gap-y-1 text-xs text-ink-soft/70 dark:text-paper-dark/50">
           <span><b>Spread</b> Lending rate − borrow cost</span>
           <span><b>OpEx/AUM</b> Operating expense as % of assets</span>
           <span><b>AUM Growth</b> Year-on-year asset growth</span>
         </div>
       )}
       {sector === 'insurance' && (
-        <div className="mb-5 flex flex-wrap gap-x-5 gap-y-1 text-xs text-slate-400 dark:text-slate-500">
+        <div className="mb-5 flex flex-wrap gap-x-5 gap-y-1 text-xs text-ink-soft/70 dark:text-paper-dark/50">
           <span><b>VNB Margin</b> Value of new business margin (life only)</span>
           <span><b>Persistency 13M</b> % policies still active after 13 months</span>
           <span><b>Combined Ratio</b> Claims + expense ratio (general; &lt;100% = profitable)</span>
         </div>
       )}
       {sector === 'hotels_airlines' && (
-        <div className="mb-5 flex flex-wrap gap-x-5 gap-y-1 text-xs text-slate-400 dark:text-slate-500">
+        <div className="mb-5 flex flex-wrap gap-x-5 gap-y-1 text-xs text-ink-soft/70 dark:text-paper-dark/50">
           <span><b>RevPAR</b> Revenue per available room (hotels)</span>
           <span><b>ARR</b> Average room rate (hotels)</span>
           <span><b>RASK/CASK</b> Revenue/Cost per available seat km in paise (airlines)</span>
@@ -328,7 +328,7 @@ export default function ScreenerPage() {
         </div>
       )}
       {sector === 'realestate' && (
-        <div className="mb-5 flex flex-wrap gap-x-5 gap-y-1 text-xs text-slate-400 dark:text-slate-500">
+        <div className="mb-5 flex flex-wrap gap-x-5 gap-y-1 text-xs text-ink-soft/70 dark:text-paper-dark/50">
           <span><b>Pre-Sales</b> Bookings value in FY</span>
           <span><b>Collections</b> Cash collected from sold units</span>
           <span><b>Unsold Inv</b> Completed but unsold inventory value</span>
@@ -336,13 +336,13 @@ export default function ScreenerPage() {
         </div>
       )}
       {sector === 'retail' && (
-        <div className="mb-5 flex flex-wrap gap-x-5 gap-y-1 text-xs text-slate-400 dark:text-slate-500">
+        <div className="mb-5 flex flex-wrap gap-x-5 gap-y-1 text-xs text-ink-soft/70 dark:text-paper-dark/50">
           <span><b>SSSG</b> Same-store sales growth year-on-year</span>
           <span><b>Rev/Sq.Ft</b> Annual revenue per square foot of retail space</span>
         </div>
       )}
       {sector === 'pharma' && (
-        <div className="mb-5 flex flex-wrap gap-x-5 gap-y-1 text-xs text-slate-400 dark:text-slate-500">
+        <div className="mb-5 flex flex-wrap gap-x-5 gap-y-1 text-xs text-ink-soft/70 dark:text-paper-dark/50">
           <span><b>ANDAs Filed</b> Cumulative US drug applications</span>
           <span><b>US/EU Rev</b> % of revenue from regulated markets</span>
           <span><b>R&D</b> R&D spend as % of revenue</span>
@@ -352,23 +352,23 @@ export default function ScreenerPage() {
       {/* Table */}
       {loading && (
         <div className="py-20 text-center">
-          <span className="inline-block h-5 w-5 rounded-full border-2 border-indigo-200 border-t-indigo-600 animate-spin" />
-          <p className="mt-3 text-sm text-slate-500 dark:text-slate-400">Loading {sectorLabel} data…</p>
+          <span className="inline-block h-5 w-5 rounded-full border-2 border-brand-600/30 border-t-brand-600 animate-spin" />
+          <p className="mt-3 text-sm text-ink-soft dark:text-paper-dark/70">Loading {sectorLabel} data…</p>
         </div>
       )}
 
       {error && !loading && (
-        <div className="rounded-2xl border border-rose-200 dark:border-rose-800 bg-rose-50 dark:bg-rose-900/20 p-6 text-center">
-          <p className="text-sm text-rose-700 dark:text-rose-400">Failed to load: {error}</p>
-          <button onClick={() => load(sector)} className="mt-3 text-sm text-indigo-600 dark:text-indigo-400 hover:underline">
+        <div className="rounded-2xl border border-alert/30 bg-alert/5 dark:bg-alert/10 p-6 text-center">
+          <p className="text-sm text-alert">Failed to load: {error}</p>
+          <button onClick={() => load(sector)} className="mt-3 text-sm text-brand-600 hover:underline">
             Retry
           </button>
         </div>
       )}
 
       {!loading && !error && companies.length === 0 && (
-        <p className="py-16 text-center text-slate-500 dark:text-slate-400 text-sm">
-          No data yet for {sectorLabel}. Run <code className="bg-slate-100 dark:bg-slate-800 px-1.5 rounded">node scripts/seed-screener.mjs</code> to seed.
+        <p className="py-16 text-center text-ink-soft dark:text-paper-dark/70 text-sm">
+          No data yet for {sectorLabel}. Run <code className="bg-surface-sunk dark:bg-surface-dark-raised px-1.5 rounded">node scripts/seed-screener.mjs</code> to seed.
         </p>
       )}
 
@@ -376,7 +376,7 @@ export default function ScreenerPage() {
         <ScreenerTable companies={companies} cols={cols} />
       )}
 
-      <p className="mt-6 text-center text-xs text-slate-400 dark:text-slate-500">
+      <p className="mt-6 text-center text-xs text-ink-soft/70 dark:text-paper-dark/50">
         Data: FY25 Annual Reports &amp; Q4FY25 quarterly results · Colour thresholds are sector-specific benchmarks · Not investment advice
       </p>
     </div>
