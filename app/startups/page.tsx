@@ -86,40 +86,41 @@ export default async function StartupsPage({ searchParams }: PageProps) {
   const totalPages = Math.max(1, Math.ceil(count / STARTUPS_PER_PAGE))
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-10">
+    <div className="mx-auto max-w-7xl px-4 py-10 text-ink dark:text-paper-dark">
       <header className="mb-6">
-        <p className="text-xs font-semibold uppercase tracking-widest text-indigo-600 dark:text-indigo-400">
+        <p className="text-xs font-bold uppercase tracking-[0.12em] text-brand-600">
           Startup Database
         </p>
-        <h1 className="mt-2 text-2xl sm:text-3xl font-bold text-slate-900 dark:text-slate-100">
+        <h1 className="mt-2 text-2xl sm:text-3xl font-bold tracking-tight text-ink dark:text-paper-dark">
           Indian Startup Database
         </h1>
-        <p className="mt-2 max-w-2xl text-sm text-slate-500 dark:text-slate-400">
-          Profiles, funding rounds, revenue snapshots and founder stories for {count}
+        <p className="mt-2 max-w-2xl text-sm leading-relaxed text-ink-soft dark:text-slate-400">
+          Profiles, funding rounds, revenue snapshots and founder stories for{' '}
+          <span className="tabular-nums font-medium text-ink dark:text-paper-dark">{count}</span>
           {count === 1 ? ' Indian startup' : ' Indian startups'}. Filter to find your sector,
           stage, or city. Design polish coming soon — this is the v1 scaffold.
         </p>
       </header>
 
       {/* Minimal placeholder filter chips — full FilterSidebar component comes in design pass */}
-      <div className="mb-6 flex flex-wrap gap-2 text-xs text-slate-500 dark:text-slate-400">
-        <span className="rounded-full bg-slate-100 dark:bg-slate-800 px-2 py-1">
+      <div className="mb-6 flex flex-wrap gap-2 text-xs text-ink-soft dark:text-slate-400">
+        <span className="rounded-full bg-surface-sunk dark:bg-surface-dark-raised px-3 py-1 tabular-nums">
           Stages: {Object.keys(STARTUP_STAGE_LABELS).length}
         </span>
-        <span className="rounded-full bg-slate-100 dark:bg-slate-800 px-2 py-1">
+        <span className="rounded-full bg-surface-sunk dark:bg-surface-dark-raised px-3 py-1 tabular-nums">
           Statuses: {Object.keys(STARTUP_STATUS_LABELS).length}
         </span>
-        <span className="rounded-full bg-slate-100 dark:bg-slate-800 px-2 py-1">
+        <span className="rounded-full bg-surface-sunk dark:bg-surface-dark-raised px-3 py-1 tabular-nums">
           Models: {Object.keys(BUSINESS_MODEL_LABELS).length}
         </span>
       </div>
 
       {startups.length === 0 ? (
-        <div className="rounded-xl border border-dashed border-slate-300 dark:border-slate-700 py-24 text-center">
-          <p className="text-lg font-medium text-slate-700 dark:text-slate-200">
+        <div className="rounded-2xl border border-dashed border-line dark:border-line-dark bg-surface-sunk/40 dark:bg-surface-dark/40 py-24 text-center">
+          <p className="text-lg font-medium text-ink dark:text-paper-dark">
             No startups in the database yet.
           </p>
-          <p className="mt-2 text-sm text-slate-400 dark:text-slate-500">
+          <p className="mt-2 text-sm text-ink-soft dark:text-slate-500">
             Add the first one via the Sanity Studio at <code>/studio</code> → Startups.
           </p>
         </div>
@@ -128,28 +129,30 @@ export default async function StartupsPage({ searchParams }: PageProps) {
           {startups.map((s) => (
             <li
               key={s._id}
-              className="rounded-xl border border-slate-200 dark:border-slate-800 p-4 hover:border-indigo-300 dark:hover:border-indigo-700 transition-colors"
+              className="rounded-2xl border border-line dark:border-line-dark bg-surface dark:bg-surface-dark p-5 transition-all hover:-translate-y-0.5 hover:border-brand-600/40 hover:shadow-[0_6px_24px_-8px_rgba(22,24,29,0.12)] dark:hover:border-brand-500/40"
             >
               <Link href={`/startups/${s.slug}`} className="block">
                 <div className="flex items-start justify-between gap-3">
-                  <h2 className="text-base font-semibold text-slate-900 dark:text-slate-100">
+                  <h2 className="text-[1.0625rem] font-semibold leading-snug text-ink dark:text-paper-dark">
                     {s.name}
                   </h2>
                   {s.stage && (
-                    <span className="shrink-0 rounded-full bg-indigo-50 dark:bg-indigo-950 px-2 py-0.5 text-[10px] font-medium text-indigo-700 dark:text-indigo-300">
+                    <span className="shrink-0 rounded-full bg-brand-50 dark:bg-brand-600/15 px-2 py-0.5 text-[10px] font-medium text-brand-700 dark:text-brand-100">
                       {STARTUP_STAGE_LABELS[s.stage] ?? s.stage}
                     </span>
                   )}
                 </div>
                 {s.tagline && (
-                  <p className="mt-1 text-sm text-slate-500 dark:text-slate-400 line-clamp-2">
+                  <p className="mt-1.5 text-sm leading-relaxed text-ink-soft dark:text-slate-400 line-clamp-2">
                     {s.tagline}
                   </p>
                 )}
-                <div className="mt-3 flex flex-wrap gap-1.5 text-[11px] text-slate-500 dark:text-slate-400">
+                <div className="mt-3 flex flex-wrap gap-1.5 text-[11px] text-ink-soft dark:text-slate-400">
                   {s.industry && <span>{s.industry}</span>}
                   {s.hq_city && <span>· {s.hq_city}</span>}
-                  {s.founded_year && <span>· Est. {s.founded_year}</span>}
+                  {s.founded_year && (
+                    <span>· Est. <span className="tabular-nums">{s.founded_year}</span></span>
+                  )}
                 </div>
               </Link>
             </li>
@@ -159,14 +162,15 @@ export default async function StartupsPage({ searchParams }: PageProps) {
 
       {totalPages > 1 && (
         <nav className="mt-8 flex items-center justify-between text-sm">
-          <span className="text-slate-500">
-            Page {currentPage} of {totalPages}
+          <span className="text-ink-soft dark:text-slate-400">
+            Page <span className="tabular-nums">{currentPage}</span> of{' '}
+            <span className="tabular-nums">{totalPages}</span>
           </span>
           <div className="flex gap-2">
             {currentPage > 1 && (
               <Link
                 href={`/startups?page=${currentPage - 1}`}
-                className="rounded-md border border-slate-200 dark:border-slate-700 px-3 py-1.5 hover:bg-slate-50 dark:hover:bg-slate-800"
+                className="rounded-md border border-line dark:border-line-dark bg-surface dark:bg-surface-dark px-3 py-1.5 text-ink-soft dark:text-slate-300 transition-colors hover:border-brand-600/40 hover:text-brand-700 dark:hover:text-brand-100"
               >
                 ← Prev
               </Link>
@@ -174,7 +178,7 @@ export default async function StartupsPage({ searchParams }: PageProps) {
             {currentPage < totalPages && (
               <Link
                 href={`/startups?page=${currentPage + 1}`}
-                className="rounded-md border border-slate-200 dark:border-slate-700 px-3 py-1.5 hover:bg-slate-50 dark:hover:bg-slate-800"
+                className="rounded-md border border-line dark:border-line-dark bg-surface dark:bg-surface-dark px-3 py-1.5 text-ink-soft dark:text-slate-300 transition-colors hover:border-brand-600/40 hover:text-brand-700 dark:hover:text-brand-100"
               >
                 Next →
               </Link>
