@@ -926,14 +926,14 @@ export default async function IdeaPage({ params }: PageProps) {
             )}
 
             {idea.case_study.key_insight && (
-              <div className="mb-4 rounded-xl border-l-4 border-brand-600 bg-surface dark:bg-surface-dark p-4">
+              <div className="mb-4 rounded-xl border border-line dark:border-line-dark bg-surface dark:bg-surface-dark p-4">
                 <p className="text-xs font-bold uppercase tracking-wide text-brand-700 dark:text-brand-600 mb-1">What Worked</p>
                 <p className="text-sm text-ink-soft dark:text-paper-dark leading-relaxed">{idea.case_study.key_insight}</p>
               </div>
             )}
 
             {idea.case_study.biggest_mistake && (
-              <div className="rounded-xl border-l-4 border-caution bg-surface dark:bg-surface-dark p-4">
+              <div className="rounded-xl border border-line dark:border-line-dark bg-surface dark:bg-surface-dark p-4">
                 <p className="text-xs font-bold uppercase tracking-wide text-caution mb-1">Biggest Mistake</p>
                 <p className="text-sm text-ink-soft dark:text-paper-dark leading-relaxed">{idea.case_study.biggest_mistake}</p>
               </div>
@@ -1180,14 +1180,7 @@ export default async function IdeaPage({ params }: PageProps) {
 
 // ── Sub-components ────────────────────────────────────────────────────────────
 
-// Semantic accents only — the colored left edge carries the meaning of the figure.
-const ACCENT_LEFT: Record<string, string> = {
-  positive: 'border-l-positive',
-  caution:  'border-l-caution',
-  alert:    'border-l-alert',
-  neutral:  'border-l-line dark:border-l-line-dark',
-}
-
+// Semantic accents only — the value color carries the meaning of the figure.
 const ACCENT_VALUE: Record<string, string> = {
   positive: 'text-positive',
   caution:  'text-caution',
@@ -1196,10 +1189,9 @@ const ACCENT_VALUE: Record<string, string> = {
 }
 
 function GlanceCard({ label, value, accent }: { label: string; value: string; accent: string }) {
-  const left = ACCENT_LEFT[accent] || ACCENT_LEFT.neutral
   const valueColor = ACCENT_VALUE[accent] || ACCENT_VALUE.neutral
   return (
-    <div className={`rounded-lg border border-line dark:border-line-dark bg-surface dark:bg-surface-dark border-l-4 ${left} px-4 py-3.5`}>
+    <div className="rounded-lg border border-line dark:border-line-dark bg-surface dark:bg-surface-dark px-4 py-3.5">
       <p className="text-[10px] font-bold uppercase tracking-widest text-ink-soft dark:text-paper-dark mb-1.5">{label}</p>
       <p className={`text-base font-bold tabular-nums leading-snug ${valueColor}`}>{value}</p>
     </div>

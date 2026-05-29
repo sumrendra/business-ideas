@@ -203,7 +203,7 @@ function SectorDrawer({ sector, onClose }: { sector: SectorPulse; onClose: () =>
           </div>
 
           {/* Consultant's read */}
-          <div className="border-l-2 border-brand-600 pl-4 py-1">
+          <div className="pl-1 py-1">
             <p className="text-[11px] font-bold text-brand-600 mb-2 uppercase tracking-[0.12em]">Analysis</p>
             <p className="text-sm text-ink-soft dark:text-paper-dark/70 leading-relaxed">
               {sector.lifecycle === 'Accelerating' && `${sector.label} is in a strong growth phase. High formation rates, healthy survival, and credit flowing suggest durable demand. Entry window is open but competition is rising — first-mover advantage still achievable in underserved geographies.`}
