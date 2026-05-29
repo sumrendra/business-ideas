@@ -10,14 +10,21 @@
     -webkit-font-smoothing: antialiased;
   }
 
-  /* Default light surface */
+  /* Default light surface — warm paper, never cold slate or pure white */
   body {
-    @apply bg-slate-50 text-slate-900;
+    @apply bg-paper text-ink;
   }
 
-  /* Dark surface */
+  /* Dark surface — warm near-black */
   html.dark body {
-    @apply bg-slate-950 text-slate-100;
+    @apply bg-ink-dark text-slate-100;
+  }
+
+  /* Financial figures align in columns. Apply to any number a reader
+     compares down a column (Tailwind's `tabular-nums` does the same). */
+  .nums {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: 'tnum' 1, 'cv05' 1;
   }
 
   /* Subtle glass surface accents — only used by chrome (nav, sticky bars, modal cards) */
