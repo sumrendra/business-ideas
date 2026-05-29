@@ -72,18 +72,18 @@ const RESOURCES = [
 ]
 
 const TAG_COLOR: Record<string, string> = {
-  Government: 'bg-green-100 text-green-700',
-  'Bank Loan': 'bg-blue-100 text-blue-700',
-  Startup:    'bg-indigo-100 text-indigo-700',
-  Incubator:  'bg-amber-100 text-amber-700',
+  Government: 'bg-brand-50 text-brand-700',
+  'Bank Loan': 'bg-brand-50 text-brand-700',
+  Startup:    'bg-brand-50 text-brand-700',
+  Incubator:  'bg-brand-50 text-brand-700',
 }
 
 export default function GetFundedPage() {
   return (
     <div className="mx-auto max-w-5xl px-4 py-14">
       <div className="mb-10">
-        <h1 className="text-3xl font-bold text-slate-900">Get Funded</h1>
-        <p className="mt-2 text-slate-500">
+        <h1 className="text-3xl font-bold tracking-tight text-ink dark:text-white">Get Funded</h1>
+        <p className="mt-2 text-ink-soft dark:text-slate-400">
           Government schemes, bank loans, and startup programs to help you launch your business idea in India.
         </p>
       </div>
@@ -91,21 +91,21 @@ export default function GetFundedPage() {
       {/* State Incentives CTA */}
       <Link
         href="/incentives"
-        className="mb-8 flex items-center justify-between gap-4 rounded-2xl border border-indigo-200 dark:border-indigo-800 bg-gradient-to-r from-indigo-50 to-violet-50 dark:from-indigo-950/40 dark:to-violet-950/40 p-5 hover:border-indigo-400 hover:shadow-md transition-all"
+        className="mb-8 flex items-center justify-between gap-4 rounded-2xl border border-line bg-surface p-5 transition-all hover:shadow-[0_6px_24px_-8px_rgba(22,24,29,0.12)] dark:border-line-dark dark:bg-surface-dark"
       >
         <div>
-          <p className="text-xs font-bold uppercase tracking-widest text-indigo-600 dark:text-indigo-400 mb-1">New</p>
-          <p className="text-lg font-bold text-slate-900 dark:text-slate-100">State-wise Business Incentive Database</p>
-          <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-            {INCENTIVES.length} incentives across {ALL_STATES.length} states — capital subsidies, GST reimbursements, stamp duty waivers & more
+          <p className="text-xs font-bold uppercase tracking-widest text-brand-600 mb-1">New</p>
+          <p className="text-lg font-bold text-ink dark:text-white">State-wise Business Incentive Database</p>
+          <p className="mt-1 text-sm text-ink-soft dark:text-slate-400">
+            <span className="tabular-nums">{INCENTIVES.length}</span> incentives across <span className="tabular-nums">{ALL_STATES.length}</span> states — capital subsidies, GST reimbursements, stamp duty waivers & more
           </p>
         </div>
-        <span className="shrink-0 text-2xl text-indigo-400">→</span>
+        <span className="shrink-0 text-2xl text-brand-600">→</span>
       </Link>
 
       {/* Quick Links */}
       <div className="mb-2">
-        <h2 className="text-lg font-semibold text-slate-700 mb-4">Quick Links</h2>
+        <h2 className="text-lg font-semibold text-ink mb-4 dark:text-slate-200">Quick Links</h2>
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {RESOURCES.map((r) => (
             <a
@@ -113,19 +113,19 @@ export default function GetFundedPage() {
               href={r.href}
               target="_blank"
               rel="noopener noreferrer"
-              className="group flex flex-col gap-3 rounded-2xl border border-slate-100 bg-white p-5 shadow-sm hover:shadow-md hover:border-indigo-200 transition-all"
+              className="group flex flex-col gap-3 rounded-2xl border border-line bg-surface p-5 transition-all hover:shadow-[0_6px_24px_-8px_rgba(22,24,29,0.12)] dark:border-line-dark dark:bg-surface-dark"
             >
               <div className="flex items-center justify-between">
-                <span className={`badge text-xs ${TAG_COLOR[r.tag] ?? 'bg-slate-100 text-slate-600'}`}>
+                <span className={`badge text-xs ${TAG_COLOR[r.tag] ?? 'bg-surface-sunk text-ink-soft'}`}>
                   {r.tag}
                 </span>
-                <span className="text-xs text-slate-300 group-hover:text-indigo-400 transition-colors">↗</span>
+                <span className="text-xs text-ink-soft group-hover:text-brand-600 transition-colors dark:text-slate-500">↗</span>
               </div>
               <div>
-                <p className="font-semibold text-slate-900 group-hover:text-indigo-700 transition-colors">
+                <p className="font-semibold text-ink group-hover:text-brand-600 transition-colors dark:text-white">
                   {r.name}
                 </p>
-                <p className="mt-1 text-sm text-slate-500">{r.description}</p>
+                <p className="mt-1 text-sm text-ink-soft dark:text-slate-400">{r.description}</p>
               </div>
             </a>
           ))}
@@ -138,15 +138,15 @@ export default function GetFundedPage() {
       {/* Funding Calculators CTA */}
       <Link
         href="/funding-calculators"
-        className="mt-10 block rounded-2xl border border-indigo-100 bg-gradient-to-br from-indigo-50 to-white p-6 hover:border-indigo-300 hover:shadow-md transition-all"
+        className="mt-10 block rounded-2xl border border-line bg-surface p-6 transition-all hover:shadow-[0_6px_24px_-8px_rgba(22,24,29,0.12)] dark:border-line-dark dark:bg-surface-dark"
       >
         <div className="flex items-center justify-between gap-4">
           <div>
-            <p className="text-xs font-bold uppercase tracking-widest text-indigo-600 mb-1">Calculators</p>
-            <p className="text-lg font-bold text-slate-900">Check what you qualify for in seconds</p>
-            <p className="mt-1 text-sm text-slate-500">MUDRA · CGTMSE · PMEGP · EMI — instant estimates</p>
+            <p className="text-xs font-bold uppercase tracking-widest text-brand-600 mb-1">Calculators</p>
+            <p className="text-lg font-bold text-ink dark:text-white">Check what you qualify for in seconds</p>
+            <p className="mt-1 text-sm text-ink-soft dark:text-slate-400">MUDRA · CGTMSE · PMEGP · EMI — instant estimates</p>
           </div>
-          <span className="text-2xl text-indigo-500">→</span>
+          <span className="text-2xl text-brand-600">→</span>
         </div>
       </Link>
 

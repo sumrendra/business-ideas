@@ -66,17 +66,17 @@ export default function FundingCalculatorsPage() {
 
       <div className="mx-auto max-w-4xl px-4 py-12">
         {/* Breadcrumb */}
-        <nav className="mb-6 text-sm text-slate-500">
-          <Link href="/" className="hover:text-indigo-600">Home</Link>
+        <nav className="mb-6 text-sm text-ink-soft dark:text-slate-400">
+          <Link href="/" className="hover:text-brand-600">Home</Link>
           <span className="mx-2">/</span>
-          <Link href="/get-funded" className="hover:text-indigo-600">Get Funded</Link>
+          <Link href="/get-funded" className="hover:text-brand-600">Get Funded</Link>
           <span className="mx-2">/</span>
-          <span className="text-slate-700">Calculators</span>
+          <span className="text-ink dark:text-slate-200">Calculators</span>
         </nav>
 
         <header className="mb-8">
-          <h1 className="text-3xl font-bold text-slate-900 sm:text-4xl">Funding Calculators for Indian Businesses</h1>
-          <p className="mt-3 text-lg text-slate-600">
+          <h1 className="text-3xl font-bold tracking-tight text-ink dark:text-white sm:text-4xl">Funding Calculators for Indian Businesses</h1>
+          <p className="mt-3 text-lg text-ink-soft dark:text-slate-400">
             Quick estimates on what you qualify for under India's main MSME funding schemes — MUDRA, CGTMSE, PMEGP — and a standard EMI calculator for any term loan.
           </p>
         </header>
@@ -85,14 +85,14 @@ export default function FundingCalculatorsPage() {
 
         {/* FAQ */}
         <section className="mt-14">
-          <h2 className="mb-4 text-2xl font-bold text-slate-900">Frequently Asked Questions</h2>
-          <div className="divide-y divide-slate-100 rounded-xl border border-slate-100">
+          <h2 className="mb-4 text-2xl font-bold tracking-tight text-ink dark:text-white">Frequently Asked Questions</h2>
+          <div className="divide-y divide-line rounded-xl border border-line dark:divide-line-dark dark:border-line-dark">
             {FAQ.map((f, i) => (
               <details key={i} className="group px-5 py-4">
-                <summary className="cursor-pointer text-sm font-medium text-slate-800 marker:content-none">
+                <summary className="cursor-pointer text-sm font-medium text-ink marker:content-none dark:text-slate-200">
                   {f.q}
                 </summary>
-                <p className="mt-3 text-sm text-slate-600 leading-relaxed">{f.a}</p>
+                <p className="mt-3 text-sm text-ink-soft leading-relaxed dark:text-slate-400">{f.a}</p>
               </details>
             ))}
           </div>

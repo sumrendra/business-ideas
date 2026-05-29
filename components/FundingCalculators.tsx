@@ -13,9 +13,9 @@ export default function FundingCalculators() {
   const [tab, setTab] = useState<Tab>('mudra')
 
   return (
-    <section className="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+    <section className="rounded-2xl border border-line bg-surface overflow-hidden dark:border-line-dark dark:bg-surface-dark">
       {/* Tabs */}
-      <div className="flex flex-wrap border-b border-slate-100 bg-slate-50">
+      <div className="flex flex-wrap border-b border-line bg-surface-sunk dark:border-line-dark dark:bg-surface-dark-raised">
         {[
           { id: 'mudra', label: 'MUDRA Loan' },
           { id: 'cgtmse', label: 'CGTMSE' },
@@ -25,10 +25,10 @@ export default function FundingCalculators() {
           <button
             key={t.id}
             onClick={() => setTab(t.id as Tab)}
-            className={`px-4 sm:px-5 py-3 text-sm font-medium transition-colors ${
+            className={`px-4 sm:px-5 min-h-[44px] py-3 text-sm font-medium transition-colors ${
               tab === t.id
-                ? 'bg-white text-indigo-700 border-b-2 border-indigo-600'
-                : 'text-slate-600 hover:text-slate-900'
+                ? 'bg-surface text-brand-600 border-b-2 border-brand-600 dark:bg-surface-dark dark:text-white'
+                : 'text-ink-soft hover:text-ink dark:text-slate-400 dark:hover:text-slate-200'
             }`}
           >
             {t.label}
@@ -76,13 +76,13 @@ function MudraCalc() {
         onChange={setAmount}
       />
 
-      <div className="rounded-xl border border-indigo-100 bg-indigo-50 p-5">
-        <p className="text-xs font-bold uppercase tracking-wide text-indigo-600">You qualify for the {tier.name} category</p>
-        <p className="mt-1 text-2xl font-bold text-slate-900">{inr(amount)}</p>
-        <p className="mt-3 text-sm text-slate-600">{tier.range} · Interest {tier.rate} · Tenure {tier.tenure}</p>
+      <div className="rounded-xl border border-line bg-surface-sunk p-5 dark:border-line-dark dark:bg-surface-dark-raised">
+        <p className="text-xs font-bold uppercase tracking-wide text-brand-600">You qualify for the {tier.name} category</p>
+        <p className="mt-1 text-3xl font-bold tabular-nums text-ink dark:text-white">{inr(amount)}</p>
+        <p className="mt-3 text-sm tabular-nums text-ink-soft dark:text-slate-400">{tier.range} · Interest {tier.rate} · Tenure {tier.tenure}</p>
       </div>
 
-      <Stat label="Eligible">{eligible ? 'Yes — apply via any public sector bank, NBFC or RRB' : 'Above MUDRA cap; consider CGTMSE'}</Stat>
+      <Stat label="Eligible" status={eligible ? 'positive' : 'caution'}>{eligible ? 'Yes — apply via any public sector bank, NBFC or RRB' : 'Above MUDRA cap; consider CGTMSE'}</Stat>
 
       <Notes
         items={[
@@ -131,11 +131,11 @@ function CgtmseCalc() {
       />
 
       <div>
-        <label className="block text-sm font-medium text-slate-700 mb-2">Borrower category</label>
+        <label className="block text-sm font-medium text-ink-soft mb-2 dark:text-slate-300">Borrower category</label>
         <select
           value={category}
           onChange={e => setCategory(e.target.value as 'general' | 'micro' | 'women_ne')}
-          className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-800 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-100"
+          className="w-full min-h-[44px] rounded-xl border border-line bg-surface px-4 py-3 text-sm text-ink focus:border-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-100 dark:border-line-dark dark:bg-surface-dark-raised dark:text-white"
         >
           <option value="general">General</option>
           <option value="micro">Micro enterprise</option>
@@ -143,15 +143,18 @@ function CgtmseCalc() {
         </select>
       </div>
 
-      <div className="rounded-xl border border-indigo-100 bg-indigo-50 p-5">
+      <div className="rounded-xl border border-line bg-surface-sunk p-5 dark:border-line-dark dark:bg-surface-dark-raised">
         {cover ? (
           <>
-            <p className="text-xs font-bold uppercase tracking-wide text-indigo-600">Guarantee cover</p>
-            <p className="mt-1 text-2xl font-bold text-slate-900">{cover.pct}% — {inr(guaranteed)}</p>
-            <p className="mt-3 text-sm text-slate-600">{cover.label}</p>
+            <p className="text-xs font-bold uppercase tracking-wide text-brand-600">Guarantee cover</p>
+            <p className="mt-1 text-3xl font-bold tabular-nums text-ink dark:text-white">{cover.pct}% — {inr(guaranteed)}</p>
+            <p className="mt-3 text-sm text-ink-soft dark:text-slate-400">{cover.label}</p>
           </>
         ) : (
-          <p className="text-sm text-slate-700">Loan exceeds CGTMSE cap of ₹5 Cr.</p>
+          <p className="flex items-start gap-1.5 text-sm text-alert">
+            <span aria-hidden="true">⚠</span>
+            <span>Loan exceeds CGTMSE cap of ₹5 Cr.</span>
+          </p>
         )}
       </div>
 
@@ -205,24 +208,24 @@ function PmegpCalc() {
 
       <div className="grid gap-4 sm:grid-cols-3">
         <div>
-          <label className="block text-sm font-medium text-slate-700 mb-2">Sector</label>
+          <label className="block text-sm font-medium text-ink-soft mb-2 dark:text-slate-300">Sector</label>
           <select value={sector} onChange={e => setSector(e.target.value as 'mfg' | 'service')}
-            className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-800">
+            className="w-full min-h-[44px] rounded-xl border border-line bg-surface px-4 py-3 text-sm text-ink focus:border-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-100 dark:border-line-dark dark:bg-surface-dark-raised dark:text-white">
             <option value="mfg">Manufacturing (max ₹50L)</option>
             <option value="service">Service / Trading (max ₹20L)</option>
           </select>
         </div>
         <div>
-          <label className="block text-sm font-medium text-slate-700 mb-2">Location</label>
+          <label className="block text-sm font-medium text-ink-soft mb-2 dark:text-slate-300">Location</label>
           <select value={area} onChange={e => setArea(e.target.value as 'urban' | 'rural')}
-            className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-800">
+            className="w-full min-h-[44px] rounded-xl border border-line bg-surface px-4 py-3 text-sm text-ink focus:border-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-100 dark:border-line-dark dark:bg-surface-dark-raised dark:text-white">
             <option value="urban">Urban</option>
             <option value="rural">Rural</option>
           </select>
         </div>
         <div className="flex items-end">
-          <label className="flex items-center gap-2 text-sm text-slate-700">
-            <input type="checkbox" checked={special} onChange={e => setSpecial(e.target.checked)} />
+          <label className="flex min-h-[44px] items-center gap-2 text-sm text-ink-soft dark:text-slate-300">
+            <input type="checkbox" checked={special} onChange={e => setSpecial(e.target.checked)} className="accent-brand-600" />
             Special category (SC/ST/OBC, Women, PH, Minorities, NER)
           </label>
         </div>
@@ -235,8 +238,11 @@ function PmegpCalc() {
       </div>
 
       {project > cap && (
-        <p className="text-sm text-amber-600">
-          Note: project cost capped at {inr(cap)} for {sector === 'mfg' ? 'manufacturing' : 'service / trading'} under PMEGP.
+        <p className="flex items-start gap-1.5 text-sm text-caution">
+          <span aria-hidden="true">⚠</span>
+          <span>
+            Note: project cost capped at <span className="tabular-nums">{inr(cap)}</span> for {sector === 'mfg' ? 'manufacturing' : 'service / trading'} under PMEGP.
+          </span>
         </p>
       )}
 
@@ -297,8 +303,8 @@ function EmiCalc() {
 function Header({ title, subtitle }: { title: string; subtitle: string }) {
   return (
     <div>
-      <h3 className="text-xl font-bold text-slate-900">{title}</h3>
-      <p className="mt-1 text-sm text-slate-500">{subtitle}</p>
+      <h3 className="text-xl font-bold tracking-tight text-ink dark:text-white">{title}</h3>
+      <p className="mt-1 text-sm text-ink-soft dark:text-slate-400">{subtitle}</p>
     </div>
   )
 }
@@ -317,8 +323,8 @@ function Slider({
   return (
     <div>
       <div className="flex items-baseline justify-between mb-2">
-        <label className="text-sm font-medium text-slate-700">{label}</label>
-        <span className="text-base font-bold text-indigo-700">{format(value)}</span>
+        <label className="text-sm font-medium text-ink-soft dark:text-slate-300">{label}</label>
+        <span className="text-base font-bold tabular-nums text-brand-600">{format(value)}</span>
       </div>
       <input
         type="range"
@@ -327,9 +333,9 @@ function Slider({
         step={step}
         value={value}
         onChange={e => onChange(Number(e.target.value))}
-        className="w-full accent-indigo-600"
+        className="w-full accent-brand-600"
       />
-      <div className="mt-1 flex justify-between text-xs text-slate-400">
+      <div className="mt-1 flex justify-between text-xs tabular-nums text-ink-soft dark:text-slate-500">
         <span>{format(min)}</span>
         <span>{format(max)}</span>
       </div>
@@ -337,36 +343,52 @@ function Slider({
   )
 }
 
-function Stat({ label, children }: { label: string; children: React.ReactNode }) {
+function Stat({ label, children, status }: { label: string; children: React.ReactNode; status?: 'positive' | 'caution' }) {
+  const tone =
+    status === 'positive'
+      ? 'text-positive'
+      : status === 'caution'
+        ? 'text-caution'
+        : 'text-ink dark:text-slate-200'
+  const icon = status === 'positive' ? '✓' : status === 'caution' ? '⚠' : null
   return (
     <div className="flex items-baseline gap-3 text-sm">
-      <span className="text-slate-500">{label}:</span>
-      <span className="font-medium text-slate-800">{children}</span>
+      <span className="text-ink-soft dark:text-slate-400">{label}:</span>
+      <span className={`flex items-center gap-1.5 font-medium ${tone}`}>
+        {icon && <span aria-hidden="true">{icon}</span>}
+        <span>{children}</span>
+      </span>
     </div>
   )
 }
 
 function Card({ label, value, accent, sub }: { label: string; value: string; accent: 'green' | 'amber' | 'indigo'; sub?: string }) {
-  const styles = {
-    green: 'border-green-100 bg-green-50 text-green-800',
-    amber: 'border-amber-100 bg-amber-50 text-amber-800',
-    indigo: 'border-indigo-100 bg-indigo-50 text-indigo-800',
+  // Numbers are the hero: flat stat tile (hairline border), semantic color on the
+  // figure only — green = money received, amber = cost/caution, indigo = neutral.
+  const valueTone = {
+    green: 'text-positive',
+    amber: 'text-caution',
+    indigo: 'text-brand-600',
   }[accent]
+  const icon = accent === 'green' ? '✓' : accent === 'amber' ? '⚠' : null
   return (
-    <div className={`rounded-xl border ${styles} p-4`}>
-      <p className="text-xs font-semibold uppercase tracking-wide opacity-70">{label}</p>
-      <p className="mt-1 text-xl font-bold">{value}</p>
-      {sub && <p className="mt-1 text-xs opacity-70">{sub}</p>}
+    <div className="rounded-xl border border-line bg-surface p-4 dark:border-line-dark dark:bg-surface-dark">
+      <p className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-ink-soft dark:text-slate-400">
+        {icon && <span aria-hidden="true">{icon}</span>}
+        <span>{label}</span>
+      </p>
+      <p className={`mt-1 text-2xl font-bold tabular-nums ${valueTone}`}>{value}</p>
+      {sub && <p className="mt-1 text-xs tabular-nums text-ink-soft dark:text-slate-400">{sub}</p>}
     </div>
   )
 }
 
 function Notes({ items }: { items: string[] }) {
   return (
-    <ul className="space-y-2 rounded-xl border border-slate-100 bg-slate-50 p-4 text-xs text-slate-600">
+    <ul className="space-y-2 rounded-xl border border-line bg-surface-sunk p-4 text-xs text-ink-soft dark:border-line-dark dark:bg-surface-dark-raised dark:text-slate-400">
       {items.map((it, i) => (
         <li key={i} className="flex items-start gap-2">
-          <span className="mt-0.5 text-slate-400">•</span>
+          <span className="mt-0.5 text-ink-soft dark:text-slate-500" aria-hidden="true">•</span>
           <span>{it}</span>
         </li>
       ))}

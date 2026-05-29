@@ -403,12 +403,12 @@ const SCHEMES: Scheme[] = [
 const STATES = [...new Set(SCHEMES.filter(s => s.state).map(s => s.state as string))].sort()
 
 const TYPE_META: Record<SchemeType, { label: string; color: string }> = {
-  loan:       { label: 'Loan',       color: 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300' },
-  subsidy:    { label: 'Subsidy',    color: 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300' },
-  grant:      { label: 'Grant',      color: 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300' },
-  equity:     { label: 'Equity',     color: 'bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300' },
-  training:   { label: 'Training',   color: 'bg-teal-100 text-teal-700 dark:bg-teal-900/40 dark:text-teal-300' },
-  incubation: { label: 'Incubation', color: 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300' },
+  loan:       { label: 'Loan',       color: 'bg-brand-50 text-brand-700 dark:bg-surface-dark-raised dark:text-slate-200' },
+  subsidy:    { label: 'Subsidy',    color: 'bg-brand-50 text-brand-700 dark:bg-surface-dark-raised dark:text-slate-200' },
+  grant:      { label: 'Grant',      color: 'bg-brand-50 text-brand-700 dark:bg-surface-dark-raised dark:text-slate-200' },
+  equity:     { label: 'Equity',     color: 'bg-brand-50 text-brand-700 dark:bg-surface-dark-raised dark:text-slate-200' },
+  training:   { label: 'Training',   color: 'bg-brand-50 text-brand-700 dark:bg-surface-dark-raised dark:text-slate-200' },
+  incubation: { label: 'Incubation', color: 'bg-brand-50 text-brand-700 dark:bg-surface-dark-raised dark:text-slate-200' },
 }
 
 const SECTOR_META: { value: SchemeSector; label: string }[] = [
@@ -542,40 +542,39 @@ export default function SchemesFinder() {
 
   function SchemeCard({ s }: { s: Scheme }) {
     return (
-      <div className="group flex flex-col gap-3 rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-5 shadow-sm hover:shadow-md hover:border-indigo-300 dark:hover:border-indigo-600 transition-all">
+      <div className="group flex flex-col gap-3 rounded-2xl border border-line dark:border-line-dark bg-surface dark:bg-surface-dark p-5 transition-all hover:shadow-[0_6px_24px_-8px_rgba(22,24,29,0.12)]">
         {/* Badges row */}
         <div className="flex flex-wrap gap-1.5">
-          <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
-            s.level === 'national'
-              ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300'
-              : 'bg-rose-100 text-rose-700 dark:bg-rose-900/40 dark:text-rose-300'
-          }`}>
+          <span className="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium bg-brand-50 text-brand-700 dark:bg-surface-dark-raised dark:text-slate-200">
             {s.level === 'national' ? 'National' : s.state ?? 'State'}
           </span>
           {s.newOnly && (
-            <span className="inline-flex items-center rounded-full bg-yellow-100 px-2.5 py-0.5 text-xs font-medium text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-300">
+            <span className="inline-flex items-center rounded-full bg-surface-sunk px-2.5 py-0.5 text-xs font-medium text-ink-soft dark:bg-surface-dark-raised dark:text-slate-300">
               New business only
             </span>
           )}
-          {s.forWomen    && <span className="rounded-full bg-pink-100 px-2.5 py-0.5 text-xs font-medium text-pink-700 dark:bg-pink-900/40 dark:text-pink-300">Women</span>}
-          {s.forDisabled && <span className="rounded-full bg-orange-100 px-2.5 py-0.5 text-xs font-medium text-orange-700 dark:bg-orange-900/40 dark:text-orange-300">Divyang</span>}
-          {s.forScSt     && <span className="rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-medium text-blue-700 dark:bg-blue-900/40 dark:text-blue-300">SC/ST</span>}
-          {s.forYouth    && <span className="rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-medium text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300">Youth</span>}
+          {s.forWomen    && <span className="rounded-full bg-surface-sunk px-2.5 py-0.5 text-xs font-medium text-ink-soft dark:bg-surface-dark-raised dark:text-slate-300">Women</span>}
+          {s.forDisabled && <span className="rounded-full bg-surface-sunk px-2.5 py-0.5 text-xs font-medium text-ink-soft dark:bg-surface-dark-raised dark:text-slate-300">Divyang</span>}
+          {s.forScSt     && <span className="rounded-full bg-surface-sunk px-2.5 py-0.5 text-xs font-medium text-ink-soft dark:bg-surface-dark-raised dark:text-slate-300">SC/ST</span>}
+          {s.forYouth    && <span className="rounded-full bg-surface-sunk px-2.5 py-0.5 text-xs font-medium text-ink-soft dark:bg-surface-dark-raised dark:text-slate-300">Youth</span>}
         </div>
 
         {/* Name + highlight */}
         <div>
-          <p className="font-semibold text-slate-900 dark:text-slate-100 text-base">{s.name}</p>
-          <p className="mt-0.5 text-sm font-medium text-green-700 dark:text-green-400">{s.highlight}</p>
+          <p className="font-semibold text-ink dark:text-white text-base">{s.name}</p>
+          <p className="mt-0.5 flex items-center gap-1.5 text-sm font-medium tabular-nums text-positive">
+            <span aria-hidden="true">✓</span>
+            <span>{s.highlight}</span>
+          </p>
         </div>
 
         {/* Description */}
-        <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed">{s.description}</p>
+        <p className="text-sm text-ink-soft dark:text-slate-400 leading-relaxed">{s.description}</p>
 
         {/* Eligibility */}
-        <div className="rounded-lg bg-slate-50 dark:bg-slate-800 px-3 py-2">
-          <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500 mb-0.5">Who can apply</p>
-          <p className="text-xs text-slate-600 dark:text-slate-300">{s.eligibility}</p>
+        <div className="rounded-lg bg-surface-sunk dark:bg-surface-dark-raised px-3 py-2">
+          <p className="text-[11px] font-semibold uppercase tracking-wide text-ink-soft dark:text-slate-500 mb-0.5">Who can apply</p>
+          <p className="text-xs text-ink-soft dark:text-slate-300">{s.eligibility}</p>
         </div>
 
         {/* Types + CTA */}
@@ -591,7 +590,7 @@ export default function SchemesFinder() {
             href={s.portal}
             target="_blank"
             rel="noopener noreferrer"
-            className="shrink-0 rounded-full bg-indigo-50 dark:bg-indigo-900/40 px-3 py-1.5 text-xs font-semibold text-indigo-700 dark:text-indigo-300 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 transition-colors"
+            className="shrink-0 rounded-full bg-brand-50 dark:bg-surface-dark-raised px-3 py-1.5 text-xs font-semibold text-brand-700 dark:text-slate-200 hover:bg-brand-100 dark:hover:bg-line-dark transition-colors"
           >
             Apply ↗
           </a>
@@ -610,10 +609,10 @@ export default function SchemesFinder() {
             <button
               key={s.value}
               onClick={() => { setWSector(s.value); setWizardStep(1) }}
-              className={`flex items-center gap-2.5 rounded-xl border px-4 py-3 text-sm font-medium text-left transition-all
+              className={`flex items-center gap-2.5 rounded-xl border px-4 py-3 min-h-[44px] text-sm font-medium text-left transition-all
                 ${wSector === s.value
-                  ? 'border-indigo-400 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300'
-                  : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:border-indigo-300'
+                  ? 'border-brand-600 bg-brand-50 dark:bg-surface-dark-raised text-brand-700 dark:text-white'
+                  : 'border-line dark:border-line-dark bg-surface dark:bg-surface-dark text-ink-soft dark:text-slate-200 hover:border-brand-600'
                 }`}
             >
               <span>{s.label}</span>
@@ -637,12 +636,12 @@ export default function SchemesFinder() {
               onClick={() => { setWStage(o.value); setWizardStep(2) }}
               className={`flex flex-col items-center gap-1 rounded-xl border px-4 py-5 text-center transition-all
                 ${wStage === o.value
-                  ? 'border-indigo-400 bg-indigo-50 dark:bg-indigo-900/30'
-                  : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:border-indigo-300'
+                  ? 'border-brand-600 bg-brand-50 dark:bg-surface-dark-raised'
+                  : 'border-line dark:border-line-dark bg-surface dark:bg-surface-dark hover:border-brand-600'
                 }`}
             >
-              <span className="font-semibold text-slate-900 dark:text-slate-100 text-sm">{o.label}</span>
-              <span className="text-xs text-slate-500 dark:text-slate-400">{o.sub}</span>
+              <span className="font-semibold text-ink dark:text-white text-sm">{o.label}</span>
+              <span className="text-xs text-ink-soft dark:text-slate-400">{o.sub}</span>
             </button>
           ))}
         </div>
@@ -664,11 +663,11 @@ export default function SchemesFinder() {
               onClick={() => { setWAmount(o.value); setWizardStep(3) }}
               className={`flex flex-col items-center gap-2 rounded-xl border px-4 py-5 text-center transition-all
                 ${wAmount === o.value
-                  ? 'border-indigo-400 bg-indigo-50 dark:bg-indigo-900/30'
-                  : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:border-indigo-300'
+                  ? 'border-brand-600 bg-brand-50 dark:bg-surface-dark-raised'
+                  : 'border-line dark:border-line-dark bg-surface dark:bg-surface-dark hover:border-brand-600'
                 }`}
             >
-              <span className="font-semibold text-slate-900 dark:text-slate-100 text-sm">{o.label}</span>
+              <span className="font-semibold tabular-nums text-ink dark:text-white text-sm">{o.label}</span>
             </button>
           ))}
         </div>
@@ -685,23 +684,23 @@ export default function SchemesFinder() {
               { label: 'I belong to SC or ST community', state: wScSt, setter: setWScSt },
               { label: 'I am a youth entrepreneur (18–35 years)', state: wYouth, setter: setWYouth },
             ].map(({ label, state, setter }) => (
-              <label key={label} className={`flex cursor-pointer items-center gap-3 rounded-xl border p-4 transition-all
+              <label key={label} className={`flex cursor-pointer items-center gap-3 rounded-xl border p-4 min-h-[44px] transition-all
                 ${state
-                  ? 'border-indigo-400 bg-indigo-50 dark:bg-indigo-900/30'
-                  : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:border-indigo-300'
+                  ? 'border-brand-600 bg-brand-50 dark:bg-surface-dark-raised'
+                  : 'border-line dark:border-line-dark bg-surface dark:bg-surface-dark hover:border-brand-600'
                 }`}>
                 <input
                   type="checkbox" checked={state}
                   onChange={e => setter(e.target.checked)}
-                  className="h-4 w-4 rounded border-slate-300 accent-indigo-600"
+                  className="h-4 w-4 rounded border-line accent-brand-600"
                 />
-                <span className="text-sm font-medium text-slate-700 dark:text-slate-200">{label}</span>
+                <span className="text-sm font-medium text-ink-soft dark:text-slate-200">{label}</span>
               </label>
             ))}
           </div>
           <button
             onClick={() => setWizardStep(4)}
-            className="w-full rounded-xl bg-indigo-600 py-3 text-sm font-semibold text-white hover:bg-indigo-700 transition-colors"
+            className="w-full min-h-[44px] rounded-xl bg-brand-600 py-3 text-sm font-semibold text-white hover:bg-brand-700 transition-colors"
           >
             Continue →
           </button>
@@ -717,10 +716,10 @@ export default function SchemesFinder() {
               <button
                 key={st || '__all'}
                 onClick={() => setWState(st)}
-                className={`rounded-xl border px-3 py-2.5 text-sm font-medium text-left transition-all
+                className={`rounded-xl border px-3 py-2.5 min-h-[44px] text-sm font-medium text-left transition-all
                   ${wState === st
-                    ? 'border-indigo-400 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300'
-                    : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:border-indigo-300'
+                    ? 'border-brand-600 bg-brand-50 dark:bg-surface-dark-raised text-brand-700 dark:text-white'
+                    : 'border-line dark:border-line-dark bg-surface dark:bg-surface-dark text-ink-soft dark:text-slate-200 hover:border-brand-600'
                   }`}
               >
                 {st || 'All India / Any State'}
@@ -729,7 +728,7 @@ export default function SchemesFinder() {
           </div>
           <button
             onClick={() => setWizardDone(true)}
-            className="w-full rounded-xl bg-indigo-600 py-3 text-sm font-semibold text-white hover:bg-indigo-700 transition-colors"
+            className="w-full min-h-[44px] rounded-xl bg-brand-600 py-3 text-sm font-semibold text-white hover:bg-brand-700 transition-colors"
           >
             Show my schemes →
           </button>
@@ -746,23 +745,23 @@ export default function SchemesFinder() {
       {/* Header */}
       <div className="mb-6 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
         <div>
-          <p className="text-xs font-bold uppercase tracking-widest text-indigo-600 dark:text-indigo-400">Funding</p>
-          <h2 className="mt-1 text-2xl font-bold text-slate-900 dark:text-slate-100">Government Scheme Finder</h2>
-          <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-            {SCHEMES.length} national & state schemes — find what fits you in seconds
+          <p className="text-xs font-bold uppercase tracking-widest text-brand-600">Funding</p>
+          <h2 className="mt-1 text-2xl font-bold tracking-tight text-ink dark:text-white">Government Scheme Finder</h2>
+          <p className="mt-1 text-sm text-ink-soft dark:text-slate-400">
+            <span className="tabular-nums">{SCHEMES.length}</span> national & state schemes — find what fits you in seconds
           </p>
         </div>
 
         {/* Mode toggle */}
-        <div className="flex rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden self-start">
+        <div className="flex rounded-xl border border-line dark:border-line-dark overflow-hidden self-start">
           {(['wizard', 'browse'] as const).map(m => (
             <button
               key={m}
               onClick={() => setMode(m)}
-              className={`px-4 py-2 text-sm font-medium transition-colors ${
+              className={`px-4 py-2 min-h-[44px] text-sm font-medium transition-colors ${
                 mode === m
-                  ? 'bg-indigo-600 text-white'
-                  : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700'
+                  ? 'bg-brand-600 text-white'
+                  : 'bg-surface dark:bg-surface-dark text-ink-soft dark:text-slate-300 hover:bg-surface-sunk dark:hover:bg-surface-dark-raised'
               }`}
             >
               {m === 'wizard' ? 'Guided' : 'Browse All'}
@@ -773,24 +772,24 @@ export default function SchemesFinder() {
 
       {/* ── WIZARD MODE ────────────────────────────────────────────────────── */}
       {mode === 'wizard' && !wizardDone && (
-        <div className="rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 overflow-hidden">
+        <div className="rounded-2xl border border-line dark:border-line-dark bg-surface-sunk dark:bg-surface-dark overflow-hidden">
           {/* Progress bar */}
-          <div className="h-1.5 bg-slate-200 dark:bg-slate-700">
+          <div className="h-1.5 bg-surface-sunk dark:bg-surface-dark-raised">
             <div
-              className="h-full bg-indigo-500 transition-all duration-300"
+              className="h-full bg-brand-600 transition-all duration-300"
               style={{ width: `${((wizardStep + 1) / WIZARD_STEPS.length) * 100}%` }}
             />
           </div>
 
           <div className="p-6 sm:p-8">
             {/* Step counter */}
-            <p className="text-xs font-semibold text-indigo-500 dark:text-indigo-400 mb-1">
+            <p className="text-xs font-semibold tabular-nums text-brand-600 mb-1">
               Step {wizardStep + 1} of {WIZARD_STEPS.length}
             </p>
-            <h3 className="text-xl font-bold text-slate-900 dark:text-slate-100 mb-1">
+            <h3 className="text-xl font-bold tracking-tight text-ink dark:text-white mb-1">
               {currentStep.title}
             </h3>
-            <p className="text-sm text-slate-500 dark:text-slate-400 mb-6">{currentStep.subtitle}</p>
+            <p className="text-sm text-ink-soft dark:text-slate-400 mb-6">{currentStep.subtitle}</p>
 
             <WizardStepContent />
 
@@ -798,7 +797,7 @@ export default function SchemesFinder() {
             {wizardStep > 0 && (
               <button
                 onClick={() => setWizardStep(s => s - 1)}
-                className="mt-4 text-sm text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors"
+                className="mt-4 text-sm text-ink-soft hover:text-ink dark:hover:text-slate-200 transition-colors"
               >
                 ← Back
               </button>
@@ -811,44 +810,44 @@ export default function SchemesFinder() {
       {mode === 'wizard' && wizardDone && (
         <>
           {/* Summary bar */}
-          <div className="mb-5 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-indigo-100 dark:border-indigo-900 bg-indigo-50 dark:bg-indigo-950/40 px-4 py-3">
+          <div className="mb-5 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-line dark:border-line-dark bg-surface-sunk dark:bg-surface-dark px-4 py-3">
             <div className="flex flex-wrap gap-2 text-xs">
-              <span className="font-semibold text-indigo-700 dark:text-indigo-300">Your profile:</span>
-              <span className="rounded-full bg-white dark:bg-slate-800 border border-indigo-200 dark:border-indigo-700 px-2.5 py-0.5 text-slate-600 dark:text-slate-300">
+              <span className="font-semibold text-brand-600">Your profile:</span>
+              <span className="rounded-full bg-surface dark:bg-surface-dark-raised border border-line dark:border-line-dark px-2.5 py-0.5 text-ink-soft dark:text-slate-300">
                 {SECTOR_META.find(s => s.value === wSector)?.label ?? 'Any sector'}
               </span>
               {wStage !== 'any' && (
-                <span className="rounded-full bg-white dark:bg-slate-800 border border-indigo-200 dark:border-indigo-700 px-2.5 py-0.5 text-slate-600 dark:text-slate-300">
+                <span className="rounded-full bg-surface dark:bg-surface-dark-raised border border-line dark:border-line-dark px-2.5 py-0.5 text-ink-soft dark:text-slate-300">
                   {wStage === 'new' ? 'New business' : 'Existing business'}
                 </span>
               )}
               {wState && (
-                <span className="rounded-full bg-white dark:bg-slate-800 border border-indigo-200 dark:border-indigo-700 px-2.5 py-0.5 text-slate-600 dark:text-slate-300">
+                <span className="rounded-full bg-surface dark:bg-surface-dark-raised border border-line dark:border-line-dark px-2.5 py-0.5 text-ink-soft dark:text-slate-300">
                   {wState}
                 </span>
               )}
-              {wWomen    && <span className="rounded-full bg-pink-100 dark:bg-pink-900/40 px-2.5 py-0.5 text-pink-700 dark:text-pink-300">Women</span>}
-              {wScSt     && <span className="rounded-full bg-blue-100 dark:bg-blue-900/40 px-2.5 py-0.5 text-blue-700 dark:text-blue-300">SC/ST</span>}
-              {wDisabled && <span className="rounded-full bg-orange-100 dark:bg-orange-900/40 px-2.5 py-0.5 text-orange-700 dark:text-orange-300">Divyang</span>}
-              {wYouth    && <span className="rounded-full bg-emerald-100 dark:bg-emerald-900/40 px-2.5 py-0.5 text-emerald-700 dark:text-emerald-300">Youth</span>}
+              {wWomen    && <span className="rounded-full bg-surface dark:bg-surface-dark-raised border border-line dark:border-line-dark px-2.5 py-0.5 text-ink-soft dark:text-slate-300">Women</span>}
+              {wScSt     && <span className="rounded-full bg-surface dark:bg-surface-dark-raised border border-line dark:border-line-dark px-2.5 py-0.5 text-ink-soft dark:text-slate-300">SC/ST</span>}
+              {wDisabled && <span className="rounded-full bg-surface dark:bg-surface-dark-raised border border-line dark:border-line-dark px-2.5 py-0.5 text-ink-soft dark:text-slate-300">Divyang</span>}
+              {wYouth    && <span className="rounded-full bg-surface dark:bg-surface-dark-raised border border-line dark:border-line-dark px-2.5 py-0.5 text-ink-soft dark:text-slate-300">Youth</span>}
             </div>
             <button
               onClick={resetWizard}
-              className="text-xs font-medium text-indigo-600 dark:text-indigo-400 hover:underline"
+              className="text-xs font-medium text-brand-600 hover:underline"
             >
               ← Redo quiz
             </button>
           </div>
 
           <div className="mb-4 flex items-center justify-between gap-3">
-            <p className="text-sm font-medium text-slate-600 dark:text-slate-400">
-              <span className="text-lg font-bold text-slate-900 dark:text-slate-100">{filtered.length}</span>
+            <p className="text-sm font-medium text-ink-soft dark:text-slate-400">
+              <span className="text-lg font-bold tabular-nums text-ink dark:text-white">{filtered.length}</span>
               {' '}scheme{filtered.length !== 1 ? 's' : ''} match your profile
             </p>
             <select
               value={sortBy}
               onChange={e => setSortBy(e.target.value as typeof sortBy)}
-              className="text-xs border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-1.5 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 focus:outline-none"
+              className="text-xs border border-line dark:border-line-dark rounded-lg px-3 py-1.5 bg-surface dark:bg-surface-dark-raised text-ink-soft dark:text-slate-200 focus:outline-none focus:border-brand-600 focus:ring-1 focus:ring-brand-600"
             >
               <option value="relevance">Sort: Relevance</option>
               <option value="amount">Sort: Max amount</option>
@@ -856,9 +855,9 @@ export default function SchemesFinder() {
           </div>
 
           {filtered.length === 0 ? (
-            <div className="rounded-2xl border border-dashed border-slate-300 dark:border-slate-600 py-16 text-center">
-              <p className="text-slate-400 dark:text-slate-500">No schemes match your exact profile.</p>
-              <button onClick={resetWizard} className="mt-3 text-sm font-medium text-indigo-600 dark:text-indigo-400 hover:underline">
+            <div className="rounded-2xl border border-dashed border-line dark:border-line-dark py-16 text-center">
+              <p className="text-ink-soft dark:text-slate-500">No schemes match your exact profile.</p>
+              <button onClick={resetWizard} className="mt-3 text-sm font-medium text-brand-600 hover:underline">
                 Try broadening your answers
               </button>
             </div>
@@ -876,7 +875,7 @@ export default function SchemesFinder() {
           {/* Search + Sort */}
           <div className="mb-4 flex flex-col sm:flex-row gap-3">
             <div className="relative flex-1">
-              <svg className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <svg className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-ink-soft dark:text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z" />
               </svg>
               <input
@@ -884,13 +883,13 @@ export default function SchemesFinder() {
                 placeholder="Search schemes by name, keyword, or state…"
                 value={bSearch}
                 onChange={e => setBSearch(e.target.value)}
-                className="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 pl-10 pr-4 py-2.5 text-sm text-slate-800 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-300 dark:focus:ring-indigo-600"
+                className="w-full min-h-[44px] rounded-xl border border-line dark:border-line-dark bg-surface dark:bg-surface-dark-raised pl-10 pr-4 py-2.5 text-sm text-ink dark:text-white placeholder:text-ink-soft focus:outline-none focus:border-brand-600 focus:ring-1 focus:ring-brand-600"
               />
             </div>
             <select
               value={sortBy}
               onChange={e => setSortBy(e.target.value as typeof sortBy)}
-              className="text-sm border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2.5 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 focus:outline-none"
+              className="text-sm min-h-[44px] border border-line dark:border-line-dark rounded-xl px-3 py-2.5 bg-surface dark:bg-surface-dark-raised text-ink-soft dark:text-slate-200 focus:outline-none focus:border-brand-600 focus:ring-1 focus:ring-brand-600"
             >
               <option value="relevance">Sort: Default</option>
               <option value="amount">Sort: Max amount</option>
@@ -898,11 +897,11 @@ export default function SchemesFinder() {
           </div>
 
           {/* Filters */}
-          <div className="rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 p-5 mb-5 space-y-5">
+          <div className="rounded-2xl border border-line dark:border-line-dark bg-surface-sunk dark:bg-surface-dark p-5 mb-5 space-y-5">
 
             {/* Sector */}
             <div>
-              <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Sector</p>
+              <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-ink-soft dark:text-slate-400">Sector</p>
               <div className="flex flex-wrap gap-2">
                 {[{ value: '', label: 'All Sectors' }, ...SECTOR_META.filter(s => s.value !== 'all').map(s => ({ value: s.value, label: s.label }))].map(opt => (
                   <button
@@ -910,8 +909,8 @@ export default function SchemesFinder() {
                     onClick={() => setBSector(opt.value as SchemeSector | '')}
                     className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
                       bSector === opt.value
-                        ? 'bg-indigo-600 text-white'
-                        : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:border-indigo-300'
+                        ? 'bg-brand-600 text-white'
+                        : 'bg-surface dark:bg-surface-dark-raised text-ink-soft dark:text-slate-300 border border-line dark:border-line-dark hover:border-brand-600'
                     }`}
                   >
                     {opt.label}
@@ -922,7 +921,7 @@ export default function SchemesFinder() {
 
             {/* Level */}
             <div>
-              <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Scheme Level</p>
+              <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-ink-soft dark:text-slate-400">Scheme Level</p>
               <div className="flex flex-wrap gap-2">
                 {(['all', 'national', 'state'] as const).map(v => (
                   <button
@@ -930,8 +929,8 @@ export default function SchemesFinder() {
                     onClick={() => { setBLevel(v); setBState('') }}
                     className={`rounded-full px-4 py-1.5 text-xs font-medium transition-colors ${
                       bLevel === v
-                        ? 'bg-indigo-600 text-white'
-                        : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:border-indigo-300'
+                        ? 'bg-brand-600 text-white'
+                        : 'bg-surface dark:bg-surface-dark-raised text-ink-soft dark:text-slate-300 border border-line dark:border-line-dark hover:border-brand-600'
                     }`}
                   >
                     {v === 'all' ? 'All' : v === 'national' ? 'National' : 'State-specific'}
@@ -941,7 +940,7 @@ export default function SchemesFinder() {
                   <select
                     value={bState}
                     onChange={e => setBState(e.target.value)}
-                    className="rounded-full border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-1.5 text-xs text-slate-700 dark:text-slate-200 focus:outline-none"
+                    className="rounded-full border border-line dark:border-line-dark bg-surface dark:bg-surface-dark-raised px-3 py-1.5 text-xs text-ink-soft dark:text-slate-200 focus:outline-none focus:border-brand-600 focus:ring-1 focus:ring-brand-600"
                   >
                     <option value="">All States</option>
                     {STATES.map(st => <option key={st} value={st}>{st}</option>)}
@@ -952,14 +951,14 @@ export default function SchemesFinder() {
 
             {/* Type */}
             <div>
-              <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Support Type</p>
+              <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-ink-soft dark:text-slate-400">Support Type</p>
               <div className="flex flex-wrap gap-2">
                 {(Object.entries(TYPE_META) as [SchemeType, typeof TYPE_META[SchemeType]][]).map(([key, meta]) => (
                   <button
                     key={key}
                     onClick={() => toggleType(key)}
                     className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
-                      bTypes.has(key) ? meta.color : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:border-slate-300'
+                      bTypes.has(key) ? 'bg-brand-600 text-white' : 'bg-surface dark:bg-surface-dark-raised text-ink-soft dark:text-slate-300 border border-line dark:border-line-dark hover:border-brand-600'
                     }`}
                   >
                     {meta.label}
@@ -970,7 +969,7 @@ export default function SchemesFinder() {
 
             {/* Beneficiary */}
             <div>
-              <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Special Category</p>
+              <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-ink-soft dark:text-slate-400">Special Category</p>
               <div className="flex flex-wrap gap-4">
                 {[
                   { label: 'Women', state: bWomen, setter: setBWomen },
@@ -979,8 +978,8 @@ export default function SchemesFinder() {
                 ].map(({ label, state, setter }) => (
                   <label key={label} className="flex cursor-pointer items-center gap-2">
                     <input type="checkbox" checked={state} onChange={e => setter(e.target.checked)}
-                      className="h-4 w-4 rounded border-slate-300 accent-indigo-600" />
-                    <span className="text-sm text-slate-700 dark:text-slate-200">{label}</span>
+                      className="h-4 w-4 rounded border-line accent-brand-600" />
+                    <span className="text-sm text-ink-soft dark:text-slate-200">{label}</span>
                   </label>
                 ))}
               </div>
@@ -988,14 +987,14 @@ export default function SchemesFinder() {
           </div>
 
           {/* Results count */}
-          <p className="mb-4 text-sm font-medium text-slate-600 dark:text-slate-400">
-            <span className="text-lg font-bold text-slate-900 dark:text-slate-100">{filtered.length}</span>
-            {' '}of {SCHEMES.length} schemes shown
+          <p className="mb-4 text-sm font-medium text-ink-soft dark:text-slate-400">
+            <span className="text-lg font-bold tabular-nums text-ink dark:text-white">{filtered.length}</span>
+            {' '}of <span className="tabular-nums">{SCHEMES.length}</span> schemes shown
           </p>
 
           {filtered.length === 0 ? (
-            <div className="rounded-2xl border border-dashed border-slate-300 dark:border-slate-600 py-16 text-center">
-              <p className="text-slate-400 dark:text-slate-500">No schemes match your filters. Try widening your selection.</p>
+            <div className="rounded-2xl border border-dashed border-line dark:border-line-dark py-16 text-center">
+              <p className="text-ink-soft dark:text-slate-500">No schemes match your filters. Try widening your selection.</p>
             </div>
           ) : (
             <div className="grid gap-4 sm:grid-cols-2">
