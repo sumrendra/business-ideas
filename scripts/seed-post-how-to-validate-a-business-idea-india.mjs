@@ -88,7 +88,7 @@ const post = {
   author: 'BusinessIdeas.live',
   published_at: new Date().toISOString(),
   seo_title: 'How to Validate a Business Idea in India (2026 Guide)',
-  seo_description: 'Validation playbook for Indian founders: WhatsApp MVPs, fake-door ads, Mamaearth's 700-mother test, and the UPI signal that proves your idea is real.',
+  seo_description: 'Validation playbook for Indian founders: WhatsApp MVPs, fake-door ads, Mamaearth\'s 700-mother test, and the UPI signal that proves your idea is real.',
   body: [
     // ── Opening: Scene (Pattern A) ────────────────────────────────────────────
     p("In the summer of 2014, Kabeer Biswas created a WhatsApp group in Bangalore and started doing errands for the people in it. He collected laundry from one part of the city, delivered Diet Cokes to another, tracked down a grandfather clock repair shop — all on his bike, all coordinated through a single chat thread. Some of the people whose tasks he ran eventually became investors in his company. The business they funded was Dunzo, which at its peak was valued at roughly ₹6,400 crore. Biswas did not write a business plan before any of this. He did not build an app, register a company, or raise a seed round. He made a WhatsApp group and started doing the work."),

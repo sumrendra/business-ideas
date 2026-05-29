@@ -13,7 +13,7 @@ Follow these 9 steps in order. Do not skip. Do not ask questions.
 
 ## Step 1 — Verify environment
 
-The agent **does not publish to Sanity itself** — it writes a seed script, commits it on a `blog/<slug>` branch, then merges that branch into `main` and pushes. The Cloud Build pipeline picks up the push to `main`, runs the seed script with repo secrets, publishes to Sanity, and deploys.
+The agent **does not publish to Sanity itself** — it writes a seed script and pushes a `blog/<slug>` branch. A GitHub Action picks up the push, runs the seed script with the secrets it owns, publishes to Sanity, then merges and dispatches the deploy. This works identically in local and remote (`/schedule`) contexts.
 
 The agent only needs:
 - Git configured (committer email + push access)
@@ -272,9 +272,9 @@ Copy `.claude/skills/blog-writer/publish-template.mjs` to `scripts/seed-post-<sl
 
 ---
 
-## Step 9 — Commit to a `blog/<slug>` branch, merge to main, and push
+## Step 9 — Commit to a `blog/<slug>` branch and push
 
-The seed file is committed on a short-lived `blog/<slug>` branch, merged into `main`, then pushed. The Cloud Build pipeline picks up the `main` push, runs the seed script (publishing to Sanity), and deploys.
+The seed file lands on a dedicated `blog/<slug>` branch cut from latest `origin/main`. A GitHub Action (`.github/workflows/auto-merge-blogs.yml`) sees the push and merges the branch into `main`, which dispatches the deploy workflow. This avoids any direct push to `main` from the agent.
 
 ```bash
 SLUG=<slug>
@@ -297,30 +297,30 @@ git add scripts/seed-post-$SLUG.mjs
 git commit -m "blog: $SLUG"
 SHORT_SHA=$(git rev-parse --short HEAD)
 
-# Merge into main and push — Cloud Build picks up the main push.
-git checkout main || { echo "ABORT: checkout main failed"; exit 1; }
-git pull origin main || { echo "ABORT: pull main failed"; exit 1; }
-git merge "$BLOG_BRANCH" --no-edit -m "blog: merge $SLUG" || { echo "ABORT: merge failed"; exit 1; }
-git push -u origin main || { echo "ABORT: push failed"; exit 1; }
+# Push the blog branch — the auto-merge-blogs Action merges into main from here.
+git push -u origin "$BLOG_BRANCH" || { echo "ABORT: push failed"; exit 1; }
 
-# Clean up the local blog branch.
+# Return to caller's branch and restore any stashed changes.
+git checkout "$ORIG_BRANCH"
+# Delete the local blog branch (the remote one is deleted by the Action after merge).
 git branch -D "$BLOG_BRANCH" 2>/dev/null || true
-
-# Return to caller's original branch and restore any stashed changes.
-git checkout "$ORIG_BRANCH" 2>/dev/null || true
 if [ "$HAS_TRACKED_CHANGES" != "0" ]; then
   git stash pop || echo "WARN: stash pop had conflicts — please resolve manually"
 fi
 
-echo "✓ Merged $SHORT_SHA ($BLOG_BRANCH) into main and pushed — Cloud Build will publish to Sanity"
+echo "✓ Pushed $SHORT_SHA to $BLOG_BRANCH — auto-merge Action will land it on main"
 ```
 
 Capture `$SHORT_SHA` for the return message.
 
 **How the post reaches production:**
-1. Agent merges the seed script into `main` and pushes.
-2. Cloud Build picks up the `main` push, installs deps, runs the seed script with repo secrets, and publishes to Sanity.
-3. The Sanity revalidate webhook purges ISR caches the instant the publish lands.
+1. Agent pushes `blog/<slug>` — visible on GitHub immediately.
+2. `.github/workflows/auto-merge-blogs.yml` fires:
+   - Installs deps + runs the seed script (this is where publish to Sanity happens, using repo secrets)
+   - Merges `blog/<slug>` into `main` and deletes the blog branch
+   - Dispatches `deploy.yml` to rebuild Cloud Run
+3. Total wall-clock from push to "blog live in Sanity" is ~1–2 minutes (Action cold-start + npm ci + publish).
+4. The Sanity revalidate webhook purges ISR caches the instant the publish lands — the post is visible at its URL without waiting for the Cloud Run deploy.
 
 Return the success block defined in `.claude/agents/blog-writer.md`.
 

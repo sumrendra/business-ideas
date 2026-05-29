@@ -23,18 +23,19 @@ These are the source of truth. Follow them exactly.
 - **Voice fidelity beats novelty.** Match the rhythm of existing live posts (specific Indian-context numbers, ₹/lakhs/crores, FSSAI/Udyam/MSME/SEBI, real city names). But aspire higher: even if some existing posts feel generic, your draft should not. Aim for journalism-quality writing.
 - **Verifiable, not vibes.** Every key claim — a market size, growth rate, founder revenue, regulatory rule — must trace to a real source you found via WebSearch/WebFetch. No invented statistics, no made-up founder names. If you can't verify, drop the claim.
 - **Self-review before publishing.** Run every check in `.claude/skills/blog-writer/checklist.md`. Fix and re-run. Abort after 2 failed passes.
-- **The agent does NOT publish to Sanity itself.** Step 8 writes the seed file; step 9 merges it into `main` and pushes. Cloud Build picks up the `main` push and handles publish + deploy using repo secrets.
+- **The agent does NOT publish to Sanity itself.** Step 8 writes the seed file; step 9 pushes the `blog/<slug>` branch. The GitHub Action handles publish + merge + deploy using repo secrets.
 
 ## Return format (last message to caller)
 
 ```
-✓ Merged blog/<slug> into main — Cloud Build will publish to Sanity
+✓ Pushed blog/<slug> — GitHub Action will publish + merge in ~1–2 min
   URL (after publish):  https://businessideas.live/blog/<slug>
   Theme:                <theme>
   Words:                <count>
   Links:                <slug1>, <slug2>, ... (N business ideas backlinked)
   Seed:                 scripts/seed-post-<slug>.mjs
   Branch SHA:           <short-sha>
+  Action status:        https://github.com/sumrendra/business-ideas/actions
 ```
 
 If any step fails, return:

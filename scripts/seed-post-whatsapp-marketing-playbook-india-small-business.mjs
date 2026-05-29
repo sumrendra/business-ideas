@@ -192,7 +192,7 @@ const post = {
     p("A standard Indian D2C WhatsApp abandoned-cart sequence looks like this: the first message goes out 30 minutes after cart abandonment — a soft reminder, not a discount, that names the specific product and includes the direct checkout link. The second message goes at 24 hours with a 'completing soon' urgency signal and optionally a small offer (free shipping, ₹50 off). The third message at 72 hours either closes the loop or re-engages with a 'would you like to see something similar?' question. The question format is deliberate — it turns a dead cart into a live customer conversation at no additional message cost."),
 
     pLinkPost(
-      'The operational infrastructure behind reliable abandoned-cart recovery — inventory that's actually available when the customer responds, order management that captures the conversion — is the same challenge covered in ',
+      'The operational infrastructure behind reliable abandoned-cart recovery — inventory that\'s actually available when the customer responds, order management that captures the conversion — is the same challenge covered in ',
       [{ text: 'inventory management for small Indian e-commerce sellers', slug: 'inventory-management-india-ecommerce' }],
       '. The best WhatsApp sequence in the world recovers a cart only to lose the customer when the item shows as available but actually isn\'t.'
     ),

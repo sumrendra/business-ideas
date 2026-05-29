@@ -227,7 +227,7 @@ const post = {
     ),
     faq(
       'What is Valmo, and why does it matter for Meesho\'s business?',
-      'Valmo is Meesho\'s in-house logistics orchestration arm, built to compress fulfillment costs. With roughly 291 full-time employees and minimal owned assets, Valmo handled 76.3 crore shipments in FY25 (up from 22.4 crore in FY24), bringing Meesho\'s cost per shipped order down from ₹55.6 (FY23) to ₹46.3 (FY25). By Q2 FY26, Valmo was handling 66–67% of all Meesho orders. Controlling logistics is what drove Meesho's free cash flow from ₹197 crore (FY24) to ₹1,032 crore (FY25) — a 5x jump in a single year.'
+      'Valmo is Meesho\'s in-house logistics orchestration arm, built to compress fulfillment costs. With roughly 291 full-time employees and minimal owned assets, Valmo handled 76.3 crore shipments in FY25 (up from 22.4 crore in FY24), bringing Meesho\'s cost per shipped order down from ₹55.6 (FY23) to ₹46.3 (FY25). By Q2 FY26, Valmo was handling 66–67% of all Meesho orders. Controlling logistics is what drove Meesho\'s free cash flow from ₹197 crore (FY24) to ₹1,032 crore (FY25) — a 5x jump in a single year.'
     ),
     faq(
       'Who are the founders of Meesho and what is their background?',
