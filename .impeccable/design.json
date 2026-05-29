@@ -1,0 +1,131 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-05-29T00:00:00.000Z",
+  "title": "Design System: BusinessIdeas.live",
+  "extensions": {
+    "colorMeta": {
+      "primary":      { "role": "primary", "displayName": "Indigo Accent", "canonical": "oklch(51% 0.21 277)", "tonalRamp": ["#1c1a4d","#2a2670","#37329a","#4338ca","#4f46e5","#7b74ee","#a9a4f5","#eef1fe"] },
+      "positive":     { "role": "secondary", "displayName": "Ledger Green", "canonical": "oklch(55% 0.13 158)", "tonalRamp": ["#0b2e1c","#114229","#175c3a","#1f8a55","#2fa86c","#5fc391","#9adcbb","#e4f5ec"] },
+      "caution":      { "role": "secondary", "displayName": "Filing Amber", "canonical": "oklch(60% 0.13 70)", "tonalRamp": ["#3a2300","#5a3700","#7d4d00","#b26a00","#d98400","#eaa54a","#f3c98c","#fbeed6"] },
+      "alert":        { "role": "secondary", "displayName": "Alert Red", "canonical": "oklch(52% 0.18 27)", "tonalRamp": ["#3a0f0c","#5a1813","#85241c","#c0362c","#d85a50","#e88a83","#f3bcb7","#fbe6e4"] },
+      "ink":          { "role": "neutral", "displayName": "Warm Ink", "canonical": "oklch(22% 0.01 270)", "tonalRamp": ["#16181d","#23262d","#3b3f47","#5a5f69","#80858f","#a7abb3","#cdcfd4","#fbfaf8"] },
+      "paper":        { "role": "neutral", "displayName": "Warm Paper", "canonical": "oklch(98% 0.004 80)", "tonalRamp": ["#16181d","#3b3f47","#80858f","#cdcfd4","#e6e3dc","#f4f2ee","#fbfaf8","#ffffff"] }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Display", "purpose": "Page hero, one per page." },
+      "numeric": { "displayName": "Numeric", "purpose": "Revenue, funding, margins, counts. Tabular figures, the load-bearing element." },
+      "label":   { "displayName": "Kicker Label", "purpose": "Uppercase tracked section kicker, used sparingly." }
+    },
+    "shadows": [
+      { "name": "lift-on-intent", "value": "0 6px 24px -8px rgba(22,24,29,0.12)", "purpose": "Hover-only lift for interactive cards and floating chrome (nav, palette, dropdowns). Never at rest on content." }
+    ],
+    "motion": [
+      { "name": "ease-out-quint", "value": "cubic-bezier(0.22, 1, 0.36, 1)", "purpose": "Default easing for state and entrance transitions. No bounce." },
+      { "name": "duration-fast", "value": "140ms", "purpose": "Hover, focus, chip toggles." },
+      { "name": "duration-base", "value": "220ms", "purpose": "Dropdown and sheet reveals." }
+    ],
+    "breakpoints": [
+      { "name": "sm", "value": "640px" },
+      { "name": "md", "value": "768px" },
+      { "name": "lg", "value": "1024px" },
+      { "name": "xl", "value": "1280px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "The single high-emphasis action per view.",
+      "html": "<button class=\"ds-btn-primary\">Get Funded</button>",
+      "css": ".ds-btn-primary{background:#4f46e5;color:#fff;font-weight:600;font-size:.875rem;padding:10px 18px;border:none;border-radius:10px;cursor:pointer;transition:background 140ms cubic-bezier(0.22,1,0.36,1)}.ds-btn-primary:hover{background:#4338ca}.ds-btn-primary:focus-visible{outline:2px solid #4f46e5;outline-offset:2px}"
+    },
+    {
+      "name": "Ghost Button",
+      "kind": "button",
+      "refersTo": "button-ghost",
+      "description": "Secondary action; surface with hairline border.",
+      "html": "<button class=\"ds-btn-ghost\">View all</button>",
+      "css": ".ds-btn-ghost{background:#fff;color:#3b3f47;font-weight:600;font-size:.875rem;padding:10px 18px;border:1px solid #e6e3dc;border-radius:10px;cursor:pointer;transition:background 140ms,border-color 140ms}.ds-btn-ghost:hover{background:#f4f2ee;border-color:#cdcfd4}"
+    },
+    {
+      "name": "Filter Chip",
+      "kind": "chip",
+      "refersTo": "chip-filter",
+      "description": "Pill filter; active state never relies on color alone.",
+      "html": "<button class=\"ds-chip\" aria-pressed=\"true\"><span class=\"ds-chip-dot\"></span>Under ₹1L</button>",
+      "css": ".ds-chip{display:inline-flex;align-items:center;gap:6px;background:#f4f2ee;color:#3b3f47;font-size:.8125rem;font-weight:500;padding:6px 12px;border:1px solid transparent;border-radius:9999px;cursor:pointer;min-height:32px;transition:background 140ms}.ds-chip[aria-pressed=\"true\"]{background:#eef1fe;color:#4338ca}.ds-chip-dot{width:6px;height:6px;border-radius:9999px;background:#4f46e5;display:none}.ds-chip[aria-pressed=\"true\"] .ds-chip-dot{display:block}"
+    },
+    {
+      "name": "Content Card",
+      "kind": "card",
+      "refersTo": "card",
+      "description": "Flat at rest with a hairline border; lifts only on hover.",
+      "html": "<a class=\"ds-card\" href=\"#\"><p class=\"ds-card-kicker\">Opportunity</p><h3 class=\"ds-card-title\">Cloud kitchen in Indore</h3><p class=\"ds-card-body\">₹4.2L setup · 62% margin · 8-month payback</p></a>",
+      "css": ".ds-card{display:block;background:#fff;border:1px solid #e6e3dc;border-radius:16px;padding:20px;text-decoration:none;transition:box-shadow 220ms cubic-bezier(0.22,1,0.36,1),border-color 140ms}.ds-card:hover{border-color:#cdcfd4;box-shadow:0 6px 24px -8px rgba(22,24,29,0.12)}.ds-card-kicker{font-size:.6875rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#4f46e5;margin:0}.ds-card-title{font-size:1.0625rem;font-weight:600;color:#16181d;margin:6px 0 0}.ds-card-body{font-size:.875rem;color:#3b3f47;margin:6px 0 0;font-feature-settings:'tnum' 1}"
+    },
+    {
+      "name": "Stat Tile",
+      "kind": "custom",
+      "refersTo": "stat-tile",
+      "description": "The site's atom: label, tabular number, provenance line.",
+      "html": "<div class=\"ds-stat\"><span class=\"ds-stat-label\">Latest revenue</span><span class=\"ds-stat-num\">₹12.00 Cr</span><span class=\"ds-stat-prov\">FY24 · Screener.in</span></div>",
+      "css": ".ds-stat{display:flex;flex-direction:column;gap:4px;background:#fff;border:1px solid #e6e3dc;border-radius:10px;padding:16px}.ds-stat-label{font-size:.75rem;color:#80858f}.ds-stat-num{font-size:1.5rem;font-weight:700;color:#16181d;line-height:1.1;letter-spacing:-0.01em;font-feature-settings:'tnum' 1}.ds-stat-prov{font-size:.6875rem;color:#b26a00}"
+    },
+    {
+      "name": "Top Navigation",
+      "kind": "nav",
+      "refersTo": "navigation",
+      "description": "Grouped sticky bar; active item underlined, not pilled. Tools collapse into a labelled dropdown.",
+      "html": "<nav class=\"ds-nav\"><a class=\"ds-nav-link ds-nav-active\" href=\"#\">Ideas</a><a class=\"ds-nav-link\" href=\"#\">Startups</a><a class=\"ds-nav-link\" href=\"#\">Insights</a><button class=\"ds-nav-link ds-nav-trigger\">Tools ▾</button></nav>",
+      "css": ".ds-nav{display:flex;align-items:center;gap:4px;background:#fbfaf8;padding:8px 12px;border-bottom:1px solid #e6e3dc}.ds-nav-link{font-size:.875rem;font-weight:500;color:#3b3f47;padding:8px 12px;border-radius:8px;text-decoration:none;background:none;border:none;cursor:pointer;position:relative;transition:background 140ms,color 140ms}.ds-nav-link:hover{background:#f4f2ee;color:#4f46e5}.ds-nav-active{color:#4f46e5}.ds-nav-active::after{content:'';position:absolute;left:12px;right:12px;bottom:-9px;height:2px;background:#4f46e5;border-radius:2px}"
+    },
+    {
+      "name": "Search Input",
+      "kind": "input",
+      "refersTo": "input-search",
+      "description": "Persistent-label search; border shifts to indigo on focus, no glow.",
+      "html": "<input class=\"ds-input\" type=\"search\" placeholder=\"Search ideas, startups, schemes\" />",
+      "css": ".ds-input{width:100%;background:#fff;color:#16181d;font-size:1rem;padding:10px 14px;border:1px solid #e6e3dc;border-radius:10px;transition:border-color 140ms,box-shadow 140ms}.ds-input::placeholder{color:#80858f}.ds-input:focus{outline:none;border-color:#4f46e5;box-shadow:0 0 0 3px #eef1fe}"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Ledger, Not the Brochure",
+    "overview": "A publication that runs on a database, not a SaaS app with a blog. References: Rest of World, The Ken, Stratechery restraint applied to Indian small business. Warm-neutral and quiet with one confident indigo accent; numbers in tabular figures are the texture. Dense where data lives, generous where prose lives. The codebase's real failure mode is not the PRODUCT.md anti-references but accidental color noise (14 decorative hues) and a flat, ungrouped nav that hides two-thirds of the site.",
+    "keyCharacteristics": [
+      "Warm paper neutrals, never cold dashboard grey, never pure black or white.",
+      "One indigo accent; all other color is semantic (positive / caution / alert), never decorative.",
+      "Numbers are first-class typography with tabular figures.",
+      "Editorial density: tight in data, generous in prose.",
+      "Thumb-first navigation and tap targets before any desktop polish."
+    ],
+    "rules": [
+      { "name": "The One Voice Rule", "body": "Indigo is the only non-semantic color on any screen, covering ≤10% of the surface. Delete any second decorative hue.", "section": "colors" },
+      { "name": "The Earned Color Rule", "body": "Green, amber, red appear only attached to a number, status, or provenance label whose meaning they carry. Color is data, not decoration.", "section": "colors" },
+      { "name": "The Tabular Number Rule", "body": "Every comparable figure uses tabular figures and right-aligns in tables.", "section": "typography" },
+      { "name": "The Quiet Kicker Rule", "body": "The uppercase tracked label is a kicker, not section grammar. At most one per major section.", "section": "typography" },
+      { "name": "The Flat-At-Rest Rule", "body": "Content cards have a border, not a shadow, until hover.", "section": "elevation" }
+    ],
+    "dos": [
+      "Do keep indigo (#4f46e5) as the only decorative color, on ≤10% of any screen.",
+      "Do attach green / amber / red to a number, status, or provenance label that gives them meaning.",
+      "Do set every comparable figure in tabular figures and right-align it in tables.",
+      "Do show provenance ('as of FY24, source: MCA AOC-4') as a styled micro-line.",
+      "Do group navigation into ≤5 top-level destinations with labelled dropdowns; every tool reachable in one tap.",
+      "Do use warm paper (#fbfaf8) and warm ink (#16181d); tint neutrals toward the brand hue.",
+      "Do give content cards a hairline border and keep them flat until hover."
+    ],
+    "donts": [
+      "Don't introduce a second decorative hue; the 14-color spread is the anti-pattern to remove.",
+      "Don't use #000 or #fff as text or page background.",
+      "Don't ship VC-Twitter SaaS hero gradients or Stripe-purple washes.",
+      "Don't drift toward JustDial / IndiaMart density: yellow CTAs, cramped grids, four ads per fold.",
+      "Don't copy Medium-style listicle layouts with stock photos and no real numbers.",
+      "Don't use fintech glassmorphism or the 'Total Revenue ↑12%' hero-metric template.",
+      "Don't use crypto-neon: black backgrounds with electric numbers, ticker tape.",
+      "Don't float content cards with drop-shadows at rest, or nest a card inside a card.",
+      "Don't rely on color alone for status; pair every semantic color with an icon or label.",
+      "Don't leave navigation as a flat, ungrouped row that hides two-thirds of the site behind /tools."
+    ]
+  }
+}
