@@ -4,13 +4,13 @@ import Link from 'next/link'
 import { FUNDING_DEALS, getSummaryStats, SECTORS, CITIES, STAGES, STAGE_LABELS, type Stage } from '@/lib/tools/funding-data'
 
 const STAGE_COLORS: Record<Stage, string> = {
-  'pre-seed': 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300',
-  'seed': 'bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300',
-  'series-a': 'bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300',
-  'series-b': 'bg-violet-100 text-violet-800 dark:bg-violet-900/40 dark:text-violet-300',
-  'series-c': 'bg-rose-100 text-rose-800 dark:bg-rose-900/40 dark:text-rose-300',
-  'series-d+': 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300',
-  'ipo-prep': 'bg-orange-100 text-orange-800 dark:bg-orange-900/40 dark:text-orange-300',
+  'pre-seed': 'bg-surface-sunk text-ink-soft dark:bg-surface-dark-raised dark:text-paper-dark',
+  'seed': 'bg-surface-sunk text-ink-soft dark:bg-surface-dark-raised dark:text-paper-dark',
+  'series-a': 'bg-surface-sunk text-ink-soft dark:bg-surface-dark-raised dark:text-paper-dark',
+  'series-b': 'bg-surface-sunk text-ink-soft dark:bg-surface-dark-raised dark:text-paper-dark',
+  'series-c': 'bg-surface-sunk text-ink-soft dark:bg-surface-dark-raised dark:text-paper-dark',
+  'series-d+': 'bg-surface-sunk text-ink-soft dark:bg-surface-dark-raised dark:text-paper-dark',
+  'ipo-prep': 'bg-surface-sunk text-ink-soft dark:bg-surface-dark-raised dark:text-paper-dark',
 }
 
 const SORT_OPTIONS = [
@@ -81,19 +81,19 @@ export default function FundingRadarPage() {
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-14">
-      <nav className="mb-6 text-sm text-slate-500 dark:text-slate-400">
-        <Link href="/" className="hover:text-indigo-600 dark:hover:text-indigo-400">Home</Link>
+      <nav className="mb-6 text-sm text-ink-soft dark:text-paper-dark">
+        <Link href="/" className="hover:text-brand-600 dark:hover:text-brand-600">Home</Link>
         <span className="mx-2">/</span>
-        <Link href="/tools" className="hover:text-indigo-600 dark:hover:text-indigo-400">Tools</Link>
+        <Link href="/tools" className="hover:text-brand-600 dark:hover:text-brand-600">Tools</Link>
         <span className="mx-2">/</span>
-        <span className="text-slate-700 dark:text-slate-300">Funding Radar</span>
+        <span className="text-ink dark:text-paper-dark">Funding Radar</span>
       </nav>
 
       <header className="mb-8">
-        <p className="text-xs font-bold uppercase tracking-widest text-indigo-600 dark:text-indigo-400">Intelligence</p>
-        <h1 className="mt-2 text-3xl sm:text-4xl font-bold text-slate-900 dark:text-slate-100">Startup Funding Radar</h1>
-        <p className="mt-2 max-w-2xl text-slate-500 dark:text-slate-400">
-          {FUNDING_DEALS.length} real Indian startup deals FY2022–FY2024 — by sector, stage, and city. Data from Inc42, VCC Edge, and public disclosures.
+        <p className="text-[0.6875rem] font-bold uppercase tracking-[0.12em] text-brand-600 dark:text-brand-600">Intelligence</p>
+        <h1 className="mt-2 text-3xl sm:text-4xl font-bold tracking-tight text-ink dark:text-paper-dark">Startup Funding Radar</h1>
+        <p className="mt-2 max-w-2xl text-ink-soft dark:text-paper-dark">
+          <span className="tabular-nums">{FUNDING_DEALS.length}</span> real Indian startup deals FY2022–FY2024 — by sector, stage, and city. Data from Inc42, VCC Edge, and public disclosures.
         </p>
       </header>
 
@@ -105,27 +105,28 @@ export default function FundingRadarPage() {
           { label: 'Top sector', value: topSector?.[0] ?? '—' },
           { label: 'Top city', value: topCity?.[0] ?? '—' },
         ].map(s => (
-          <div key={s.label} className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-4">
-            <p className="text-[11px] uppercase tracking-wider text-slate-400 dark:text-slate-500">{s.label}</p>
-            <p className="mt-1 text-xl font-bold text-slate-900 dark:text-slate-100 truncate">{s.value}</p>
+          <div key={s.label} className="rounded-lg border border-line dark:border-line-dark bg-surface dark:bg-surface-dark p-4">
+            <p className="text-[0.6875rem] font-bold uppercase tracking-[0.12em] text-ink-soft dark:text-paper-dark">{s.label}</p>
+            <p className="mt-1.5 text-2xl font-bold tabular-nums tracking-tight text-ink dark:text-paper-dark truncate">{s.value}</p>
+            <p className="mt-1 text-[10px] tabular-nums text-ink-soft dark:text-paper-dark">FY22–24</p>
           </div>
         ))}
       </div>
 
       {/* Stage breakdown bar */}
-      <div className="mb-8 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-5">
-        <p className="text-xs font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-4">Deals by Stage</p>
+      <div className="mb-8 rounded-lg border border-line dark:border-line-dark bg-surface dark:bg-surface-dark p-5">
+        <p className="text-[0.6875rem] font-bold uppercase tracking-[0.12em] text-ink-soft dark:text-paper-dark mb-4">Deals by Stage</p>
         <div className="space-y-2">
           {stageBreakdown.map(({ stage: s, count }) => (
             <div key={s} className="flex items-center gap-3">
-              <span className="w-24 shrink-0 text-xs text-slate-500 dark:text-slate-400 text-right">{STAGE_LABELS[s as Stage]}</span>
-              <div className="flex-1 h-5 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
+              <span className="w-24 shrink-0 text-xs text-ink-soft dark:text-paper-dark text-right">{STAGE_LABELS[s as Stage]}</span>
+              <div className="flex-1 h-5 rounded-full bg-surface-sunk dark:bg-surface-dark-raised overflow-hidden">
                 <div
-                  className="h-full rounded-full bg-indigo-500 dark:bg-indigo-400 transition-all duration-500"
+                  className="h-full rounded-full bg-brand-600 transition-all duration-500"
                   style={{ width: `${(count / maxStageCount) * 100}%` }}
                 />
               </div>
-              <span className="w-6 text-xs font-semibold text-slate-600 dark:text-slate-400">{count}</span>
+              <span className="w-6 text-xs font-semibold tabular-nums text-right text-ink dark:text-paper-dark">{count}</span>
             </div>
           ))}
         </div>
@@ -138,25 +139,25 @@ export default function FundingRadarPage() {
           placeholder="Search company, tagline, investor…"
           value={search}
           onChange={e => setSearch(e.target.value)}
-          className="flex-1 min-w-[200px] rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-4 py-2 text-sm text-slate-800 dark:text-slate-200 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          className="flex-1 min-w-[200px] min-h-[44px] rounded-md border border-line dark:border-line-dark bg-surface dark:bg-surface-dark px-4 py-2.5 text-sm text-ink dark:text-paper-dark placeholder-ink-soft dark:placeholder-paper-dark focus:outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-600/40"
         />
-        <select value={sector} onChange={e => setSector(e.target.value)} className="rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-2 text-sm text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+        <select value={sector} onChange={e => setSector(e.target.value)} className="min-h-[44px] rounded-md border border-line dark:border-line-dark bg-surface dark:bg-surface-dark px-3 py-2.5 text-sm text-ink-soft dark:text-paper-dark focus:outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-600/40">
           <option value="">All sectors</option>
           {SECTORS.map(s => <option key={s} value={s}>{s}</option>)}
         </select>
-        <select value={stage} onChange={e => setStage(e.target.value as Stage | '')} className="rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-2 text-sm text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+        <select value={stage} onChange={e => setStage(e.target.value as Stage | '')} className="min-h-[44px] rounded-md border border-line dark:border-line-dark bg-surface dark:bg-surface-dark px-3 py-2.5 text-sm text-ink-soft dark:text-paper-dark focus:outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-600/40">
           <option value="">All stages</option>
           {STAGES.map(s => <option key={s} value={s}>{STAGE_LABELS[s]}</option>)}
         </select>
-        <select value={city} onChange={e => setCity(e.target.value)} className="rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-2 text-sm text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+        <select value={city} onChange={e => setCity(e.target.value)} className="min-h-[44px] rounded-md border border-line dark:border-line-dark bg-surface dark:bg-surface-dark px-3 py-2.5 text-sm text-ink-soft dark:text-paper-dark focus:outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-600/40">
           <option value="">All cities</option>
           {CITIES.map(c => <option key={c} value={c}>{c}</option>)}
         </select>
-        <select value={sort} onChange={e => setSort(e.target.value)} className="rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-2 text-sm text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+        <select value={sort} onChange={e => setSort(e.target.value)} className="min-h-[44px] rounded-md border border-line dark:border-line-dark bg-surface dark:bg-surface-dark px-3 py-2.5 text-sm text-ink-soft dark:text-paper-dark focus:outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-600/40">
           {SORT_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
         </select>
         {(sector || stage || city || search) && (
-          <button onClick={() => { setSector(''); setStage(''); setCity(''); setSearch('') }} className="rounded-lg border border-slate-200 dark:border-slate-700 px-3 py-2 text-sm text-slate-500 hover:text-slate-800 dark:hover:text-slate-200">
+          <button onClick={() => { setSector(''); setStage(''); setCity(''); setSearch('') }} className="min-h-[44px] rounded-md border border-line dark:border-line-dark px-3 py-2.5 text-sm text-ink-soft hover:text-ink dark:hover:text-paper-dark focus:outline-none focus:ring-2 focus:ring-brand-600/40">
             Clear ✕
           </button>
         )}
@@ -164,38 +165,38 @@ export default function FundingRadarPage() {
 
       {/* Deals grid */}
       {filtered.length === 0 ? (
-        <div className="py-16 text-center text-slate-400">No deals match your filters.</div>
+        <div className="py-16 text-center text-ink-soft dark:text-paper-dark">No deals match your filters.</div>
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {filtered.map(deal => (
-            <div key={deal.id} className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-5 flex flex-col gap-3 hover:border-indigo-300 dark:hover:border-indigo-700 transition-colors">
+            <div key={deal.id} className="rounded-lg border border-line dark:border-line-dark bg-surface dark:bg-surface-dark p-5 flex flex-col gap-3 transition-shadow hover:shadow-[0_6px_24px_-8px_rgba(22,24,29,0.12)]">
               <div className="flex items-start justify-between gap-2">
                 <div>
-                  <p className="font-bold text-slate-900 dark:text-slate-100 text-base leading-tight">{deal.company}</p>
-                  <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">{deal.city} · Est. {deal.founded}</p>
+                  <p className="font-bold text-ink dark:text-paper-dark text-base leading-tight">{deal.company}</p>
+                  <p className="text-xs text-ink-soft dark:text-paper-dark mt-0.5 tabular-nums">{deal.city} · Est. {deal.founded}</p>
                 </div>
                 <div className="text-right shrink-0">
-                  <p className="text-lg font-bold text-indigo-600 dark:text-indigo-400">{fmtUSD(deal.amountUSD)}</p>
-                  <p className="text-[10px] text-slate-400">{fmtINR(deal.amountINR)}</p>
+                  <p className="text-lg font-bold tabular-nums text-ink dark:text-paper-dark">{fmtUSD(deal.amountUSD)}</p>
+                  <p className="text-[10px] tabular-nums text-ink-soft dark:text-paper-dark">{fmtINR(deal.amountINR)}</p>
                 </div>
               </div>
 
-              <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">{deal.tagline}</p>
+              <p className="text-xs text-ink-soft dark:text-paper-dark leading-relaxed">{deal.tagline}</p>
 
-              <div className="flex flex-wrap gap-1.5 mt-auto pt-2 border-t border-slate-100 dark:border-slate-800">
+              <div className="flex flex-wrap gap-1.5 mt-auto pt-2 border-t border-line dark:border-line-dark">
                 <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide ${STAGE_COLORS[deal.stage]}`}>
                   {STAGE_LABELS[deal.stage]}
                 </span>
-                <span className="rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 px-2 py-0.5 text-[10px]">
+                <span className="rounded-full bg-surface-sunk dark:bg-surface-dark-raised text-ink-soft dark:text-paper-dark px-2 py-0.5 text-[10px]">
                   {deal.sector}
                 </span>
-                <span className="rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-500 px-2 py-0.5 text-[10px]">
+                <span className="rounded-full bg-surface-sunk dark:bg-surface-dark-raised text-ink-soft dark:text-paper-dark px-2 py-0.5 text-[10px] tabular-nums">
                   {deal.month}
                 </span>
               </div>
 
-              <div className="text-[11px] text-slate-400 dark:text-slate-500">
-                <span className="font-medium text-slate-500 dark:text-slate-400">Investors: </span>
+              <div className="text-[11px] text-ink-soft dark:text-paper-dark">
+                <span className="font-medium text-ink dark:text-paper-dark">Investors: </span>
                 {deal.investors.slice(0, 2).join(', ')}{deal.investors.length > 2 ? ` +${deal.investors.length - 2}` : ''}
               </div>
             </div>
@@ -203,7 +204,7 @@ export default function FundingRadarPage() {
         </div>
       )}
 
-      <p className="mt-8 text-center text-xs text-slate-400 dark:text-slate-600">
+      <p className="mt-8 text-center text-xs text-ink-soft dark:text-paper-dark">
         Data sourced from Inc42, VCC Edge, Tracxn, and public disclosures. Amounts in USD million at approximate INR exchange rates. Not exhaustive.
       </p>
     </div>
