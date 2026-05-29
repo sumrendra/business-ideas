@@ -8,6 +8,7 @@ const NAV_LINKS = [
   { href: '/blog',                    label: 'Blogs' },
   { href: '/policy-pulse',            label: 'Policy Pulse' },
   { href: '/sectors',                 label: 'Sectors' },
+  { href: '/startups',                label: 'Startups' },
   { href: '/incentives',              label: 'State Incentives' },
   { href: '/hyperlocal-opportunity',  label: 'Opportunity Map' },
   { href: '/tools',                   label: 'Tools' },

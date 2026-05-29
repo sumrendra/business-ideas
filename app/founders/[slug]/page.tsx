@@ -1,14 +1,14 @@
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
-import { client } from '@/lib/sanity/client'
+import { readClient } from '@/lib/sanity/client'
 import { FOUNDER_BY_SLUG_QUERY, FOUNDER_SLUGS_QUERY } from '@/lib/sanity/queries'
 import type { StartupFounder, Startup } from '@/lib/sanity/types'
 
 const BASE = 'https://businessideas.live'
 
 export async function generateStaticParams() {
-  const slugs = await client.fetch<{ slug: string }[]>(FOUNDER_SLUGS_QUERY)
+  const slugs = await readClient.fetch<{ slug: string }[]>(FOUNDER_SLUGS_QUERY)
   return slugs.map((s) => ({ slug: s.slug }))
 }
 
@@ -18,7 +18,7 @@ interface Props {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params
-  const f = await client.fetch<(StartupFounder & { startups?: Startup[] }) | null>(
+  const f = await readClient.fetch<(StartupFounder & { startups?: Startup[] }) | null>(
     FOUNDER_BY_SLUG_QUERY,
     { slug },
     { next: { tags: ['startup-founders', `founder:${slug}`] } },
@@ -34,7 +34,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function FounderPage({ params }: Props) {
   const { slug } = await params
-  const f = await client.fetch<(StartupFounder & { startups?: Startup[] }) | null>(
+  const f = await readClient.fetch<(StartupFounder & { startups?: Startup[] }) | null>(
     FOUNDER_BY_SLUG_QUERY,
     { slug },
     { next: { tags: ['startup-founders', `founder:${slug}`] } },

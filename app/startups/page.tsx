@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import { client } from '@/lib/sanity/client'
+import { readClient } from '@/lib/sanity/client'
 import { STARTUPS_QUERY, STARTUPS_COUNT_QUERY } from '@/lib/sanity/queries'
 import type { Startup } from '@/lib/sanity/types'
 import {
@@ -73,12 +73,12 @@ export default async function StartupsPage({ searchParams }: PageProps) {
   }
 
   const [startups, count] = await Promise.all([
-    client.fetch<Startup[]>(
+    readClient.fetch<Startup[]>(
       STARTUPS_QUERY,
       { ...filterParams, from, to },
       { next: { tags: ['startups'] } },
     ),
-    client.fetch<number>(STARTUPS_COUNT_QUERY, filterParams, {
+    readClient.fetch<number>(STARTUPS_COUNT_QUERY, filterParams, {
       next: { tags: ['startups'] },
     }),
   ])

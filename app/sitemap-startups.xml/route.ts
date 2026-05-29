@@ -1,4 +1,4 @@
-import { client } from '@/lib/sanity/client'
+import { readClient } from '@/lib/sanity/client'
 import { STARTUP_SLUGS_QUERY, FOUNDER_SLUGS_QUERY } from '@/lib/sanity/queries'
 
 const BASE = 'https://businessideas.live'
@@ -22,8 +22,8 @@ export async function GET() {
   const today = new Date().toISOString().split('T')[0]
 
   const [startupSlugs, founderSlugs] = await Promise.all([
-    client.fetch<{ slug: string; lastmod: string }[]>(STARTUP_SLUGS_QUERY, {}, { cache: 'no-store' }),
-    client.fetch<{ slug: string; lastmod: string }[]>(FOUNDER_SLUGS_QUERY, {}, { cache: 'no-store' }),
+    readClient.fetch<{ slug: string; lastmod: string }[]>(STARTUP_SLUGS_QUERY, {}, { cache: 'no-store' }),
+    readClient.fetch<{ slug: string; lastmod: string }[]>(FOUNDER_SLUGS_QUERY, {}, { cache: 'no-store' }),
   ])
 
   const startupUrls = startupSlugs.map((s) => {
