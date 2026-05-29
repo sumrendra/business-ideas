@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
-import { client } from '@/lib/sanity/client'
+import { readClient } from '@/lib/sanity/client'
 import { STARTUP_BY_SLUG_QUERY, STARTUP_SLUGS_QUERY } from '@/lib/sanity/queries'
 import type { Startup } from '@/lib/sanity/types'
 import {
@@ -13,7 +13,7 @@ import {
 const BASE = 'https://businessideas.live'
 
 export async function generateStaticParams() {
-  const slugs = await client.fetch<{ slug: string }[]>(STARTUP_SLUGS_QUERY)
+  const slugs = await readClient.fetch<{ slug: string }[]>(STARTUP_SLUGS_QUERY)
   return slugs.map((s) => ({ slug: s.slug }))
 }
 
@@ -23,7 +23,7 @@ interface Props {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params
-  const s = await client.fetch<Startup | null>(
+  const s = await readClient.fetch<Startup | null>(
     STARTUP_BY_SLUG_QUERY,
     { slug },
     { next: { tags: ['startups', `startup:${slug}`] } },
@@ -54,7 +54,7 @@ function fmtINR(n?: number) {
 
 export default async function StartupPage({ params }: Props) {
   const { slug } = await params
-  const s = await client.fetch<Startup | null>(
+  const s = await readClient.fetch<Startup | null>(
     STARTUP_BY_SLUG_QUERY,
     { slug },
     { next: { tags: ['startups', `startup:${slug}`] } },
