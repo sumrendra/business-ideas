@@ -14,9 +14,8 @@ The subagent must run the full pipeline:
    - Otherwise → use `$ARGUMENTS` verbatim as the theme.
 4. Pick 3–6 idea slugs to backlink (must match the theme by industry/tags).
 5. Draft the post in memory, then self-review against `checklist.md`. If any check fails, fix and re-review. Hard-fail (abort) if checks still fail after 2 passes.
-6. Write `scripts/seed-post-<slug>.mjs` from `publish-template.mjs`.
-7. Run `node scripts/seed-post-<slug>.mjs` to publish live to Sanity (no `drafts.` prefix; `featured: false`).
-8. Commit and push to **main** (follow step 9 of `SKILL.md` — handles branch switch, stash, return).
-9. Return: live URL (`https://businessideas.live/blog/<slug>`), theme picked, idea slugs backlinked, word count, and a one-line summary.
+6. Write `scripts/seed-post-<slug>.mjs` from `publish-template.mjs`. Do NOT execute it.
+7. Commit the seed script on a `blog/<slug>` branch, merge into `main`, and push (follow step 9 of `SKILL.md` — handles branch switch, stash, return to original branch).
+8. Return: URL (`https://businessideas.live/blog/<slug>`), theme picked, idea slugs backlinked, word count, and a one-line summary.
 
 **Do NOT** ask the user any questions mid-flow. Make reasonable choices and proceed. If a hard blocker occurs (Sanity auth missing, git push fails), abort with a clear error message.
