@@ -46,7 +46,6 @@ const SECTORS: {
   label: string
   href: string
   tag: string
-  accent: string     // gradient classes
   iconWrap: string   // icon background/text color classes
   icon: ReactNode
 }[] = [
@@ -55,8 +54,7 @@ const SECTORS: {
     label: 'SaaS',
     href: '/business-ideas/saas',
     tag: 'Hottest',
-    accent: 'from-orange-500/20 via-rose-500/10 to-transparent',
-    iconWrap: 'bg-orange-500/15 text-orange-500 dark:text-orange-400',
+    iconWrap: 'bg-brand-600/10 text-brand-600 dark:text-indigo-400',
     icon: <FireIcon />,
   },
   {
@@ -64,8 +62,7 @@ const SECTORS: {
     label: 'AI & Machine Learning',
     href: '/business-ideas/ai-ml',
     tag: 'Fast-growing',
-    accent: 'from-violet-500/20 via-indigo-500/10 to-transparent',
-    iconWrap: 'bg-violet-500/15 text-violet-500 dark:text-violet-400',
+    iconWrap: 'bg-brand-600/10 text-brand-600 dark:text-indigo-400',
     icon: <BoltIcon />,
   },
   {
@@ -73,8 +70,7 @@ const SECTORS: {
     label: 'Climate & Sustainability',
     href: '/business-ideas/climate',
     tag: 'Rising',
-    accent: 'from-emerald-500/20 via-teal-500/10 to-transparent',
-    iconWrap: 'bg-emerald-500/15 text-emerald-500 dark:text-emerald-400',
+    iconWrap: 'bg-brand-600/10 text-brand-600 dark:text-indigo-400',
     icon: <TrendUpIcon />,
   },
   {
@@ -82,26 +78,25 @@ const SECTORS: {
     label: 'E-commerce',
     href: '/business-ideas/ecommerce',
     tag: 'Top picks',
-    accent: 'from-pink-500/20 via-rose-500/10 to-transparent',
-    iconWrap: 'bg-pink-500/15 text-pink-500 dark:text-pink-400',
+    iconWrap: 'bg-brand-600/10 text-brand-600 dark:text-indigo-400',
     icon: <SparklesIcon />,
   },
 ]
 
 export default function TrendingSectors({ counts }: { counts: SectorCounts }) {
   return (
-    <section className="border-y border-slate-200/60 dark:border-slate-800/60">
+    <section className="border-y border-line dark:border-line-dark">
       <div className="mx-auto max-w-7xl px-4 py-12">
         <div className="mb-6 flex items-end justify-between gap-4">
           <div>
-            <p className="text-xs font-bold uppercase tracking-widest text-indigo-600 dark:text-indigo-400">Browse by sector</p>
-            <h2 className="mt-1 text-xl sm:text-2xl font-bold text-slate-900 dark:text-slate-100">
+            <p className="text-xs font-bold uppercase tracking-widest text-brand-600 dark:text-indigo-400">Browse by sector</p>
+            <h2 className="mt-1 text-xl sm:text-2xl font-bold text-ink dark:text-slate-100">
               Trending right now
             </h2>
           </div>
           <Link
             href="/sectors"
-            className="hidden sm:inline-flex text-sm font-medium text-indigo-600 dark:text-indigo-400 hover:underline"
+            className="hidden sm:inline-flex text-sm font-medium text-brand-600 dark:text-indigo-400 hover:underline"
           >
             All sectors →
           </Link>
@@ -112,22 +107,21 @@ export default function TrendingSectors({ counts }: { counts: SectorCounts }) {
             <Link
               key={s.key}
               href={s.href}
-              className="group relative overflow-hidden rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-5 hover:border-indigo-300 dark:hover:border-indigo-700 transition-colors"
+              className="group relative overflow-hidden rounded-xl border border-line dark:border-line-dark bg-surface dark:bg-surface-dark-raised p-5 hover:border-brand-600 dark:hover:border-brand-600 hover:shadow-[0_6px_24px_-8px_rgba(22,24,29,0.12)] transition-all"
             >
-              <div className={`pointer-events-none absolute inset-0 bg-gradient-to-br ${s.accent} opacity-70`} />
               <div className="relative flex flex-col">
                 <div className="flex items-start justify-between">
                   <span className={`flex h-9 w-9 items-center justify-center rounded-lg ${s.iconWrap}`}>
                     {s.icon}
                   </span>
-                  <span className="rounded-full bg-slate-100 dark:bg-slate-800 px-2 py-0.5 text-[11px] font-semibold text-slate-600 dark:text-slate-300">
-                    {counts[s.key]} ideas
+                  <span className="rounded-full bg-surface-sunk dark:bg-surface-dark px-2 py-0.5 text-[11px] font-semibold text-ink-soft dark:text-slate-300">
+                    <span className="tabular-nums">{counts[s.key]}</span> ideas
                   </span>
                 </div>
-                <p className="mt-4 text-[11px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500">
+                <p className="mt-4 text-[11px] font-bold uppercase tracking-widest text-ink-soft dark:text-slate-500">
                   {s.tag}
                 </p>
-                <p className="mt-1 text-base font-semibold text-slate-900 dark:text-slate-100 group-hover:text-indigo-700 dark:group-hover:text-indigo-300 transition-colors">
+                <p className="mt-1 text-base font-semibold text-ink dark:text-slate-100 group-hover:text-brand-600 dark:group-hover:text-indigo-300 transition-colors">
                   {s.label}
                 </p>
               </div>
@@ -136,7 +130,7 @@ export default function TrendingSectors({ counts }: { counts: SectorCounts }) {
         </div>
 
         <div className="mt-6 text-center sm:hidden">
-          <Link href="/sectors" className="text-sm font-medium text-indigo-600 dark:text-indigo-400 hover:underline">
+          <Link href="/sectors" className="text-sm font-medium text-brand-600 dark:text-indigo-400 hover:underline">
             All sectors →
           </Link>
         </div>

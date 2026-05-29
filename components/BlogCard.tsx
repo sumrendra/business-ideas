@@ -17,10 +17,10 @@ export default function BlogCard({ post }: { post: Post }) {
   return (
     <Link
       href={`/blog/${post.slug}`}
-      className="group flex flex-col rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 overflow-hidden hover:border-indigo-300 dark:hover:border-indigo-700 hover:shadow-md transition-colors"
+      className="group flex flex-col rounded-2xl border border-line dark:border-line-dark bg-surface dark:bg-surface-dark-raised overflow-hidden hover:border-brand-600 dark:hover:border-brand-600 hover:shadow-[0_6px_24px_-8px_rgba(22,24,29,0.12)] transition-all"
     >
       {/* Cover */}
-      <div className="relative aspect-[16/10] w-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
+      <div className="relative aspect-[16/10] w-full bg-surface-sunk dark:bg-surface-dark overflow-hidden">
         {coverUrl ? (
           <Image
             src={coverUrl}
@@ -30,11 +30,11 @@ export default function BlogCard({ post }: { post: Post }) {
             className="object-cover"
           />
         ) : (
-          <div className="absolute inset-0 bg-gradient-to-br from-indigo-100 to-indigo-50 dark:from-indigo-950/40 dark:to-slate-900" />
+          <div className="absolute inset-0 bg-surface-sunk dark:bg-surface-dark" />
         )}
         {post.category && (
           <div className="absolute left-3 top-3">
-            <span className="rounded-full bg-white/85 dark:bg-slate-900/80 backdrop-blur-md px-2.5 py-1 text-[11px] font-bold uppercase tracking-widest text-slate-700 dark:text-slate-200 border border-white/40 dark:border-slate-700/50">
+            <span className="rounded-full bg-surface/90 dark:bg-surface-dark/80 backdrop-blur-md px-2.5 py-1 text-[11px] font-bold uppercase tracking-widest text-ink-soft dark:text-slate-200 border border-line dark:border-line-dark">
               {post.category}
             </span>
           </div>
@@ -43,23 +43,23 @@ export default function BlogCard({ post }: { post: Post }) {
 
       {/* Content */}
       <div className="flex flex-1 flex-col p-5">
-        <h3 className="text-base font-semibold leading-snug text-slate-900 dark:text-slate-100 group-hover:text-indigo-700 dark:group-hover:text-indigo-300 transition-colors line-clamp-2">
+        <h3 className="text-base font-semibold leading-snug text-ink dark:text-slate-100 group-hover:text-brand-600 dark:group-hover:text-indigo-300 transition-colors line-clamp-2">
           {post.title}
         </h3>
 
         {post.excerpt && (
-          <p className="mt-2 text-sm leading-relaxed text-slate-500 dark:text-slate-400 line-clamp-2 flex-1">
+          <p className="mt-2 text-sm leading-relaxed text-ink-soft dark:text-slate-400 line-clamp-2 flex-1">
             {post.excerpt}
           </p>
         )}
 
         {/* Meta line */}
-        <div className="mt-4 flex items-center gap-2 text-xs text-slate-400 dark:text-slate-500">
-          {publishedDate && <time dateTime={post.published_at}>{publishedDate}</time>}
+        <div className="mt-4 flex items-center gap-2 text-xs text-ink-soft dark:text-slate-500">
+          {publishedDate && <time dateTime={post.published_at} className="tabular-nums">{publishedDate}</time>}
           {post.reading_time && (
             <>
               <span aria-hidden>·</span>
-              <span>{post.reading_time} min read</span>
+              <span><span className="tabular-nums">{post.reading_time}</span> min read</span>
             </>
           )}
         </div>
