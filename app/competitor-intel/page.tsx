@@ -216,11 +216,11 @@ export default function CompetitorIntelPage() {
               const bar = RATING_BAR[r.rating]
               const multiPct = r.supplyCount > 0 ? Math.round((r.multilingualCount / r.supplyCount) * 100) : 0
               return (
-                <div key={r.id} className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-5">
+                <div key={r.id} className="rounded-xl border border-line dark:border-line-dark bg-surface dark:bg-surface-dark p-5 transition-shadow hover:shadow-[0_6px_24px_-8px_rgba(22,24,29,0.12)]">
                   <div className="flex items-start justify-between gap-2 mb-4">
                     <div className="flex items-center gap-2">
                       <span className="text-2xl">{r.icon}</span>
-                      <p className="font-semibold text-sm text-slate-800 dark:text-slate-200 leading-tight">{r.label}</p>
+                      <p className="font-semibold text-sm text-ink dark:text-slate-200 leading-tight">{r.label}</p>
                     </div>
                     <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide shrink-0 ${RATING_STYLE[r.rating]}`}>
                       {r.rating}
@@ -229,29 +229,29 @@ export default function CompetitorIntelPage() {
 
                   {/* Gap bar */}
                   <div className="mb-4">
-                    <div className="flex justify-between text-[10px] text-slate-400 dark:text-slate-500 mb-1">
+                    <div className="flex justify-between text-[10px] text-ink-soft dark:text-slate-500 mb-1">
                       <span>Opportunity</span>
-                      <span>Gap: {r.gapScore}/100</span>
+                      <span>Gap: <span className="tabular-nums">{r.gapScore}</span>/100</span>
                     </div>
-                    <div className="h-2 rounded-full bg-slate-100 dark:bg-slate-800">
+                    <div className="h-2 rounded-full bg-surface-sunk dark:bg-surface-dark-raised">
                       <div className={`h-full rounded-full transition-all duration-700 ${bar.cls}`} style={{ width: bar.width }} />
                     </div>
                   </div>
 
                   <MoatBar supply={r.supplyScore} demand={r.demandScore} />
 
-                  <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800 grid grid-cols-3 gap-2 text-center">
+                  <div className="mt-4 pt-3 border-t border-line dark:border-line-dark grid grid-cols-3 gap-2 text-center">
                     <div>
-                      <p className="text-lg font-bold text-slate-900 dark:text-slate-100">{r.demandScore}</p>
-                      <p className="text-[9px] uppercase tracking-wider text-slate-400 dark:text-slate-500">Demand</p>
+                      <p className="text-lg font-bold text-ink dark:text-slate-100 tabular-nums">{r.demandScore}</p>
+                      <p className="text-[9px] uppercase tracking-wider text-ink-soft dark:text-slate-500">Demand</p>
                     </div>
                     <div>
-                      <p className="text-lg font-bold text-slate-900 dark:text-slate-100">{r.supplyCount}</p>
-                      <p className="text-[9px] uppercase tracking-wider text-slate-400 dark:text-slate-500">Competitors</p>
+                      <p className="text-lg font-bold text-ink dark:text-slate-100 tabular-nums">{r.supplyCount}</p>
+                      <p className="text-[9px] uppercase tracking-wider text-ink-soft dark:text-slate-500">Competitors</p>
                     </div>
                     <div>
-                      <p className="text-lg font-bold text-slate-900 dark:text-slate-100">{multiPct}%</p>
-                      <p className="text-[9px] uppercase tracking-wider text-slate-400 dark:text-slate-500">Local-named</p>
+                      <p className="text-lg font-bold text-ink dark:text-slate-100 tabular-nums">{multiPct}%</p>
+                      <p className="text-[9px] uppercase tracking-wider text-ink-soft dark:text-slate-500">Local-named</p>
                     </div>
                   </div>
 
@@ -261,7 +261,7 @@ export default function CompetitorIntelPage() {
 
                   <Link
                     href={`/hyperlocal-opportunity?city=${cityId}&category=${r.id}`}
-                    className="mt-3 block w-full text-center rounded-lg border border-slate-200 dark:border-slate-700 py-1.5 text-xs font-medium text-slate-600 dark:text-slate-400 hover:border-indigo-400 hover:text-indigo-600 dark:hover:border-indigo-600 dark:hover:text-indigo-400 transition-colors"
+                    className="mt-3 block w-full text-center rounded-lg border border-line dark:border-line-dark py-1.5 text-xs font-medium text-ink-soft dark:text-slate-400 hover:border-brand-600 hover:text-brand-600 dark:hover:border-brand-500 dark:hover:text-brand-500 transition-colors"
                   >
                     View hex map →
                   </Link>
