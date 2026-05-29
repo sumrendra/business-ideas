@@ -60,20 +60,20 @@ export default async function PolicyPulsePage({ searchParams }: PageProps) {
       {/* Header */}
       <div className="mb-10">
         <div className="flex items-center gap-2 mb-3">
-          <span className="inline-block h-2 w-2 rounded-full bg-red-500" />
-          <span className="text-xs font-bold uppercase tracking-widest text-red-500">Policy Pulse</span>
+          <span className="inline-block h-2 w-2 rounded-full bg-alert" />
+          <span className="text-xs font-bold uppercase tracking-[0.14em] text-alert">Policy Pulse</span>
         </div>
-        <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100">News &amp; Articles</h1>
-        <p className="mt-2 text-slate-500 dark:text-slate-400">
+        <h1 className="text-3xl font-bold tracking-tight text-ink dark:text-slate-100">News &amp; Articles</h1>
+        <p className="mt-2 text-ink-soft dark:text-slate-400">
           Government policies &amp; schemes creating real business opportunities right now
-          {count > 0 && <> · <span className="font-medium">{count} article{count !== 1 ? 's' : ''}</span></>}
+          {count > 0 && <> · <span className="font-medium tabular-nums">{count} article{count !== 1 ? 's' : ''}</span></>}
         </p>
       </div>
 
       {posts.length === 0 ? (
-        <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-slate-300 dark:border-slate-700 py-24 text-center">
-          <p className="text-lg font-medium text-slate-700 dark:text-slate-300">No policy articles yet</p>
-          <p className="mt-2 text-sm text-slate-400">Check back soon — we publish policy breakdowns regularly.</p>
+        <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-line dark:border-line-dark py-24 text-center">
+          <p className="text-lg font-medium text-ink dark:text-slate-200">No policy articles yet</p>
+          <p className="mt-2 text-sm text-ink-soft dark:text-slate-400">Check back soon — we publish policy breakdowns regularly.</p>
         </div>
       ) : (
         <>
@@ -87,14 +87,14 @@ export default async function PolicyPulsePage({ searchParams }: PageProps) {
       )}
 
       {/* CTA strip */}
-      <div className="mt-16 rounded-2xl bg-slate-950 text-white px-8 py-10 text-center">
+      <div className="mt-16 rounded-2xl bg-ink-dark text-white px-8 py-10 text-center">
         <h2 className="text-xl font-bold">Don&apos;t miss the next policy window</h2>
         <p className="mt-2 text-sm text-slate-400">
           Get a breakdown of new government schemes and the business opportunities they create — straight to your inbox.
         </p>
         <Link
           href="/subscribe"
-          className="mt-6 inline-flex items-center rounded-lg bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-indigo-500 transition-colors"
+          className="mt-6 inline-flex items-center rounded-lg bg-brand-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-brand-700 transition-colors"
         >
           Subscribe free →
         </Link>

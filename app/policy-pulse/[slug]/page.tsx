@@ -28,18 +28,18 @@ function MetaRow({ author, publishedDate, updatedDate, publishedAt, updatedAt, r
   publishedAt?: string | null; updatedAt?: string | null; readingTime?: number | null
 }) {
   return (
-    <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-slate-500 dark:text-slate-400">
+    <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-ink-soft dark:text-slate-400">
       <div className="flex items-center gap-2">
-        <div className="flex h-7 w-7 items-center justify-center rounded-full bg-indigo-100 dark:bg-indigo-900/40 text-xs font-bold text-indigo-700 dark:text-indigo-300 shrink-0">
+        <div className="flex h-7 w-7 items-center justify-center rounded-full bg-brand-600/10 dark:bg-brand-600/20 text-xs font-bold text-brand-700 dark:text-brand-600 shrink-0">
           {author.charAt(0).toUpperCase()}
         </div>
-        <span className="font-medium text-slate-700 dark:text-slate-300">{author}</span>
+        <span className="font-medium text-ink dark:text-slate-300">{author}</span>
       </div>
-      {publishedDate && <><span className="text-slate-300 dark:text-slate-600">·</span><time dateTime={publishedAt ?? ''}>{publishedDate}</time></>}
-      {updatedDate && updatedDate !== publishedDate && <><span className="text-slate-300 dark:text-slate-600">·</span><time dateTime={updatedAt ?? ''}>Updated {updatedDate}</time></>}
+      {publishedDate && <><span className="text-line dark:text-slate-600">·</span><time dateTime={publishedAt ?? ''} className="tabular-nums">{publishedDate}</time></>}
+      {updatedDate && updatedDate !== publishedDate && <><span className="text-line dark:text-slate-600">·</span><time dateTime={updatedAt ?? ''} className="tabular-nums">Updated {updatedDate}</time></>}
       {readingTime && (
-        <><span className="text-slate-300 dark:text-slate-600">·</span>
-        <span className="flex items-center gap-1">
+        <><span className="text-line dark:text-slate-600">·</span>
+        <span className="flex items-center gap-1 tabular-nums">
           <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" strokeWidth="2"/><polyline points="12,6 12,12 16,14" strokeWidth="2"/></svg>
           {readingTime} min read
         </span></>
@@ -162,12 +162,12 @@ export default async function PolicyPulsePostPage({ params }: PageProps) {
       {faqLd && <Ld data={faqLd} />}
       <div className="mx-auto max-w-7xl px-4 py-10">
         {/* Breadcrumb */}
-        <nav className="mb-6 flex min-w-0 items-center gap-1 text-sm text-slate-500 dark:text-slate-400">
-          <Link href="/" className="shrink-0 hover:text-indigo-600 dark:hover:text-indigo-400">Home</Link>
+        <nav className="mb-6 flex min-w-0 items-center gap-1 text-sm text-ink-soft dark:text-slate-400">
+          <Link href="/" className="shrink-0 hover:text-brand-600 dark:hover:text-brand-600">Home</Link>
           <span className="shrink-0 mx-1">/</span>
-          <Link href="/policy-pulse" className="shrink-0 hover:text-indigo-600 dark:hover:text-indigo-400">Policy Pulse</Link>
+          <Link href="/policy-pulse" className="shrink-0 hover:text-brand-600 dark:hover:text-brand-600">Policy Pulse</Link>
           <span className="shrink-0 mx-1">/</span>
-          <span className="min-w-0 truncate text-slate-700 dark:text-slate-300">{post.title}</span>
+          <span className="min-w-0 truncate text-ink dark:text-slate-300">{post.title}</span>
         </nav>
 
         {/* Hero */}
@@ -177,13 +177,13 @@ export default async function PolicyPulsePostPage({ params }: PageProps) {
             <div className="relative mb-8 h-64 w-full overflow-hidden rounded-2xl sm:h-80 lg:h-96">
               <Image src={coverUrl} alt={post.cover_image?.alt || post.title} fill className="object-cover" priority />
               <div className="absolute top-4 left-4">
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-red-500/90 px-3 py-1 text-xs font-bold text-white backdrop-blur-sm">
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-alert/90 px-3 py-1 text-xs font-bold text-white backdrop-blur-sm">
                   <span className="h-1.5 w-1.5 rounded-full bg-white animate-pulse" />
                   Policy Pulse
                 </span>
               </div>
             </div>
-            <h1 className="text-2xl font-bold leading-snug text-slate-900 dark:text-slate-100 sm:text-3xl lg:text-4xl max-w-4xl">
+            <h1 className="text-2xl font-bold leading-snug tracking-tight text-ink dark:text-slate-100 sm:text-3xl lg:text-4xl max-w-4xl">
               {post.title}
             </h1>
             <div className="mt-5 flex flex-wrap items-center justify-between gap-4">
@@ -196,11 +196,11 @@ export default async function PolicyPulsePostPage({ params }: PageProps) {
           <div className="mb-10 grid grid-cols-1 gap-8 lg:grid-cols-5 lg:items-start">
             {/* Left: badge + title */}
             <div className="lg:col-span-3">
-              <span className="mb-4 inline-flex items-center gap-1.5 rounded-full bg-red-500 px-3 py-1 text-xs font-bold text-white">
+              <span className="mb-4 inline-flex items-center gap-1.5 rounded-full bg-alert px-3 py-1 text-xs font-bold text-white">
                 <span className="h-1.5 w-1.5 rounded-full bg-white animate-pulse" />
                 Policy Pulse
               </span>
-              <h1 className="text-2xl font-bold leading-snug text-slate-900 dark:text-slate-100 sm:text-3xl">
+              <h1 className="text-2xl font-bold leading-snug tracking-tight text-ink dark:text-slate-100 sm:text-3xl">
                 {post.title}
               </h1>
               <div className="mt-5 flex flex-wrap items-center gap-4">
@@ -213,18 +213,18 @@ export default async function PolicyPulsePostPage({ params }: PageProps) {
 
             {/* Right: excerpt summary card */}
             {post.excerpt && (
-              <div className="lg:col-span-2 rounded-2xl border border-red-100 dark:border-red-900/40 bg-red-50 dark:bg-red-950/20 p-6">
-                <p className="mb-3 text-xs font-bold uppercase tracking-widest text-red-600 dark:text-red-400">Summary</p>
-                <p className="text-sm leading-relaxed text-slate-700 dark:text-slate-300">{post.excerpt}</p>
+              <div className="lg:col-span-2 rounded-2xl border border-alert/20 dark:border-alert/30 bg-alert/5 dark:bg-alert/10 p-6">
+                <p className="mb-3 text-xs font-bold uppercase tracking-[0.14em] text-alert">Summary</p>
+                <p className="text-sm leading-relaxed text-ink-soft dark:text-slate-300">{post.excerpt}</p>
                 {post.reading_time && (
-                  <p className="mt-4 text-xs text-slate-400 dark:text-slate-500">{post.reading_time} min read · Government Policy Update</p>
+                  <p className="mt-4 text-xs tabular-nums text-ink-soft dark:text-slate-500">{post.reading_time} min read · Government Policy Update</p>
                 )}
               </div>
             )}
           </div>
         )}
 
-        <hr className="mb-8 border-slate-100 dark:border-slate-800" />
+        <hr className="mb-8 border-line dark:border-line-dark" />
 
         {/* Body + TOC */}
         <div className="flex gap-10 items-start">
@@ -235,7 +235,7 @@ export default async function PolicyPulsePostPage({ params }: PageProps) {
           )}
 
           <div className="min-w-0 flex-1">
-            <p className="text-lg leading-relaxed text-slate-600 dark:text-slate-400 mb-10">{post.excerpt}</p>
+            <p className="text-lg leading-relaxed text-ink-soft dark:text-slate-400 mb-10">{post.excerpt}</p>
 
             {post.body && (
               <div className="prose-content">
@@ -248,8 +248,8 @@ export default async function PolicyPulsePostPage({ params }: PageProps) {
                         const href: string = value?.href ?? ''
                         const isInternal = href.startsWith('/') || href.includes('businessideas.live')
                         const internalHref = isInternal ? href.replace(/^https?:\/\/businessideas\.live/, '') : href
-                        if (isInternal) return <Link href={internalHref} className="text-indigo-600 underline underline-offset-2 hover:text-indigo-800 transition-colors">{children}</Link>
-                        return <a href={href} target="_blank" rel="noopener noreferrer" className="text-indigo-600 underline underline-offset-2 hover:text-indigo-800 transition-colors">{children}</a>
+                        if (isInternal) return <Link href={internalHref} className="text-brand-600 underline underline-offset-2 hover:text-brand-700 transition-colors">{children}</Link>
+                        return <a href={href} target="_blank" rel="noopener noreferrer" className="text-brand-600 underline underline-offset-2 hover:text-brand-700 transition-colors">{children}</a>
                       },
                     },
                     types: {
@@ -260,7 +260,7 @@ export default async function PolicyPulsePostPage({ params }: PageProps) {
                             <div className="relative h-64 w-full overflow-hidden rounded-xl sm:h-80">
                               <Image src={urlFor(value).width(800).url()} alt={value.alt || ''} fill className="object-cover" />
                             </div>
-                            {value.caption && <figcaption className="mt-2 text-center text-sm text-slate-400">{value.caption}</figcaption>}
+                            {value.caption && <figcaption className="mt-2 text-center text-sm text-ink-soft dark:text-slate-400">{value.caption}</figcaption>}
                           </figure>
                         )
                       },
@@ -272,17 +272,17 @@ export default async function PolicyPulsePostPage({ params }: PageProps) {
 
             {post.faqs && post.faqs.length > 0 && (
               <section className="mt-12">
-                <h2 className="mb-6 text-2xl font-bold text-slate-900 dark:text-slate-100">Frequently Asked Questions</h2>
+                <h2 className="mb-6 text-2xl font-bold tracking-tight text-ink dark:text-slate-100">Frequently Asked Questions</h2>
                 <div className="space-y-4">
                   {post.faqs.map((faq, i) => (
-                    <details key={i} className="group rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 p-5 open:bg-white dark:open:bg-slate-800 open:shadow-sm transition-all">
-                      <summary className="flex cursor-pointer items-center justify-between gap-4 font-semibold text-slate-800 dark:text-slate-100 list-none">
+                    <details key={i} className="group rounded-xl border border-line dark:border-line-dark bg-surface-sunk dark:bg-surface-dark/50 p-5 open:bg-surface dark:open:bg-surface-dark-raised open:shadow-sm transition-all">
+                      <summary className="flex cursor-pointer items-center justify-between gap-4 font-semibold text-ink dark:text-slate-100 list-none">
                         {faq.question}
-                        <span className="shrink-0 text-slate-400 group-open:rotate-180 transition-transform duration-200">
+                        <span className="shrink-0 text-ink-soft dark:text-slate-500 group-open:rotate-180 transition-transform duration-200">
                           <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
                         </span>
                       </summary>
-                      <p className="mt-3 text-slate-600 dark:text-slate-400 leading-relaxed">{faq.answer}</p>
+                      <p className="mt-3 text-ink-soft dark:text-slate-400 leading-relaxed">{faq.answer}</p>
                     </details>
                   ))}
                 </div>
@@ -290,12 +290,12 @@ export default async function PolicyPulsePostPage({ params }: PageProps) {
             )}
 
             {post.tags?.length > 0 && (
-              <div className="mt-10 border-t border-slate-100 dark:border-slate-800 pt-6">
-                <p className="mb-2 text-sm font-medium text-slate-500">Tags</p>
+              <div className="mt-10 border-t border-line dark:border-line-dark pt-6">
+                <p className="mb-2 text-sm font-medium text-ink-soft dark:text-slate-400">Tags</p>
                 <div className="flex flex-wrap gap-2">
                   {post.tags.map((tag) => (
                     <Link key={tag} href={tag === 'policy-pulse' ? '/policy-pulse' : `/blog?tag=${encodeURIComponent(tag)}`}
-                      className="badge bg-slate-100 text-slate-600 hover:bg-indigo-100 hover:text-indigo-700 transition-colors">
+                      className="badge bg-surface-sunk text-ink-soft hover:bg-brand-600/10 hover:text-brand-700 dark:bg-surface-dark-raised dark:text-slate-400 transition-colors">
                       {tag}
                     </Link>
                   ))}
@@ -303,15 +303,15 @@ export default async function PolicyPulsePostPage({ params }: PageProps) {
               </div>
             )}
 
-            <div className="mt-10 border-t border-slate-100 dark:border-slate-800 pt-6">
-              <p className="mb-1 text-sm font-medium text-slate-500">Share this article</p>
+            <div className="mt-10 border-t border-line dark:border-line-dark pt-6">
+              <p className="mb-1 text-sm font-medium text-ink-soft dark:text-slate-400">Share this article</p>
               <ShareButtons title={post.title} url={pageUrl} />
             </div>
 
             {relatedIdeas.length > 0 && (
-              <section className="mt-16 border-t-2 border-slate-100 dark:border-slate-800 pt-10">
-                <h2 className="mb-2 text-xl font-bold text-slate-900 dark:text-slate-100">Related Business Ideas</h2>
-                <p className="mb-6 text-sm text-slate-500">Ideas you can start based on this policy change</p>
+              <section className="mt-16 border-t border-line dark:border-line-dark pt-10">
+                <h2 className="mb-2 text-xl font-bold tracking-tight text-ink dark:text-slate-100">Related Business Ideas</h2>
+                <p className="mb-6 text-sm text-ink-soft dark:text-slate-400">Ideas you can start based on this policy change</p>
                 <div className="grid gap-5 sm:grid-cols-3">
                   {relatedIdeas.map(idea => <IdeaCard key={idea._id} idea={idea} />)}
                 </div>
@@ -320,8 +320,8 @@ export default async function PolicyPulsePostPage({ params }: PageProps) {
 
             <div className="mt-12 flex flex-wrap items-center justify-center gap-3">
               <Link href="/policy-pulse" className="btn-outline">← Back to Policy Pulse</Link>
-              <Link href="/business-ideas" className="inline-flex items-center rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-500 transition-colors">
-                Browse 298 Business Ideas →
+              <Link href="/business-ideas" className="inline-flex items-center rounded-lg bg-brand-600 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-700 transition-colors">
+                Browse <span className="mx-1 tabular-nums">298</span> Business Ideas →
               </Link>
             </div>
           </div>

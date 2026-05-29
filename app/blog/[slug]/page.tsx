@@ -162,22 +162,22 @@ export default async function BlogPostPage({ params }: PageProps) {
       {faqLd && <Ld data={faqLd} />}
       <div className="mx-auto max-w-7xl px-4 py-10">
         {/* Breadcrumb */}
-        <nav className="mb-6 flex min-w-0 items-center gap-1 text-sm text-slate-500 dark:text-slate-400">
-          <Link href="/" className="shrink-0 hover:text-indigo-600 dark:hover:text-indigo-400">Home</Link>
+        <nav className="mb-6 flex min-w-0 items-center gap-1 text-sm text-ink-soft dark:text-slate-400">
+          <Link href="/" className="shrink-0 hover:text-brand-600 dark:hover:text-brand-600">Home</Link>
           <span className="shrink-0 mx-1">/</span>
           {isPolicyPulse ? (
-            <Link href="/policy-pulse" className="shrink-0 hover:text-indigo-600 dark:hover:text-indigo-400">Policy Pulse</Link>
+            <Link href="/policy-pulse" className="shrink-0 hover:text-brand-600 dark:hover:text-brand-600">Policy Pulse</Link>
           ) : (
-            <Link href="/blog" className="shrink-0 hover:text-indigo-600 dark:hover:text-indigo-400">Blog</Link>
+            <Link href="/blog" className="shrink-0 hover:text-brand-600 dark:hover:text-brand-600">Blog</Link>
           )}
           {post.category && !isPolicyPulse && (
             <>
               <span className="shrink-0 mx-1">/</span>
-              <Link href={`/blog?category=${encodeURIComponent(post.category)}`} className="shrink-0 hover:text-indigo-600 dark:hover:text-indigo-400">{post.category}</Link>
+              <Link href={`/blog?category=${encodeURIComponent(post.category)}`} className="shrink-0 hover:text-brand-600 dark:hover:text-brand-600">{post.category}</Link>
             </>
           )}
           <span className="shrink-0 mx-1">/</span>
-          <span className="min-w-0 truncate text-slate-700 dark:text-slate-300">{post.title}</span>
+          <span className="min-w-0 truncate text-ink dark:text-slate-300">{post.title}</span>
         </nav>
 
         {/* Hero: cover image full-width, then title below */}
@@ -194,7 +194,7 @@ export default async function BlogPostPage({ params }: PageProps) {
               />
               {isPolicyPulse && (
                 <div className="absolute top-4 left-4">
-                  <span className="inline-flex items-center gap-1.5 rounded-full bg-red-500/90 px-3 py-1 text-xs font-bold text-white backdrop-blur-sm">
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-alert/90 px-3 py-1 text-xs font-bold text-white backdrop-blur-sm">
                     <span className="h-1.5 w-1.5 rounded-full bg-white animate-pulse" />
                     Policy Pulse
                   </span>
@@ -207,43 +207,43 @@ export default async function BlogPostPage({ params }: PageProps) {
           {post.category && !isPolicyPulse && (
             <Link
               href={`/blog?category=${encodeURIComponent(post.category)}`}
-              className="mb-4 inline-block rounded-md bg-teal-100 dark:bg-teal-900/40 px-3 py-1 text-xs font-bold uppercase tracking-widest text-teal-700 dark:text-teal-300 hover:bg-teal-200 dark:hover:bg-teal-900/60 transition-colors"
+              className="mb-4 inline-block rounded-md bg-surface-sunk dark:bg-surface-dark-raised px-3 py-1 text-xs font-bold uppercase tracking-[0.14em] text-ink-soft dark:text-slate-400 hover:text-brand-600 dark:hover:text-brand-600 transition-colors"
             >
               {post.category}
             </Link>
           )}
 
           {/* Title — smaller when no cover image to avoid wall-of-text effect */}
-          <h1 className={`font-bold leading-snug text-slate-900 dark:text-slate-100 max-w-3xl ${coverUrl ? 'text-3xl sm:text-4xl lg:text-5xl' : 'text-2xl sm:text-3xl'}`}>
+          <h1 className={`font-bold leading-snug tracking-tight text-ink dark:text-slate-100 max-w-3xl ${coverUrl ? 'text-3xl sm:text-4xl lg:text-5xl' : 'text-2xl sm:text-3xl'}`}>
             {post.title}
           </h1>
 
           {/* Meta row */}
           <div className="mt-5 flex flex-wrap items-center justify-between gap-4">
-            <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-slate-500 dark:text-slate-400">
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-ink-soft dark:text-slate-400">
               {/* Author */}
               <div className="flex items-center gap-2">
-                <div className="flex h-7 w-7 items-center justify-center rounded-full bg-indigo-100 dark:bg-indigo-900/40 text-xs font-bold text-indigo-700 dark:text-indigo-300 shrink-0">
+                <div className="flex h-7 w-7 items-center justify-center rounded-full bg-brand-600/10 dark:bg-brand-600/20 text-xs font-bold text-brand-700 dark:text-brand-600 shrink-0">
                   {author.charAt(0).toUpperCase()}
                 </div>
-                <span className="font-medium text-slate-700 dark:text-slate-300">{author}</span>
+                <span className="font-medium text-ink dark:text-slate-300">{author}</span>
               </div>
               {publishedDate && (
                 <>
-                  <span className="text-slate-300 dark:text-slate-600">·</span>
-                  <time dateTime={post.published_at}>{publishedDate}</time>
+                  <span className="text-line dark:text-slate-600">·</span>
+                  <time dateTime={post.published_at} className="tabular-nums">{publishedDate}</time>
                 </>
               )}
               {updatedDate && updatedDate !== publishedDate && (
                 <>
-                  <span className="text-slate-300 dark:text-slate-600">·</span>
-                  <time dateTime={post._updatedAt}>Updated {updatedDate}</time>
+                  <span className="text-line dark:text-slate-600">·</span>
+                  <time dateTime={post._updatedAt} className="tabular-nums">Updated {updatedDate}</time>
                 </>
               )}
               {post.reading_time && (
                 <>
-                  <span className="text-slate-300 dark:text-slate-600">·</span>
-                  <span className="flex items-center gap-1">
+                  <span className="text-line dark:text-slate-600">·</span>
+                  <span className="flex items-center gap-1 tabular-nums">
                     <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <circle cx="12" cy="12" r="10" strokeWidth="2"/>
                       <polyline points="12,6 12,12 16,14" strokeWidth="2"/>
@@ -257,7 +257,7 @@ export default async function BlogPostPage({ params }: PageProps) {
           </div>
         </div>
 
-        <hr className="mb-8 border-slate-100 dark:border-slate-800" />
+        <hr className="mb-8 border-line dark:border-line-dark" />
 
         {/* Body area: TOC sidebar + content */}
         <div className="flex gap-10 items-start">
@@ -271,7 +271,7 @@ export default async function BlogPostPage({ params }: PageProps) {
           {/* Main content */}
           <div className="min-w-0 flex-1">
             {/* Excerpt */}
-            <p className="text-lg leading-relaxed text-slate-600 mb-10">{post.excerpt}</p>
+            <p className="text-lg leading-relaxed text-ink-soft dark:text-slate-400 mb-10">{post.excerpt}</p>
 
             {/* Body */}
             {post.body && (
@@ -296,7 +296,7 @@ export default async function BlogPostPage({ params }: PageProps) {
                           return (
                             <Link
                               href={internalHref}
-                              className="text-indigo-600 underline underline-offset-2 hover:text-indigo-800 transition-colors"
+                              className="text-brand-600 underline underline-offset-2 hover:text-brand-700 transition-colors"
                             >
                               {children}
                             </Link>
@@ -307,7 +307,7 @@ export default async function BlogPostPage({ params }: PageProps) {
                             href={href}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="text-indigo-600 underline underline-offset-2 hover:text-indigo-800 transition-colors"
+                            className="text-brand-600 underline underline-offset-2 hover:text-brand-700 transition-colors"
                           >
                             {children}
                           </a>
@@ -328,7 +328,7 @@ export default async function BlogPostPage({ params }: PageProps) {
                               />
                             </div>
                             {value.caption && (
-                              <figcaption className="mt-2 text-center text-sm text-slate-400">{value.caption}</figcaption>
+                              <figcaption className="mt-2 text-center text-sm text-ink-soft dark:text-slate-400">{value.caption}</figcaption>
                             )}
                           </figure>
                         )
@@ -342,22 +342,22 @@ export default async function BlogPostPage({ params }: PageProps) {
             {/* FAQs */}
             {post.faqs && post.faqs.length > 0 && (
               <section className="mt-12">
-                <h2 className="mb-6 text-2xl font-bold text-slate-900 dark:text-slate-100">Frequently Asked Questions</h2>
+                <h2 className="mb-6 text-2xl font-bold tracking-tight text-ink dark:text-slate-100">Frequently Asked Questions</h2>
                 <div className="space-y-4">
                   {post.faqs.map((faq, i) => (
                     <details
                       key={i}
-                      className="group rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 p-5 open:bg-white dark:open:bg-slate-800 open:shadow-sm transition-all"
+                      className="group rounded-xl border border-line dark:border-line-dark bg-surface-sunk dark:bg-surface-dark/50 p-5 open:bg-surface dark:open:bg-surface-dark-raised open:shadow-sm transition-all"
                     >
-                      <summary className="flex cursor-pointer items-center justify-between gap-4 font-semibold text-slate-800 dark:text-slate-100 list-none">
+                      <summary className="flex cursor-pointer items-center justify-between gap-4 font-semibold text-ink dark:text-slate-100 list-none">
                         {faq.question}
-                        <span className="shrink-0 text-slate-400 dark:text-slate-500 group-open:rotate-180 transition-transform duration-200">
+                        <span className="shrink-0 text-ink-soft dark:text-slate-500 group-open:rotate-180 transition-transform duration-200">
                           <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                           </svg>
                         </span>
                       </summary>
-                      <p className="mt-3 text-slate-600 dark:text-slate-400 leading-relaxed">{faq.answer}</p>
+                      <p className="mt-3 text-ink-soft dark:text-slate-400 leading-relaxed">{faq.answer}</p>
                     </details>
                   ))}
                 </div>
@@ -366,14 +366,14 @@ export default async function BlogPostPage({ params }: PageProps) {
 
             {/* Tags */}
             {post.tags?.length > 0 && (
-              <div className="mt-10 border-t border-slate-100 pt-6">
-                <p className="mb-2 text-sm font-medium text-slate-500">Tags</p>
+              <div className="mt-10 border-t border-line dark:border-line-dark pt-6">
+                <p className="mb-2 text-sm font-medium text-ink-soft dark:text-slate-400">Tags</p>
                 <div className="flex flex-wrap gap-2">
                   {post.tags.map((tag) => (
                     <Link
                       key={tag}
                       href={`/blog?tag=${encodeURIComponent(tag)}`}
-                      className="badge bg-slate-100 text-slate-600 hover:bg-indigo-100 hover:text-indigo-700 transition-colors"
+                      className="badge bg-surface-sunk text-ink-soft hover:bg-brand-600/10 hover:text-brand-700 dark:bg-surface-dark-raised dark:text-slate-400 transition-colors"
                     >
                       {tag}
                     </Link>
@@ -383,15 +383,15 @@ export default async function BlogPostPage({ params }: PageProps) {
             )}
 
             {/* Share again at bottom */}
-            <div className="mt-10 border-t border-slate-100 pt-6">
-              <p className="mb-1 text-sm font-medium text-slate-500">Share this article</p>
+            <div className="mt-10 border-t border-line dark:border-line-dark pt-6">
+              <p className="mb-1 text-sm font-medium text-ink-soft dark:text-slate-400">Share this article</p>
               <ShareButtons title={post.title} url={pageUrl} />
             </div>
 
             {/* Related posts */}
             {relatedPosts.length > 0 && (
-              <section className="mt-16 border-t-2 border-slate-200 dark:border-slate-700 pt-10">
-                <h2 className="mb-8 text-2xl font-bold uppercase tracking-widest text-amber-700 dark:text-amber-400">
+              <section className="mt-16 border-t border-line dark:border-line-dark pt-10">
+                <h2 className="mb-8 text-2xl font-bold tracking-tight text-ink dark:text-slate-100">
                   Related Blog
                 </h2>
                 <div className="grid gap-8 sm:grid-cols-3">
@@ -401,7 +401,7 @@ export default async function BlogPostPage({ params }: PageProps) {
                       : null
                     return (
                       <div key={related._id} className="flex flex-col">
-                        <div className="relative h-48 w-full overflow-hidden rounded-sm bg-slate-100 dark:bg-slate-800">
+                        <div className="relative h-48 w-full overflow-hidden rounded-sm bg-surface-sunk dark:bg-surface-dark">
                           {relatedCover ? (
                             <Image
                               src={relatedCover}
@@ -410,7 +410,7 @@ export default async function BlogPostPage({ params }: PageProps) {
                               className="object-cover transition-transform duration-300 hover:scale-105"
                             />
                           ) : (
-                            <div className="flex h-full items-center justify-center text-slate-300 dark:text-slate-600">
+                            <div className="flex h-full items-center justify-center text-ink-soft dark:text-slate-600">
                               <svg className="h-12 w-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <rect x="3" y="3" width="18" height="18" rx="2" strokeWidth="1.5"/>
                                 <circle cx="8.5" cy="8.5" r="1.5" strokeWidth="1.5"/>
@@ -419,13 +419,13 @@ export default async function BlogPostPage({ params }: PageProps) {
                             </div>
                           )}
                         </div>
-                        <h3 className="mt-4 text-base font-semibold leading-snug text-slate-800 dark:text-slate-100 line-clamp-2">
+                        <h3 className="mt-4 text-base font-semibold leading-snug text-ink dark:text-slate-100 line-clamp-2">
                           {related.title}
                         </h3>
                         <div className="mt-4">
                           <Link
                             href={`/blog/${related.slug}`}
-                            className="inline-block border border-slate-400 dark:border-slate-600 px-4 py-1.5 text-xs font-semibold uppercase tracking-widest text-slate-700 dark:text-slate-300 hover:border-amber-600 dark:hover:border-amber-500 hover:text-amber-700 dark:hover:text-amber-400 transition-colors"
+                            className="inline-block rounded-md border border-line dark:border-line-dark px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.14em] text-ink-soft dark:text-slate-300 hover:border-brand-600 dark:hover:border-brand-600 hover:text-brand-600 dark:hover:text-brand-600 transition-colors"
                           >
                             Read More
                           </Link>
@@ -439,9 +439,9 @@ export default async function BlogPostPage({ params }: PageProps) {
 
             {/* Related Business Ideas */}
             {relatedIdeas.length > 0 && (
-              <section className="mt-16 border-t-2 border-slate-100 pt-10">
-                <h2 className="mb-2 text-xl font-bold text-slate-900 dark:text-slate-100">Related Business Ideas</h2>
-                <p className="mb-6 text-sm text-slate-500">Ideas you can start based on this article</p>
+              <section className="mt-16 border-t border-line dark:border-line-dark pt-10">
+                <h2 className="mb-2 text-xl font-bold tracking-tight text-ink dark:text-slate-100">Related Business Ideas</h2>
+                <p className="mb-6 text-sm text-ink-soft dark:text-slate-400">Ideas you can start based on this article</p>
                 <div className="grid gap-5 sm:grid-cols-3">
                   {relatedIdeas.map(idea => <IdeaCard key={idea._id} idea={idea} />)}
                 </div>
@@ -451,8 +451,8 @@ export default async function BlogPostPage({ params }: PageProps) {
             {/* Back CTAs */}
             <div className="mt-12 flex flex-wrap items-center justify-center gap-3">
               <Link href="/blog" className="btn-outline">← Back to Blogs</Link>
-              <Link href="/business-ideas" className="inline-flex items-center rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-500 transition-colors">
-                Browse 298 Business Ideas →
+              <Link href="/business-ideas" className="inline-flex items-center rounded-lg bg-brand-600 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-700 transition-colors">
+                Browse <span className="mx-1 tabular-nums">298</span> Business Ideas →
               </Link>
             </div>
           </div>

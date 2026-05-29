@@ -124,13 +124,13 @@ export default async function BlogPage({ searchParams }: PageProps) {
     <Ld data={breadcrumb} />
     <div className="mx-auto max-w-7xl px-4 py-10">
       <div className="mb-6">
-        <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100">Blogs</h1>
+        <h1 className="text-3xl font-bold tracking-tight text-ink dark:text-slate-100">Blogs</h1>
       </div>
 
       {/* Results bar + sort */}
       <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
-        <p className="text-sm text-slate-500 dark:text-slate-400">
-          Showing <span className="font-semibold text-slate-800 dark:text-slate-100">{count}</span> article{count !== 1 ? 's' : ''}
+        <p className="text-sm text-ink-soft dark:text-slate-400">
+          Showing <span className="font-semibold tabular-nums text-ink dark:text-slate-100">{count}</span> article{count !== 1 ? 's' : ''}
           {hasFilters ? ' matching your filters' : ''}
         </p>
         <SortDropdown
@@ -142,21 +142,21 @@ export default async function BlogPage({ searchParams }: PageProps) {
       <div className="flex flex-col gap-8 lg:flex-row">
         {/* Sidebar */}
         <aside className="w-full lg:w-64 shrink-0">
-          <div className="space-y-3 rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
-            <div className="flex items-center justify-between pb-2 border-b border-slate-100">
-              <h2 className="font-semibold text-slate-900">Filters</h2>
+          <div className="space-y-3 rounded-2xl border border-line dark:border-line-dark bg-surface dark:bg-surface-dark-raised p-5">
+            <div className="flex items-center justify-between pb-2 border-b border-line dark:border-line-dark">
+              <h2 className="font-semibold text-ink dark:text-slate-100">Filters</h2>
               {hasFilters && (
-                <Link href="/blog" className="text-xs text-red-500 hover:text-red-700 font-medium transition-colors">
+                <Link href="/blog" className="text-xs text-brand-600 hover:text-brand-700 font-medium transition-colors">
                   Clear all
                 </Link>
               )}
             </div>
 
             {/* Category filter */}
-            <details open={!!sp.category} className="group border-b border-slate-100 pb-3 last:border-b-0 last:pb-0">
+            <details open={!!sp.category} className="group border-b border-line dark:border-line-dark pb-3 last:border-b-0 last:pb-0">
               <summary className="flex cursor-pointer items-center justify-between list-none mb-2 select-none">
-                <span className="text-xs font-semibold uppercase tracking-wide text-slate-400 group-hover:text-slate-600 transition-colors">Category</span>
-                <svg className="h-4 w-4 text-slate-400 transition-transform duration-200 group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <span className="text-xs font-semibold uppercase tracking-[0.14em] text-ink-soft group-hover:text-ink dark:text-slate-400 dark:group-hover:text-slate-200 transition-colors">Category</span>
+                <svg className="h-4 w-4 text-ink-soft dark:text-slate-400 transition-transform duration-200 group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
                 </svg>
               </summary>
@@ -168,8 +168,8 @@ export default async function BlogPage({ searchParams }: PageProps) {
                     rel="nofollow"
                     className={`flex w-full items-center justify-between rounded-lg px-3 py-1.5 text-sm transition-colors text-left ${
                       sp.category === cat
-                        ? 'bg-indigo-600 text-white font-medium'
-                        : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+                        ? 'bg-brand-600 text-white font-medium'
+                        : 'text-ink-soft hover:bg-surface-sunk hover:text-ink dark:text-slate-400 dark:hover:bg-surface-dark dark:hover:text-slate-100'
                     }`}
                   >
                     {cat}
@@ -181,10 +181,10 @@ export default async function BlogPage({ searchParams }: PageProps) {
 
             {/* Tag filter */}
             {allTags.length > 0 && (
-              <details open={!!sp.tag} className="group border-b border-slate-100 pb-3 last:border-b-0 last:pb-0">
+              <details open={!!sp.tag} className="group border-b border-line dark:border-line-dark pb-3 last:border-b-0 last:pb-0">
                 <summary className="flex cursor-pointer items-center justify-between list-none mb-2 select-none">
-                  <span className="text-xs font-semibold uppercase tracking-wide text-slate-400 group-hover:text-slate-600 transition-colors">Tags</span>
-                  <svg className="h-4 w-4 text-slate-400 transition-transform duration-200 group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <span className="text-xs font-semibold uppercase tracking-[0.14em] text-ink-soft group-hover:text-ink dark:text-slate-400 dark:group-hover:text-slate-200 transition-colors">Tags</span>
+                  <svg className="h-4 w-4 text-ink-soft dark:text-slate-400 transition-transform duration-200 group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
                   </svg>
                 </summary>
@@ -197,9 +197,9 @@ export default async function BlogPage({ searchParams }: PageProps) {
         {/* Posts grid */}
         <div className="flex-1">
           {posts.length === 0 ? (
-            <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-slate-300 py-24 text-center">
-              <p className="text-lg font-medium text-slate-700">No posts found</p>
-              <p className="mt-2 text-sm text-slate-400">Try removing some filters to see more results.</p>
+            <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-line dark:border-line-dark py-24 text-center">
+              <p className="text-lg font-medium text-ink dark:text-slate-200">No posts found</p>
+              <p className="mt-2 text-sm text-ink-soft dark:text-slate-400">Try removing some filters to see more results.</p>
               <Link href="/blog" className="mt-4 btn-outline text-sm">Clear filters</Link>
             </div>
           ) : (

@@ -107,16 +107,16 @@ export default function ToolsPage() {
   return (
     <div className="mx-auto max-w-5xl px-4 py-14">
       {/* Breadcrumb */}
-      <nav className="mb-6 text-sm text-slate-500 dark:text-slate-400">
-        <Link href="/" className="hover:text-indigo-600 dark:hover:text-indigo-400">Home</Link>
+      <nav className="mb-6 text-sm text-ink-soft dark:text-slate-400">
+        <Link href="/" className="hover:text-brand-600 dark:hover:text-brand-600">Home</Link>
         <span className="mx-2">/</span>
-        <span className="text-slate-700 dark:text-slate-300">Tools</span>
+        <span className="text-ink dark:text-slate-300">Tools</span>
       </nav>
 
       <header className="mb-10">
-        <p className="text-xs font-bold uppercase tracking-widest text-indigo-600 dark:text-indigo-400">Tools</p>
-        <h1 className="mt-2 text-3xl sm:text-4xl font-bold text-slate-900 dark:text-slate-100">Practical tools for founders</h1>
-        <p className="mt-3 max-w-2xl text-lg text-slate-600 dark:text-slate-400">
+        <p className="text-xs font-bold uppercase tracking-[0.14em] text-brand-600 dark:text-brand-600">Tools</p>
+        <h1 className="mt-2 text-3xl sm:text-4xl font-bold tracking-tight text-ink dark:text-slate-100">Practical tools for founders</h1>
+        <p className="mt-3 max-w-2xl text-lg text-ink-soft dark:text-slate-400">
           Calculators, finders and filters built around the funding schemes and idea data on this site.
           Free to use, no sign-up.
         </p>
@@ -127,18 +127,18 @@ export default function ToolsPage() {
           <Link
             key={t.href}
             href={t.href}
-            className="group flex flex-col rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-5 hover:border-indigo-300 dark:hover:border-indigo-700 hover:shadow-md transition-colors"
+            className="group flex flex-col rounded-2xl border border-line dark:border-line-dark bg-surface dark:bg-surface-dark-raised p-5 transition duration-150 ease-out hover:-translate-y-0.5 hover:border-brand-600 dark:hover:border-brand-600 hover:shadow-[0_6px_24px_-8px_rgba(22,24,29,0.12)]"
           >
-            <span className="self-start rounded-full bg-indigo-50 dark:bg-indigo-950/40 px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-widest text-indigo-700 dark:text-indigo-300">
+            <span className="self-start rounded-full bg-surface-sunk dark:bg-surface-dark px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-[0.14em] text-ink-soft dark:text-slate-400">
               {t.badge}
             </span>
-            <p className="mt-3 text-base font-semibold text-slate-900 dark:text-slate-100 group-hover:text-indigo-700 dark:group-hover:text-indigo-300 transition-colors">
+            <p className="mt-3 text-base font-semibold text-ink dark:text-slate-100 group-hover:text-brand-600 dark:group-hover:text-brand-600 transition-colors">
               {t.label}
             </p>
-            <p className="mt-1 flex-1 text-sm text-slate-500 dark:text-slate-400 leading-relaxed">
+            <p className="mt-1 flex-1 text-sm text-ink-soft dark:text-slate-400 leading-relaxed">
               {t.description}
             </p>
-            <span className="mt-4 text-xs font-semibold text-indigo-600 dark:text-indigo-400">
+            <span className="mt-4 text-xs font-semibold text-brand-600 dark:text-brand-600">
               Open →
             </span>
           </Link>
