@@ -8,19 +8,22 @@ interface Props {
   ideaTitle?: string
 }
 
+// One Voice Rule: funding stage is a neutral label, not a decorative hue.
+// "Listed" is the one earned-positive milestone.
+const NEUTRAL_STAGE = 'bg-surface-sunk dark:bg-surface-dark-raised text-ink-soft dark:text-slate-400'
 const STAGE_COLORS: Record<FundingStage, string> = {
-  'Bootstrapped': 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400',
-  'Angel':        'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400',
-  'Pre-Seed':     'bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400',
-  'Seed':         'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400',
-  'Series A':     'bg-sky-100 dark:bg-sky-900/30 text-sky-700 dark:text-sky-400',
-  'Series B':     'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400',
-  'Series C':     'bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-400',
-  'Series D+':    'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400',
-  'Series E':     'bg-purple-200 dark:bg-purple-900/50 text-purple-800 dark:text-purple-300',
-  'Series F':     'bg-violet-100 dark:bg-violet-900/30 text-violet-700 dark:text-violet-400',
-  'Series G':     'bg-violet-200 dark:bg-violet-900/50 text-violet-800 dark:text-violet-300',
-  'Listed':       'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400',
+  'Bootstrapped': NEUTRAL_STAGE,
+  'Angel':        NEUTRAL_STAGE,
+  'Pre-Seed':     NEUTRAL_STAGE,
+  'Seed':         NEUTRAL_STAGE,
+  'Series A':     NEUTRAL_STAGE,
+  'Series B':     NEUTRAL_STAGE,
+  'Series C':     NEUTRAL_STAGE,
+  'Series D+':    NEUTRAL_STAGE,
+  'Series E':     NEUTRAL_STAGE,
+  'Series F':     NEUTRAL_STAGE,
+  'Series G':     NEUTRAL_STAGE,
+  'Listed':       'bg-surface-sunk dark:bg-surface-dark-raised text-positive',
 }
 
 interface ScoredStartup extends DPIITStartup { relevanceScore: number }
@@ -78,7 +81,7 @@ export default function DPIITLookup({ industry, ideaTitle }: Props) {
   const exactCount = data?.exact.length ?? 0
 
   return (
-    <div className="mt-6 rounded-2xl border border-indigo-200 dark:border-indigo-900/60 bg-indigo-50/40 dark:bg-indigo-950/20 overflow-hidden">
+    <div className="mt-6 rounded-2xl border border-line dark:border-line-dark bg-surface dark:bg-surface-dark overflow-hidden">
       {/* Header */}
       <button
         onClick={() => setOpen(v => !v)}
@@ -87,22 +90,22 @@ export default function DPIITLookup({ industry, ideaTitle }: Props) {
         <div className="flex items-center gap-3">
           <span className="text-lg">🏛</span>
           <div>
-            <p className="font-semibold text-slate-900 dark:text-slate-100 text-sm sm:text-base">
+            <p className="font-semibold text-ink dark:text-slate-100 text-sm sm:text-base">
               DPIIT-Recognised Startups
             </p>
-            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+            <p className="text-xs text-ink-soft dark:text-slate-400 mt-0.5">
               Registered startups in the {industry} space — DPIIT recognition database
             </p>
           </div>
         </div>
         <div className="flex items-center gap-2 flex-shrink-0">
           {data && (
-            <span className="rounded-full bg-indigo-600 text-white px-2.5 py-0.5 text-xs font-bold">
+            <span className="rounded-full bg-brand-600 text-white px-2.5 py-0.5 text-xs font-bold tabular-nums">
               {exactCount}
             </span>
           )}
           <svg
-            className={`h-5 w-5 text-slate-400 transition-transform duration-200 ${open ? 'rotate-180' : ''}`}
+            className={`h-5 w-5 text-ink-soft transition-transform duration-200 ${open ? 'rotate-180' : ''}`}
             fill="none" stroke="currentColor" viewBox="0 0 24 24"
           >
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
@@ -111,10 +114,10 @@ export default function DPIITLookup({ industry, ideaTitle }: Props) {
       </button>
 
       {open && (
-        <div className="border-t border-indigo-200 dark:border-indigo-900/60">
+        <div className="border-t border-line dark:border-line-dark">
           {loading && (
-            <div className="flex items-center justify-center gap-2 py-10 text-sm text-slate-500 dark:text-slate-400">
-              <svg className="h-4 w-4 animate-spin text-indigo-600" fill="none" viewBox="0 0 24 24">
+            <div className="flex items-center justify-center gap-2 py-10 text-sm text-ink-soft dark:text-slate-400">
+              <svg className="h-4 w-4 animate-spin text-brand-600" fill="none" viewBox="0 0 24 24">
                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
               </svg>
@@ -128,16 +131,16 @@ export default function DPIITLookup({ industry, ideaTitle }: Props) {
               {data.matchMode === 'sector-fallback' && !showSectorFallback && (
                 <div className="px-5 py-8 text-center">
                   <p className="text-2xl mb-2">🔍</p>
-                  <p className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+                  <p className="text-sm font-semibold text-ink dark:text-slate-300">
                     No funded startups found specifically for this niche
                   </p>
-                  <p className="mt-1 text-xs text-slate-500 dark:text-slate-400 max-w-sm mx-auto">
+                  <p className="mt-1 text-xs text-ink-soft dark:text-slate-400 max-w-sm mx-auto">
                     This could mean the space is underserved by venture-backed companies — often a good signal for an independent manufacturer.
                   </p>
                   {data.sectorResults.length > 0 && (
                     <button
                       onClick={() => setShowSectorFallback(true)}
-                      className="mt-4 text-xs font-medium text-indigo-600 dark:text-indigo-400 hover:underline"
+                      className="mt-4 text-xs font-medium text-brand-600 dark:text-brand-500 hover:underline"
                     >
                       Show {data.sectorResults.length} broader {data.sector} startups →
                     </button>
@@ -149,18 +152,18 @@ export default function DPIITLookup({ industry, ideaTitle }: Props) {
               {(data.matchMode !== 'sector-fallback' || showSectorFallback) && (
                 <>
                   {/* Filters */}
-                  <div className="flex flex-wrap gap-2 px-5 py-3 bg-white/60 dark:bg-slate-900/40 border-b border-indigo-100 dark:border-indigo-900/40">
+                  <div className="flex flex-wrap gap-2 px-5 py-3 bg-surface-sunk/60 dark:bg-surface-dark-raised/40 border-b border-line dark:border-line-dark">
                     <input
                       type="text"
                       placeholder="Search startups…"
                       value={query}
                       onChange={e => setQuery(e.target.value)}
-                      className="flex-1 min-w-[140px] rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-1.5 text-xs text-slate-800 dark:text-slate-200 placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-indigo-400"
+                      className="flex-1 min-w-[140px] rounded-lg border border-line dark:border-line-dark bg-surface dark:bg-surface-dark px-3 py-1.5 text-xs text-ink dark:text-slate-200 placeholder-ink-soft focus:outline-none focus:ring-1 focus:ring-brand-600"
                     />
                     <select
                       value={stateFilter}
                       onChange={e => setStateFilter(e.target.value)}
-                      className="rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-2 py-1.5 text-xs text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-1 focus:ring-indigo-400"
+                      className="rounded-lg border border-line dark:border-line-dark bg-surface dark:bg-surface-dark px-2 py-1.5 text-xs text-ink dark:text-slate-300 focus:outline-none focus:ring-1 focus:ring-brand-600"
                     >
                       <option value="">All States</option>
                       {states.map(s => <option key={s} value={s}>{s}</option>)}
@@ -168,28 +171,28 @@ export default function DPIITLookup({ industry, ideaTitle }: Props) {
                     <select
                       value={stageFilter}
                       onChange={e => setStageFilter(e.target.value)}
-                      className="rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-2 py-1.5 text-xs text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-1 focus:ring-indigo-400"
+                      className="rounded-lg border border-line dark:border-line-dark bg-surface dark:bg-surface-dark px-2 py-1.5 text-xs text-ink dark:text-slate-300 focus:outline-none focus:ring-1 focus:ring-brand-600"
                     >
                       <option value="">All Stages</option>
                       {stages.map(s => <option key={s} value={s}>{s}</option>)}
                     </select>
-                    <span className="self-center text-xs text-slate-400 dark:text-slate-500 ml-auto">
+                    <span className="self-center text-xs text-ink-soft dark:text-slate-500 ml-auto tabular-nums">
                       {filtered.length} shown
                     </span>
                   </div>
 
                   {/* Label */}
                   <div className="px-5 pt-3 pb-1 flex items-center justify-between">
-                    <p className="text-xs text-slate-500 dark:text-slate-400">
+                    <p className="text-xs text-ink-soft dark:text-slate-400">
                       {data.matchMode === 'exact'
-                        ? <>Matched to <span className="font-semibold text-indigo-700 dark:text-indigo-300">&ldquo;{ideaTitle}&rdquo;</span> by keyword relevance</>
-                        : <>Broader <span className="font-semibold text-indigo-700 dark:text-indigo-300">{data.sector}</span> startups — no exact niche match found</>
+                        ? <>Matched to <span className="font-semibold text-brand-700 dark:text-brand-500">&ldquo;{ideaTitle}&rdquo;</span> by keyword relevance</>
+                        : <>Broader <span className="font-semibold text-brand-700 dark:text-brand-500">{data.sector}</span> startups — no exact niche match found</>
                       }
                     </p>
                     {showSectorFallback && (
                       <button
                         onClick={() => setShowSectorFallback(false)}
-                        className="text-[11px] text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
+                        className="text-[11px] text-ink-soft hover:text-ink dark:hover:text-slate-300"
                       >
                         ← Back
                       </button>
@@ -197,35 +200,35 @@ export default function DPIITLookup({ industry, ideaTitle }: Props) {
                   </div>
 
                   {filtered.length === 0 ? (
-                    <p className="px-5 py-8 text-center text-sm text-slate-500 dark:text-slate-400">
+                    <p className="px-5 py-8 text-center text-sm text-ink-soft dark:text-slate-400">
                       No startups matched your filters.
                     </p>
                   ) : (
                     <div className="overflow-x-auto">
                       <table className="w-full text-xs sm:text-sm">
                         <thead>
-                          <tr className="border-b border-indigo-100 dark:border-indigo-900/40 bg-white/40 dark:bg-slate-900/30">
-                            <th className="px-5 py-2.5 text-left font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide text-[11px]">Startup</th>
-                            <th className="px-3 py-2.5 text-left font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide text-[11px] hidden sm:table-cell">City / State</th>
-                            <th className="px-3 py-2.5 text-left font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide text-[11px]">Stage</th>
-                            <th className="px-3 py-2.5 text-left font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide text-[11px] hidden md:table-cell">Funding</th>
-                            <th className="px-3 py-2.5 text-left font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide text-[11px] hidden lg:table-cell">Revenue Signal</th>
-                            <th className="px-3 py-2.5 text-left font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide text-[11px]">Reg.</th>
+                          <tr className="border-b border-line dark:border-line-dark bg-surface-sunk dark:bg-surface-dark-raised">
+                            <th className="px-5 py-2.5 text-left font-semibold text-ink-soft dark:text-slate-400 uppercase tracking-wide text-[11px]">Startup</th>
+                            <th className="px-3 py-2.5 text-left font-semibold text-ink-soft dark:text-slate-400 uppercase tracking-wide text-[11px] hidden sm:table-cell">City / State</th>
+                            <th className="px-3 py-2.5 text-left font-semibold text-ink-soft dark:text-slate-400 uppercase tracking-wide text-[11px]">Stage</th>
+                            <th className="px-3 py-2.5 text-right font-semibold text-ink-soft dark:text-slate-400 uppercase tracking-wide text-[11px] hidden md:table-cell">Funding</th>
+                            <th className="px-3 py-2.5 text-right font-semibold text-ink-soft dark:text-slate-400 uppercase tracking-wide text-[11px] hidden lg:table-cell">Revenue Signal</th>
+                            <th className="px-3 py-2.5 text-right font-semibold text-ink-soft dark:text-slate-400 uppercase tracking-wide text-[11px]">Reg.</th>
                           </tr>
                         </thead>
-                        <tbody className="divide-y divide-indigo-50 dark:divide-indigo-950/40">
+                        <tbody className="divide-y divide-line dark:divide-line-dark">
                           {filtered.map(s => (
-                            <tr key={s.id} className="hover:bg-white/60 dark:hover:bg-slate-900/40 transition-colors">
+                            <tr key={s.id} className="hover:bg-surface-sunk/60 dark:hover:bg-surface-dark-raised/40 transition-colors">
                               <td className="px-5 py-3">
-                                <p className="font-semibold text-slate-800 dark:text-slate-200 leading-snug">{s.name}</p>
-                                <p className="text-[11px] text-slate-400 dark:text-slate-500 mt-0.5 leading-snug">{s.subSector}</p>
+                                <p className="font-semibold text-ink dark:text-slate-200 leading-snug">{s.name}</p>
+                                <p className="text-[11px] text-ink-soft dark:text-slate-500 mt-0.5 leading-snug">{s.subSector}</p>
                                 {s.cin && (
-                                  <p className="text-[10px] text-slate-300 dark:text-slate-600 mt-0.5 font-mono">CIN: {s.cin}</p>
+                                  <p className="text-[10px] text-ink-soft dark:text-slate-600 mt-0.5 font-mono tabular-nums">CIN: {s.cin}</p>
                                 )}
                               </td>
-                              <td className="px-3 py-3 text-slate-500 dark:text-slate-400 hidden sm:table-cell whitespace-nowrap">
+                              <td className="px-3 py-3 text-ink-soft dark:text-slate-400 hidden sm:table-cell whitespace-nowrap">
                                 <p>{s.city}</p>
-                                <p className="text-[11px] text-slate-400 dark:text-slate-500">{s.state}</p>
+                                <p className="text-[11px] text-ink-soft dark:text-slate-500">{s.state}</p>
                               </td>
                               <td className="px-3 py-3">
                                 {s.fundingStage ? (
@@ -234,13 +237,13 @@ export default function DPIITLookup({ industry, ideaTitle }: Props) {
                                   </span>
                                 ) : '—'}
                               </td>
-                              <td className="px-3 py-3 text-slate-600 dark:text-slate-400 hidden md:table-cell whitespace-nowrap font-medium">
+                              <td className="px-3 py-3 text-ink dark:text-slate-400 hidden md:table-cell whitespace-nowrap font-medium text-right tabular-nums">
                                 {s.fundingRaised ?? '—'}
                               </td>
-                              <td className="px-3 py-3 text-slate-500 dark:text-slate-400 hidden lg:table-cell">
+                              <td className="px-3 py-3 text-ink-soft dark:text-slate-400 hidden lg:table-cell text-right tabular-nums">
                                 {s.estimatedRevenue ?? '—'}
                               </td>
-                              <td className="px-3 py-3 text-slate-400 dark:text-slate-500 whitespace-nowrap">
+                              <td className="px-3 py-3 text-ink-soft dark:text-slate-500 whitespace-nowrap text-right tabular-nums">
                                 {s.registrationYear}
                               </td>
                             </tr>
@@ -250,9 +253,9 @@ export default function DPIITLookup({ industry, ideaTitle }: Props) {
                     </div>
                   )}
 
-                  <div className="px-5 py-3 text-[11px] text-slate-400 dark:text-slate-500 border-t border-indigo-100 dark:border-indigo-900/40 flex flex-wrap items-center justify-between gap-2">
+                  <div className="px-5 py-3 text-[11px] text-caution border-t border-line dark:border-line-dark flex flex-wrap items-center justify-between gap-2">
                     <span>Source: DPIIT Startup Recognition CSV (Dec 2023) · MCA21 CIN registry · Crunchbase public data</span>
-                    <a href="/dpiit-lookup" className="text-indigo-600 dark:text-indigo-400 font-semibold hover:underline">
+                    <a href="/dpiit-lookup" className="text-brand-600 dark:text-brand-500 font-semibold hover:underline">
                       Full Database →
                     </a>
                   </div>
