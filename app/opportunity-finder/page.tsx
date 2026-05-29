@@ -32,11 +32,11 @@ export default function OpportunityFinderPage() {
     <div className="mx-auto max-w-5xl px-4 py-14">
       {/* Header */}
       <header className="mb-10 max-w-3xl">
-        <p className="text-xs font-bold uppercase tracking-widest text-indigo-600 dark:text-indigo-400">Supply-Demand Gap Engine</p>
-        <h1 className="mt-2 text-3xl sm:text-4xl font-bold text-slate-900 dark:text-slate-100">
+        <p className="text-[0.6875rem] font-bold uppercase tracking-[0.12em] text-brand-600 dark:text-indigo-400">Supply-Demand Gap Engine</p>
+        <h1 className="mt-2 text-3xl sm:text-4xl font-bold tracking-tight text-ink dark:text-slate-100">
           Opportunity Finder
         </h1>
-        <p className="mt-3 text-lg text-slate-600 dark:text-slate-400">
+        <p className="mt-3 text-lg text-ink-soft dark:text-slate-400">
           Pick a city and a business category. We cross-reference Google Trends search demand with
           Google Maps business count and Udyam MSME registration density to surface where genuine
           gaps exist — high demand, low supply.
@@ -63,12 +63,12 @@ export default function OpportunityFinderPage() {
           ].map(s => (
             <div
               key={s.title}
-              className="flex items-start gap-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-4"
+              className="flex items-start gap-3 rounded-lg border border-line dark:border-line-dark bg-surface dark:bg-surface-dark p-4 transition-shadow hover:shadow-[0_6px_24px_-8px_rgba(22,24,29,0.12)]"
             >
               <span className="text-xl">{s.icon}</span>
               <div>
-                <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">{s.title}</p>
-                <p className="text-xs text-slate-500 dark:text-slate-400">{s.desc}</p>
+                <p className="text-sm font-semibold text-ink dark:text-slate-100">{s.title}</p>
+                <p className="text-xs text-ink-soft dark:text-slate-400">{s.desc}</p>
               </div>
             </div>
           ))}
@@ -77,7 +77,7 @@ export default function OpportunityFinderPage() {
         {/* Data sources badge strip */}
         <div className="mt-4 flex flex-wrap gap-2">
           {['Google Trends', 'Google Maps Places API', 'Udyam Registration (MSME)', 'RBI State Finance Data'].map(src => (
-            <span key={src} className="rounded-full bg-slate-100 dark:bg-slate-800 px-3 py-1 text-xs font-medium text-slate-600 dark:text-slate-400">
+            <span key={src} className="rounded-full bg-surface-sunk dark:bg-surface-dark-raised px-3 py-1 text-xs font-medium text-ink-soft dark:text-slate-400">
               {src}
             </span>
           ))}

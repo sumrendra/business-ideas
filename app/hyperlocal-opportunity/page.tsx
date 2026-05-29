@@ -33,15 +33,15 @@ export default function HyperlocalOpportunityPage() {
       {/* Header */}
       <div className="mb-6 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
         <div>
-          <p className="text-xs font-bold uppercase tracking-widest text-indigo-600 dark:text-indigo-400">Supply-Demand Gap Engine</p>
-          <h1 className="mt-1 text-2xl sm:text-3xl font-bold text-slate-900 dark:text-slate-100">
+          <p className="text-[0.6875rem] font-bold uppercase tracking-[0.12em] text-brand-600 dark:text-brand-500">Supply-Demand Gap Engine</p>
+          <h1 className="mt-1 text-2xl sm:text-3xl font-bold text-ink dark:text-paper-dark">
             Hyperlocal Opportunity
           </h1>
-          <p className="mt-1.5 text-sm text-slate-500 dark:text-slate-400 max-w-2xl">
+          <p className="mt-1.5 text-sm text-ink-soft dark:text-paper-dark/70 max-w-2xl">
             Interactive heatmap of search demand vs. business supply across any Indian city.
-            <span className="text-indigo-600 dark:text-indigo-400 font-medium"> Orange zones</span> = high demand ·
-            <span className="text-indigo-600 dark:text-indigo-400 font-medium"> Indigo clusters</span> = existing businesses ·
-            <span className="text-green-600 dark:text-green-400 font-medium"> Green zones</span> = opportunity gaps.
+            <span className="text-caution font-medium"> Demand zones</span> = high demand ·
+            <span className="text-brand-600 dark:text-brand-500 font-medium"> Indigo clusters</span> = existing businesses ·
+            <span className="text-positive font-medium"> Gap zones</span> = opportunity gaps.
           </p>
         </div>
 
@@ -53,9 +53,9 @@ export default function HyperlocalOpportunityPage() {
           ].map(d => (
             <span
               key={d.src}
-              className="flex items-center gap-1.5 rounded-full border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 py-1 text-xs font-medium text-slate-600 dark:text-slate-400"
+              className="flex items-center gap-1.5 rounded-full border border-line dark:border-line-dark bg-surface dark:bg-surface-dark px-3 py-1 text-xs font-medium text-ink-soft dark:text-paper-dark/70"
             >
-              <span>{d.icon}</span>{d.src}
+              <span aria-hidden>{d.icon}</span>{d.src}
             </span>
           ))}
         </div>
@@ -85,18 +85,18 @@ export default function HyperlocalOpportunityPage() {
         ].map(s => (
           <div
             key={s.title}
-            className="flex gap-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-4"
+            className="flex gap-3 rounded-lg border border-line dark:border-line-dark bg-surface dark:bg-surface-dark p-4"
           >
-            <span className="text-xl shrink-0 mt-0.5">{s.icon}</span>
+            <span aria-hidden className="text-xl shrink-0 mt-0.5">{s.icon}</span>
             <div>
-              <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">{s.title}</p>
-              <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400 leading-relaxed">{s.desc}</p>
+              <p className="text-sm font-semibold text-ink dark:text-paper-dark">{s.title}</p>
+              <p className="mt-0.5 text-xs text-ink-soft dark:text-paper-dark/60 leading-relaxed">{s.desc}</p>
             </div>
           </div>
         ))}
       </div>
 
-      <p className="mt-4 text-xs text-center text-slate-400 dark:text-slate-500">
+      <p className="mt-4 text-xs text-center text-ink-soft/70 dark:text-paper-dark/50">
         Demand heatmap is an estimate based on state-level Trends data and population density modelling. It is not a substitute for a primary market study.
         Supply data reflects Google Maps listings and may be incomplete.
       </p>

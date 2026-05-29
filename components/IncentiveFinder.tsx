@@ -53,15 +53,19 @@ const STATE_ABBR: Record<string, string> = {
 const ALL_TYPES = Object.keys(TYPE_META) as IncentiveType[]
 const ALL_SIZES = Object.keys(SIZE_META) as EnterpriseSizeKey[]
 
+// Incentive type is a non-semantic category, so every chip uses the single
+// indigo accent (One Voice Rule). The label text is the distinguishing cue.
+const TYPE_CHIP =
+  'bg-brand-50 text-brand-700 ring-brand-200 dark:bg-brand-600/15 dark:text-brand-100 dark:ring-brand-600/30'
 const TYPE_RING: Record<IncentiveType, string> = {
-  'capital-subsidy':   'bg-emerald-50 text-emerald-700 ring-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-300 dark:ring-emerald-500/20',
-  'interest-subsidy':  'bg-sky-50 text-sky-700 ring-sky-200 dark:bg-sky-500/10 dark:text-sky-300 dark:ring-sky-500/20',
-  'stamp-duty':        'bg-violet-50 text-violet-700 ring-violet-200 dark:bg-violet-500/10 dark:text-violet-300 dark:ring-violet-500/20',
-  'electricity':       'bg-yellow-50 text-yellow-800 ring-yellow-200 dark:bg-yellow-500/10 dark:text-yellow-300 dark:ring-yellow-500/20',
-  'gst-reimbursement': 'bg-indigo-50 text-indigo-700 ring-indigo-200 dark:bg-indigo-500/10 dark:text-indigo-300 dark:ring-indigo-500/20',
-  'employment':        'bg-teal-50 text-teal-700 ring-teal-200 dark:bg-teal-500/10 dark:text-teal-300 dark:ring-teal-500/20',
-  'tax-holiday':       'bg-amber-50 text-amber-700 ring-amber-200 dark:bg-amber-500/10 dark:text-amber-300 dark:ring-amber-500/20',
-  'other':             'bg-slate-50 text-slate-600 ring-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:ring-slate-700',
+  'capital-subsidy':   TYPE_CHIP,
+  'interest-subsidy':  TYPE_CHIP,
+  'stamp-duty':        TYPE_CHIP,
+  'electricity':       TYPE_CHIP,
+  'gst-reimbursement': TYPE_CHIP,
+  'employment':        TYPE_CHIP,
+  'tax-holiday':       TYPE_CHIP,
+  'other':             'bg-surface-sunk text-ink-soft ring-line dark:bg-surface-dark-raised dark:text-paper-dark/70 dark:ring-line-dark',
 }
 
 // ─── Hooks ───────────────────────────────────────────────────────────────────
@@ -114,15 +118,15 @@ function FilterButton({
       <button
         type="button"
         onClick={onClick}
-        className={`inline-flex items-center gap-1.5 rounded-lg border px-3 py-2 text-sm font-medium transition-colors ${
+        className={`inline-flex min-h-[44px] items-center gap-1.5 rounded-md border px-3 py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 ${
           active
-            ? 'border-indigo-200 bg-indigo-50 text-indigo-700 dark:border-indigo-800/60 dark:bg-indigo-500/10 dark:text-indigo-300'
-            : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800'
+            ? 'border-brand-200 bg-brand-50 text-brand-700 dark:border-brand-600/40 dark:bg-brand-600/15 dark:text-brand-100'
+            : 'border-line bg-surface text-ink-soft hover:bg-surface-sunk dark:border-line-dark dark:bg-surface-dark dark:text-paper-dark/70 dark:hover:bg-surface-dark-raised'
         }`}
       >
         {label}
         {count !== undefined && count > 0 && (
-          <span className="rounded-full bg-indigo-600 px-1.5 py-px text-[10px] font-bold text-white">{count}</span>
+          <span className="rounded-full bg-brand-600 px-1.5 py-px text-[10px] font-bold tabular-nums text-white">{count}</span>
         )}
         <Chevron open={open} />
       </button>
@@ -134,7 +138,7 @@ function FilterButton({
 function Popover({ children, align = 'left' }: { children: React.ReactNode; align?: 'left' | 'right' }) {
   return (
     <div
-      className={`absolute z-30 mt-2 min-w-[14rem] overflow-hidden rounded-xl border border-slate-200 bg-white shadow-xl dark:border-slate-800 dark:bg-slate-900 ${
+      className={`absolute z-30 mt-2 min-w-[14rem] overflow-hidden rounded-lg border border-line bg-surface shadow-xl dark:border-line-dark dark:bg-surface-dark ${
         align === 'right' ? 'right-0' : 'left-0'
       }`}
     >
@@ -210,10 +214,10 @@ function StateRail({
           onClick={() => scrollBy(-1)}
           disabled={!canScrollLeft}
           aria-label="Scroll states left"
-          className={`hidden h-9 w-9 shrink-0 items-center justify-center rounded-full border text-slate-500 transition-all md:inline-flex ${
+          className={`hidden h-9 w-9 shrink-0 items-center justify-center rounded-full border text-ink-soft transition-all md:inline-flex ${
             canScrollLeft
-              ? 'border-slate-200 bg-white shadow-sm hover:bg-slate-50 hover:text-slate-900 dark:border-slate-800 dark:bg-slate-900 dark:hover:bg-slate-800 dark:hover:text-slate-100'
-              : 'pointer-events-none border-transparent bg-transparent text-slate-300 dark:text-slate-700'
+              ? 'border-line bg-surface shadow-sm hover:bg-surface-sunk hover:text-ink dark:border-line-dark dark:bg-surface-dark dark:hover:bg-surface-dark-raised dark:hover:text-paper-dark'
+              : 'pointer-events-none border-transparent bg-transparent text-ink-soft/40 dark:text-paper-dark/30'
           }`}
         >
           <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -232,12 +236,14 @@ function StateRail({
               onClick={() => onSelect('')}
               data-state=""
               style={{ scrollSnapAlign: 'start' }}
-              className={`shrink-0 rounded-full px-3 py-1.5 text-sm font-medium transition-colors ${
+              aria-pressed={selected === ''}
+              className={`inline-flex shrink-0 items-center gap-1 rounded-full px-3 py-1.5 text-sm font-medium transition-colors ${
                 selected === ''
-                  ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900'
-                  : 'border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800'
+                  ? 'bg-brand-50 text-brand-700 ring-1 ring-inset ring-brand-200 dark:bg-brand-600/20 dark:text-brand-100 dark:ring-brand-600/40'
+                  : 'border border-line bg-surface text-ink-soft hover:bg-surface-sunk dark:border-line-dark dark:bg-surface-dark dark:text-paper-dark/70 dark:hover:bg-surface-dark-raised'
               }`}
             >
+              {selected === '' && <span aria-hidden>✓</span>}
               All states
             </button>
             {sortedStates.map(st => {
@@ -248,15 +254,17 @@ function StateRail({
                   data-state={st}
                   onClick={() => onSelect(isActive ? '' : st)}
                   style={{ scrollSnapAlign: 'start' }}
+                  aria-pressed={isActive}
                   className={`group inline-flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-medium transition-colors ${
                     isActive
-                      ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900'
-                      : 'border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800'
+                      ? 'bg-brand-50 text-brand-700 ring-1 ring-inset ring-brand-200 dark:bg-brand-600/20 dark:text-brand-100 dark:ring-brand-600/40'
+                      : 'border border-line bg-surface text-ink-soft hover:bg-surface-sunk dark:border-line-dark dark:bg-surface-dark dark:text-paper-dark/70 dark:hover:bg-surface-dark-raised'
                   }`}
                 >
+                  {isActive && <span aria-hidden>✓</span>}
                   {st}
                   <span className={`text-[10px] font-semibold tabular-nums ${
-                    isActive ? 'text-white/60 dark:text-slate-500' : 'text-slate-400 dark:text-slate-500'
+                    isActive ? 'text-brand-600/70 dark:text-brand-200/70' : 'text-ink-soft/60 dark:text-paper-dark/50'
                   }`}>
                     {counts[st] ?? 0}
                   </span>
@@ -272,10 +280,10 @@ function StateRail({
           onClick={() => scrollBy(1)}
           disabled={!canScrollRight}
           aria-label="Scroll states right"
-          className={`hidden h-9 w-9 shrink-0 items-center justify-center rounded-full border text-slate-500 transition-all md:inline-flex ${
+          className={`hidden h-9 w-9 shrink-0 items-center justify-center rounded-full border text-ink-soft transition-all md:inline-flex ${
             canScrollRight
-              ? 'border-slate-200 bg-white shadow-sm hover:bg-slate-50 hover:text-slate-900 dark:border-slate-800 dark:bg-slate-900 dark:hover:bg-slate-800 dark:hover:text-slate-100'
-              : 'pointer-events-none border-transparent bg-transparent text-slate-300 dark:text-slate-700'
+              ? 'border-line bg-surface shadow-sm hover:bg-surface-sunk hover:text-ink dark:border-line-dark dark:bg-surface-dark dark:hover:bg-surface-dark-raised dark:hover:text-paper-dark'
+              : 'pointer-events-none border-transparent bg-transparent text-ink-soft/40 dark:text-paper-dark/30'
           }`}
         >
           <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -288,7 +296,7 @@ function StateRail({
           <button
             type="button"
             onClick={() => setPopoverOpen(o => !o)}
-            className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800"
+            className="inline-flex min-h-[44px] items-center gap-1.5 rounded-md border border-line bg-surface px-3 py-2 text-sm font-medium text-ink-soft hover:bg-surface-sunk focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600 dark:border-line-dark dark:bg-surface-dark dark:text-paper-dark/70 dark:hover:bg-surface-dark-raised"
             aria-label="Browse all states by region"
           >
             <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -306,7 +314,7 @@ function StateRail({
                   if (!visible.length) return null
                   return (
                     <div key={region} className="mb-2 last:mb-0">
-                      <p className="px-2 py-1 text-[10px] font-semibold uppercase tracking-widest text-slate-400 dark:text-slate-500">{region}</p>
+                      <p className="px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-ink-soft/70 dark:text-paper-dark/50">{region}</p>
                       <div className="flex flex-col">
                         {visible.map(st => (
                           <button
@@ -314,12 +322,12 @@ function StateRail({
                             onClick={() => { onSelect(selected === st ? '' : st); setPopoverOpen(false) }}
                             className={`flex items-center justify-between rounded-md px-2 py-1.5 text-sm transition-colors ${
                               selected === st
-                                ? 'bg-indigo-50 text-indigo-700 dark:bg-indigo-500/10 dark:text-indigo-300'
-                                : 'text-slate-700 hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-800'
+                                ? 'bg-brand-50 text-brand-700 dark:bg-brand-600/15 dark:text-brand-100'
+                                : 'text-ink-soft hover:bg-surface-sunk dark:text-paper-dark/70 dark:hover:bg-surface-dark-raised'
                             }`}
                           >
                             <span>{st}</span>
-                            <span className="text-xs tabular-nums text-slate-400 dark:text-slate-500">{counts[st] ?? 0}</span>
+                            <span className="text-xs tabular-nums text-ink-soft/60 dark:text-paper-dark/50">{counts[st] ?? 0}</span>
                           </button>
                         ))}
                       </div>
@@ -358,14 +366,14 @@ function TypePopover({
               <button
                 key={t}
                 onClick={() => onToggle(t)}
-                className="flex w-full items-center justify-between rounded-md px-2 py-1.5 text-sm text-slate-700 transition-colors hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-800"
+                className="flex w-full items-center justify-between rounded-md px-2 py-1.5 text-sm text-ink-soft transition-colors hover:bg-surface-sunk dark:text-paper-dark/70 dark:hover:bg-surface-dark-raised"
               >
                 <span className="flex items-center gap-2">
-                  <span className={`inline-block h-2.5 w-2.5 rounded-sm ring-1 ring-inset ${TYPE_RING[t]}`} />
+                  <span aria-hidden className={`inline-block h-2.5 w-2.5 rounded-sm ring-1 ring-inset ${TYPE_RING[t]}`} />
                   {meta.label}
                 </span>
                 {active && (
-                  <svg className="h-3.5 w-3.5 text-indigo-600 dark:text-indigo-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <svg className="h-3.5 w-3.5 text-brand-600 dark:text-brand-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                     <polyline points="20 6 9 17 4 12" />
                   </svg>
                 )}
@@ -399,11 +407,11 @@ function SizePopover({
               <button
                 key={s}
                 onClick={() => onToggle(s)}
-                className="flex w-full items-center justify-between rounded-md px-2 py-1.5 text-sm text-slate-700 transition-colors hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-800"
+                className="flex w-full items-center justify-between rounded-md px-2 py-1.5 text-sm text-ink-soft transition-colors hover:bg-surface-sunk dark:text-paper-dark/70 dark:hover:bg-surface-dark-raised"
               >
                 {meta.label}
                 {active && (
-                  <svg className="h-3.5 w-3.5 text-indigo-600 dark:text-indigo-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <svg className="h-3.5 w-3.5 text-brand-600 dark:text-brand-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                     <polyline points="20 6 9 17 4 12" />
                   </svg>
                 )}
@@ -436,12 +444,12 @@ function MorePopover({
             { label: 'SC/ST entrepreneurs', state: forScSt,  set: setForScSt },
             { label: 'New businesses only', state: newOnly,  set: setNewOnly },
           ].map(({ label, state, set }) => (
-            <label key={label} className="flex cursor-pointer items-center gap-3 rounded-md px-2 py-1.5 text-sm text-slate-700 hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-800">
+            <label key={label} className="flex cursor-pointer items-center gap-3 rounded-md px-2 py-1.5 text-sm text-ink-soft hover:bg-surface-sunk dark:text-paper-dark/70 dark:hover:bg-surface-dark-raised">
               <input
                 type="checkbox"
                 checked={state}
                 onChange={e => set(e.target.checked)}
-                className="h-4 w-4 rounded border-slate-300 accent-indigo-600 dark:border-slate-600"
+                className="h-4 w-4 rounded border-line accent-brand-600 dark:border-line-dark"
               />
               {label}
             </label>
@@ -477,8 +485,8 @@ function SortPopover({
               onClick={() => { setSortBy(o.key); onClose() }}
               className={`flex w-full items-center justify-between rounded-md px-2 py-1.5 text-sm transition-colors ${
                 sortBy === o.key
-                  ? 'bg-indigo-50 text-indigo-700 dark:bg-indigo-500/10 dark:text-indigo-300'
-                  : 'text-slate-700 hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-800'
+                  ? 'bg-brand-50 text-brand-700 dark:bg-brand-600/15 dark:text-brand-100'
+                  : 'text-ink-soft hover:bg-surface-sunk dark:text-paper-dark/70 dark:hover:bg-surface-dark-raised'
               }`}
             >
               {o.label}
@@ -506,33 +514,33 @@ function IncentiveRow({ inc }: { inc: NormalizedIncentive }) {
   const hasUrl = inc.sourceUrl && inc.sourceUrl.length > 0
 
   return (
-    <div className="group rounded-xl border border-slate-200 bg-white transition-all hover:-translate-y-px hover:border-indigo-300 hover:shadow-sm hover:shadow-indigo-500/5 dark:border-slate-800 dark:bg-slate-900 dark:hover:border-indigo-700">
+    <div className="group rounded-lg border border-line bg-surface transition-all hover:-translate-y-px hover:border-brand-300 hover:shadow-[0_6px_24px_-8px_rgba(22,24,29,0.12)] dark:border-line-dark dark:bg-surface-dark dark:hover:border-brand-600/50">
       <div className="flex items-start gap-3 px-4 py-3 sm:items-center sm:gap-4">
         {/* State abbreviation */}
-        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-xs font-bold tracking-wide text-slate-600 dark:bg-slate-800 dark:text-slate-300">
+        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-surface-sunk text-xs font-bold tracking-wide text-ink-soft dark:bg-surface-dark-raised dark:text-paper-dark/70">
           {STATE_ABBR[inc.state] ?? inc.state.slice(0, 2).toUpperCase()}
         </div>
 
         {/* Main column */}
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-            <p className="truncate text-sm font-semibold text-slate-900 dark:text-slate-100">
+            <p className="truncate text-sm font-semibold text-ink dark:text-paper-dark">
               {inc.name}
             </p>
             {inc.source === 'live' && (
-              <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-1.5 py-px text-[9px] font-semibold uppercase tracking-wider text-emerald-700 ring-1 ring-inset ring-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-300 dark:ring-emerald-500/20">
-                <span className="h-1 w-1 rounded-full bg-emerald-500" />
+              <span className="inline-flex items-center gap-1 rounded-full bg-positive/10 px-1.5 py-px text-[9px] font-semibold uppercase tracking-wider text-positive ring-1 ring-inset ring-positive/20 dark:bg-positive/15 dark:ring-positive/25">
+                <span aria-hidden className="h-1 w-1 rounded-full bg-positive" />
                 Live
               </span>
             )}
           </div>
-          <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-slate-500 dark:text-slate-400">
+          <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-ink-soft dark:text-paper-dark/60">
             <span className="truncate">{inc.state}</span>
             {inc.sector && <><span>·</span><span className="capitalize">{inc.sector}</span></>}
             {inc.duration && inc.duration !== '—' && <><span>·</span><span>{inc.duration}</span></>}
-            {inc.newOnly && <><span>·</span><span className="text-slate-400 dark:text-slate-500">New units</span></>}
-            {inc.forWomen && <><span>·</span><span className="text-rose-600 dark:text-rose-400">Women</span></>}
-            {inc.forScSt && <><span>·</span><span className="text-sky-600 dark:text-sky-400">SC/ST</span></>}
+            {inc.newOnly && <><span>·</span><span className="text-ink-soft/70 dark:text-paper-dark/50">New units</span></>}
+            {inc.forWomen && <><span>·</span><span>Women</span></>}
+            {inc.forScSt && <><span>·</span><span>SC/ST</span></>}
           </div>
         </div>
 
@@ -543,7 +551,7 @@ function IncentiveRow({ inc }: { inc: NormalizedIncentive }) {
 
         {/* Amount */}
         <div className="hidden shrink-0 text-right md:block">
-          <p className="max-w-[14rem] truncate text-sm font-semibold text-emerald-600 dark:text-emerald-400">
+          <p className="max-w-[14rem] truncate text-sm font-semibold tabular-nums text-positive">
             {inc.amount}
           </p>
         </div>
@@ -553,7 +561,7 @@ function IncentiveRow({ inc }: { inc: NormalizedIncentive }) {
           <button
             type="button"
             onClick={() => setOpen(o => !o)}
-            className="rounded-md p-2 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700 dark:hover:bg-slate-800 dark:hover:text-slate-200"
+            className="rounded-md p-2 text-ink-soft/60 transition-colors hover:bg-surface-sunk hover:text-ink dark:hover:bg-surface-dark-raised dark:hover:text-paper-dark"
             aria-label={open ? 'Collapse details' : 'Expand details'}
             aria-expanded={open}
           >
@@ -564,7 +572,7 @@ function IncentiveRow({ inc }: { inc: NormalizedIncentive }) {
               href={inc.sourceUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="hidden items-center gap-1 rounded-md px-2.5 py-1.5 text-xs font-semibold text-indigo-600 hover:bg-indigo-50 dark:text-indigo-400 dark:hover:bg-indigo-500/10 sm:inline-flex"
+              className="hidden items-center gap-1 rounded-md px-2.5 py-1.5 text-xs font-semibold text-brand-600 hover:bg-brand-50 dark:text-brand-500 dark:hover:bg-brand-600/15 sm:inline-flex"
             >
               Apply
               <svg className="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -576,17 +584,17 @@ function IncentiveRow({ inc }: { inc: NormalizedIncentive }) {
       </div>
 
       {/* Mobile-only row 2 (type + amount) */}
-      <div className="flex flex-wrap items-center gap-2 border-t border-slate-100 px-4 py-2 dark:border-slate-800 md:hidden">
+      <div className="flex flex-wrap items-center gap-2 border-t border-line px-4 py-2 dark:border-line-dark md:hidden">
         <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider ring-1 ring-inset ${TYPE_RING[inc.type]}`}>
           {typeLabel}
         </span>
-        <span className="text-sm font-semibold text-emerald-600 dark:text-emerald-400">{inc.amount}</span>
+        <span className="text-sm font-semibold tabular-nums text-positive">{inc.amount}</span>
         {hasUrl && (
           <a
             href={inc.sourceUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="ml-auto inline-flex items-center gap-1 text-xs font-semibold text-indigo-600 dark:text-indigo-400"
+            className="ml-auto inline-flex items-center gap-1 text-xs font-semibold text-brand-600 dark:text-brand-500"
           >
             Apply
             <svg className="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -598,23 +606,23 @@ function IncentiveRow({ inc }: { inc: NormalizedIncentive }) {
 
       {/* Expanded detail */}
       {open && (
-        <div className="grid gap-3 border-t border-slate-100 bg-slate-50/60 px-4 py-3 text-xs dark:border-slate-800 dark:bg-slate-900/50 sm:grid-cols-3">
+        <div className="grid gap-3 border-t border-line bg-surface-sunk/60 px-4 py-3 text-xs dark:border-line-dark dark:bg-surface-dark/50 sm:grid-cols-3">
           <div>
-            <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400 dark:text-slate-500">Who qualifies</p>
-            <p className="mt-0.5 text-slate-600 dark:text-slate-300">{inc.eligibility}</p>
+            <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-ink-soft/70 dark:text-paper-dark/50">Who qualifies</p>
+            <p className="mt-0.5 text-ink-soft dark:text-paper-dark/70">{inc.eligibility}</p>
           </div>
           <div>
-            <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400 dark:text-slate-500">Duration</p>
-            <p className="mt-0.5 text-slate-600 dark:text-slate-300">{inc.duration}</p>
+            <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-ink-soft/70 dark:text-paper-dark/50">Duration</p>
+            <p className="mt-0.5 text-ink-soft dark:text-paper-dark/70">{inc.duration}</p>
           </div>
           <div>
-            <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400 dark:text-slate-500">Enterprise size</p>
+            <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-ink-soft/70 dark:text-paper-dark/50">Enterprise size</p>
             <p className="mt-0.5 flex flex-wrap gap-1">
               {inc.enterpriseSize.length === 0 ? (
-                <span className="text-slate-400 dark:text-slate-500">—</span>
+                <span className="text-ink-soft/60 dark:text-paper-dark/40">—</span>
               ) : (
                 inc.enterpriseSize.map(s => (
-                  <span key={s} className="rounded bg-white px-1.5 py-px text-[10px] font-medium text-slate-600 ring-1 ring-inset ring-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:ring-slate-700">
+                  <span key={s} className="rounded bg-surface px-1.5 py-px text-[10px] font-medium text-ink-soft ring-1 ring-inset ring-line dark:bg-surface-dark-raised dark:text-paper-dark/70 dark:ring-line-dark">
                     {SIZE_META[s].label}
                   </span>
                 ))
@@ -622,8 +630,8 @@ function IncentiveRow({ inc }: { inc: NormalizedIncentive }) {
             </p>
           </div>
           <div className="sm:col-span-3">
-            <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-400 dark:text-slate-500">Policy</p>
-            <p className="mt-0.5 italic text-slate-500 dark:text-slate-400">{inc.policyName}</p>
+            <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-ink-soft/70 dark:text-paper-dark/50">Policy</p>
+            <p className="mt-0.5 italic text-ink-soft dark:text-paper-dark/60">{inc.policyName}</p>
           </div>
         </div>
       )}
@@ -646,16 +654,16 @@ function GroupHeader({
       onClick={onToggle}
       className="group flex w-full items-center gap-3 py-3 text-left"
     >
-      <span className="flex h-5 w-5 items-center justify-center rounded text-slate-400 transition-colors group-hover:bg-slate-100 group-hover:text-slate-700 dark:group-hover:bg-slate-800 dark:group-hover:text-slate-200">
+      <span className="flex h-5 w-5 items-center justify-center rounded text-ink-soft/60 transition-colors group-hover:bg-surface-sunk group-hover:text-ink dark:group-hover:bg-surface-dark-raised dark:group-hover:text-paper-dark">
         <Chevron open={open} />
       </span>
-      <h3 className="text-base font-semibold tracking-tight text-slate-900 dark:text-slate-100">
+      <h3 className="text-base font-semibold tracking-tight text-ink dark:text-paper-dark">
         {label}
       </h3>
-      <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-medium tabular-nums text-slate-500 dark:bg-slate-800 dark:text-slate-400">
+      <span className="rounded-full bg-surface-sunk px-2 py-0.5 text-[11px] font-medium tabular-nums text-ink-soft dark:bg-surface-dark-raised dark:text-paper-dark/60">
         {count}
       </span>
-      <span className="h-px flex-1 bg-slate-200/70 dark:bg-slate-800" />
+      <span className="h-px flex-1 bg-line/70 dark:bg-line-dark" />
     </button>
   )
 }
@@ -790,19 +798,21 @@ export default function IncentiveFinder({
       />
 
       {/* ── Sticky toolbar ───────────────────────────────────────────── */}
-      <div className="sticky top-[64px] z-20 -mx-4 mb-3 border-y border-slate-200 bg-slate-50/90 px-4 py-3 backdrop-blur-md dark:border-slate-800 dark:bg-slate-950/90 sm:top-[80px]">
+      <div className="sticky top-[64px] z-20 -mx-4 mb-3 border-y border-line bg-paper/90 px-4 py-3 backdrop-blur-md dark:border-line-dark dark:bg-ink-dark/90 sm:top-[80px]">
         <div className="flex flex-wrap items-center gap-2">
           {/* Search */}
           <div className="relative min-w-[200px] flex-1">
-            <svg className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <svg className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-soft/60" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z" />
             </svg>
+            <label htmlFor="incentive-search" className="sr-only">Search incentives</label>
             <input
+              id="incentive-search"
               type="text"
               placeholder="Search incentives, amounts, policies…"
               value={search}
               onChange={e => setSearch(e.target.value)}
-              className="w-full rounded-lg border border-slate-200 bg-white py-2 pl-9 pr-3 text-sm text-slate-800 shadow-sm placeholder:text-slate-400 focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-100 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-100 dark:placeholder:text-slate-500 dark:focus:border-indigo-500 dark:focus:ring-indigo-900/30"
+              className="min-h-[44px] w-full rounded-md border border-line bg-surface py-2 pl-9 pr-3 text-sm text-ink shadow-sm placeholder:text-ink-soft/50 focus:border-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-600/30 dark:border-line-dark dark:bg-surface-dark dark:text-paper-dark dark:placeholder:text-paper-dark/40"
             />
           </div>
 
@@ -886,7 +896,7 @@ export default function IncentiveFinder({
             {search.trim() && <ActiveChip label={`"${search}"`} onClear={() => setSearch('')} />}
             <button
               onClick={clearAll}
-              className="ml-1 text-xs font-medium text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200"
+              className="ml-1 text-xs font-medium text-ink-soft hover:text-ink dark:text-paper-dark/60 dark:hover:text-paper-dark"
             >
               Clear all
             </button>
@@ -897,9 +907,9 @@ export default function IncentiveFinder({
       {/* ── Result count — only when filtered ────────────────────────── */}
       {isFiltered && (
         <div className="mb-4 flex items-baseline justify-between">
-          <p className="text-sm text-slate-600 dark:text-slate-400">
-            <span className="font-semibold tabular-nums text-slate-900 dark:text-slate-100">{filtered.length}</span>
-            <span className="ml-1.5">of {incentives.length} schemes match</span>
+          <p className="text-sm text-ink-soft dark:text-paper-dark/60">
+            <span className="font-semibold tabular-nums text-ink dark:text-paper-dark">{filtered.length}</span>
+            <span className="ml-1.5 tabular-nums">of {incentives.length} schemes match</span>
           </p>
         </div>
       )}

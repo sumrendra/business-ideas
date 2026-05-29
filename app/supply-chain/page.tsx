@@ -214,13 +214,25 @@ const CHAIN: ChainNode[] = [
   },
 ]
 
+// Single-hue indigo treatment with a deliberate intensity ramp by chain position.
+// All decorative rainbow hues collapse to the one brand accent (DESIGN.md "One Voice Rule");
+// node identity now comes from icon + position, not from color.
+const ACCENT_BASE = {
+  ring: 'ring-indigo-400 dark:ring-indigo-600',
+  bg: 'bg-indigo-50 dark:bg-indigo-950/30',
+  text: 'text-indigo-700 dark:text-indigo-300',
+  dot: 'bg-indigo-500',
+  line: 'border-indigo-200 dark:border-indigo-800',
+  tag: 'bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300',
+}
+
 const ACCENT: Record<string, { ring: string; bg: string; text: string; dot: string; line: string; tag: string }> = {
-  violet: { ring: 'ring-violet-400 dark:ring-violet-600', bg: 'bg-violet-50 dark:bg-violet-950/30', text: 'text-violet-700 dark:text-violet-300', dot: 'bg-violet-500', line: 'border-violet-200 dark:border-violet-800', tag: 'bg-violet-100 dark:bg-violet-900/40 text-violet-700 dark:text-violet-300' },
-  blue:   { ring: 'ring-blue-400 dark:ring-blue-600',   bg: 'bg-blue-50 dark:bg-blue-950/30',   text: 'text-blue-700 dark:text-blue-300',   dot: 'bg-blue-500',   line: 'border-blue-200 dark:border-blue-800',   tag: 'bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300' },
-  amber:  { ring: 'ring-amber-400 dark:ring-amber-600', bg: 'bg-amber-50 dark:bg-amber-950/30', text: 'text-amber-700 dark:text-amber-300', dot: 'bg-amber-500', line: 'border-amber-200 dark:border-amber-800', tag: 'bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300' },
-  indigo: { ring: 'ring-indigo-400 dark:ring-indigo-600', bg: 'bg-indigo-50 dark:bg-indigo-950/30', text: 'text-indigo-700 dark:text-indigo-300', dot: 'bg-indigo-500', line: 'border-indigo-200 dark:border-indigo-800', tag: 'bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300' },
-  cyan:   { ring: 'ring-cyan-400 dark:ring-cyan-600',   bg: 'bg-cyan-50 dark:bg-cyan-950/30',   text: 'text-cyan-700 dark:text-cyan-300',   dot: 'bg-cyan-500',   line: 'border-cyan-200 dark:border-cyan-800',   tag: 'bg-cyan-100 dark:bg-cyan-900/40 text-cyan-700 dark:text-cyan-300' },
-  emerald:{ ring: 'ring-emerald-400 dark:ring-emerald-600', bg: 'bg-emerald-50 dark:bg-emerald-950/30', text: 'text-emerald-700 dark:text-emerald-300', dot: 'bg-emerald-500', line: 'border-emerald-200 dark:border-emerald-800', tag: 'bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300' },
+  violet:  ACCENT_BASE,
+  blue:    ACCENT_BASE,
+  amber:   ACCENT_BASE,
+  indigo:  ACCENT_BASE,
+  cyan:    ACCENT_BASE,
+  emerald: ACCENT_BASE,
 }
 
 type Tab = 'suppliers' | 'costs' | 'problems' | 'tools'
@@ -234,20 +246,20 @@ export default function SupplyChainPage() {
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-14">
-      <nav className="mb-6 text-sm text-slate-500 dark:text-slate-400">
-        <Link href="/" className="hover:text-indigo-600 dark:hover:text-indigo-400">Home</Link>
+      <nav className="mb-6 text-sm text-ink-soft dark:text-slate-400">
+        <Link href="/" className="hover:text-brand-600 dark:hover:text-indigo-400">Home</Link>
         <span className="mx-2">/</span>
-        <Link href="/tools" className="hover:text-indigo-600 dark:hover:text-indigo-400">Tools</Link>
+        <Link href="/tools" className="hover:text-brand-600 dark:hover:text-indigo-400">Tools</Link>
         <span className="mx-2">/</span>
-        <span className="text-slate-700 dark:text-slate-300">Supply Chain</span>
+        <span className="text-ink dark:text-slate-300">Supply Chain</span>
       </nav>
 
       <header className="mb-10">
-        <p className="text-xs font-bold uppercase tracking-widest text-indigo-600 dark:text-indigo-400">Supply Chain Flow</p>
-        <h1 className="mt-2 text-3xl sm:text-4xl font-bold text-slate-900 dark:text-slate-100">
+        <p className="text-[0.6875rem] font-bold uppercase tracking-[0.12em] text-brand-600 dark:text-indigo-400">Supply Chain Flow</p>
+        <h1 className="mt-2 text-3xl sm:text-4xl font-bold tracking-tight text-ink dark:text-slate-100">
           ☀️ Solar Panel Maintenance
         </h1>
-        <p className="mt-2 max-w-2xl text-slate-500 dark:text-slate-400">
+        <p className="mt-2 max-w-2xl text-ink-soft dark:text-slate-400">
           Full supply chain — from raw inputs to end customer. Click any node to explore suppliers, real costs, margins, common pitfalls, and the tools used at each stage.
         </p>
       </header>
@@ -264,7 +276,7 @@ export default function SupplyChainPage() {
                 {/* Connector line */}
                 {i < CHAIN.length - 1 && (
                   <div className="absolute left-[27px] top-[60px] w-[2px] h-[calc(100%-4px)] z-0">
-                    <div className="w-full h-full border-l-2 border-dashed border-slate-200 dark:border-slate-700" />
+                    <div className="w-full h-full border-l-2 border-dashed border-line dark:border-line-dark" />
                     {/* Animated flow dot */}
                     <div
                       className={`absolute top-0 w-2 h-2 rounded-full -left-[3px] ${ac.dot} opacity-70`}
@@ -277,25 +289,25 @@ export default function SupplyChainPage() {
                   onClick={() => { setActive(n.id); setTab('suppliers') }}
                   className={`relative z-10 w-full flex items-center gap-4 rounded-2xl border-2 p-4 mb-4 text-left transition-all duration-200 ${
                     isActive
-                      ? `${ac.ring} ring-2 ring-offset-2 dark:ring-offset-slate-950 ${ac.bg} border-transparent`
-                      : 'border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:border-slate-300 dark:hover:border-slate-700'
+                      ? `${ac.ring} ring-2 ring-offset-2 dark:ring-offset-ink-dark ${ac.bg} border-transparent`
+                      : 'border-line dark:border-line-dark bg-surface dark:bg-surface-dark hover:border-indigo-300 dark:hover:border-indigo-700 hover:shadow-[0_6px_24px_-8px_rgba(22,24,29,0.12)]'
                   }`}
                 >
                   {/* Icon circle */}
-                  <div className={`w-11 h-11 shrink-0 rounded-full flex items-center justify-center text-xl transition-colors ${isActive ? ac.bg + ' ' + ac.dot.replace('bg-', 'ring-') : 'bg-slate-100 dark:bg-slate-800'}`}>
+                  <div className={`w-11 h-11 shrink-0 rounded-full flex items-center justify-center text-xl transition-colors ${isActive ? ac.bg + ' ' + ac.dot.replace('bg-', 'ring-') : 'bg-surface-sunk dark:bg-surface-dark-raised'}`}>
                     {n.icon}
                   </div>
 
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <p className={`font-semibold text-sm leading-tight transition-colors ${isActive ? ac.text : 'text-slate-700 dark:text-slate-300'}`}>
+                      <p className={`font-semibold text-sm leading-tight transition-colors ${isActive ? ac.text : 'text-ink dark:text-slate-300'}`}>
                         {n.stage}
                       </p>
                       {n.isYou && (
-                        <span className="rounded-full bg-indigo-600 text-white text-[9px] font-bold uppercase tracking-wider px-2 py-0.5">You</span>
+                        <span className="rounded-full bg-brand-600 text-white text-[9px] font-bold uppercase tracking-wider px-2 py-0.5">You</span>
                       )}
                     </div>
-                    <p className="text-[11px] text-slate-400 dark:text-slate-500 mt-0.5 leading-tight line-clamp-1">{n.tagline}</p>
+                    <p className="text-[11px] text-ink-soft dark:text-slate-500 mt-0.5 leading-tight line-clamp-1">{n.tagline}</p>
                   </div>
 
                   {isActive && (
@@ -328,19 +340,19 @@ export default function SupplyChainPage() {
                 <div className="flex items-center gap-2 flex-wrap">
                   <h2 className={`text-xl font-bold ${a.text}`}>{node.stage}</h2>
                   {node.isYou && (
-                    <span className="rounded-full bg-indigo-600 text-white text-[9px] font-bold uppercase tracking-wider px-2 py-0.5">Your business</span>
+                    <span className="rounded-full bg-brand-600 text-white text-[9px] font-bold uppercase tracking-wider px-2 py-0.5">Your business</span>
                   )}
                 </div>
-                <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">{node.tagline}</p>
+                <p className="text-sm text-ink-soft dark:text-slate-400 mt-0.5">{node.tagline}</p>
               </div>
             </div>
 
             {/* Margin pill */}
             <div className={`mt-3 inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold ${a.tag}`}>
               <span>Margin at this stage:</span>
-              <span className="font-bold">{node.margin.pct}</span>
+              <span className="font-bold tabular-nums">{node.margin.pct}</span>
             </div>
-            <p className="mt-2 text-xs text-slate-500 dark:text-slate-400 leading-relaxed">{node.margin.context}</p>
+            <p className="mt-2 text-xs text-ink-soft dark:text-slate-400 leading-relaxed">{node.margin.context}</p>
           </div>
 
           {/* Tabs */}
@@ -357,11 +369,11 @@ export default function SupplyChainPage() {
                 className={`mr-1 pb-2 pt-2 px-3 text-xs font-semibold border-b-2 transition-colors ${
                   tab === t.key
                     ? `border-current ${a.text}`
-                    : 'border-transparent text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'
+                    : 'border-transparent text-ink-soft dark:text-slate-500 hover:text-ink dark:hover:text-slate-300'
                 }`}
               >
                 {t.label}
-                <span className={`ml-1.5 rounded-full px-1.5 py-0.5 text-[9px] ${tab === t.key ? a.tag : 'bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-500'}`}>
+                <span className={`ml-1.5 rounded-full px-1.5 py-0.5 text-[9px] tabular-nums ${tab === t.key ? a.tag : 'bg-surface-sunk dark:bg-surface-dark-raised text-ink-soft dark:text-slate-500'}`}>
                   {t.count}
                 </span>
               </button>
@@ -374,12 +386,12 @@ export default function SupplyChainPage() {
             {tab === 'suppliers' && (
               <div className="space-y-3">
                 {node.suppliers.map((s, i) => (
-                  <div key={i} className="rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-4">
+                  <div key={i} className="rounded-xl bg-surface dark:bg-surface-dark border border-line dark:border-line-dark p-4">
                     <div className="flex items-start justify-between gap-2">
-                      <p className="font-semibold text-sm text-slate-800 dark:text-slate-200">{s.name}</p>
+                      <p className="font-semibold text-sm text-ink dark:text-slate-200">{s.name}</p>
                       <span className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-medium ${a.tag}`}>{s.location}</span>
                     </div>
-                    <p className="mt-1 text-xs text-slate-500 dark:text-slate-400 leading-relaxed">{s.note}</p>
+                    <p className="mt-1 text-xs text-ink-soft dark:text-slate-400 leading-relaxed">{s.note}</p>
                   </div>
                 ))}
               </div>
@@ -388,12 +400,12 @@ export default function SupplyChainPage() {
             {tab === 'costs' && (
               <div className="space-y-3">
                 {node.costs.map((c, i) => (
-                  <div key={i} className="rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-4">
+                  <div key={i} className="rounded-xl bg-surface dark:bg-surface-dark border border-line dark:border-line-dark p-4">
                     <div className="flex items-start justify-between gap-4">
-                      <p className="text-sm font-medium text-slate-700 dark:text-slate-300">{c.label}</p>
-                      <p className={`text-sm font-bold shrink-0 ${a.text}`}>{c.value}</p>
+                      <p className="text-sm font-medium text-ink dark:text-slate-300">{c.label}</p>
+                      <p className={`text-sm font-bold shrink-0 tabular-nums ${a.text}`}>{c.value}</p>
                     </div>
-                    {c.note && <p className="mt-1 text-xs text-slate-400 dark:text-slate-500 leading-relaxed">{c.note}</p>}
+                    {c.note && <p className="mt-1 text-xs text-ink-soft dark:text-slate-500 leading-relaxed">{c.note}</p>}
                   </div>
                 ))}
               </div>
@@ -402,12 +414,12 @@ export default function SupplyChainPage() {
             {tab === 'problems' && (
               <div className="space-y-4">
                 {node.problems.map((p, i) => (
-                  <div key={i} className="rounded-xl bg-white dark:bg-slate-900 border border-amber-200 dark:border-amber-900/40 p-4">
+                  <div key={i} className="rounded-xl bg-surface dark:bg-surface-dark border border-line dark:border-line-dark p-4">
                     <div className="flex items-start gap-2">
-                      <span className="text-amber-500 mt-0.5 shrink-0 text-base">⚠</span>
+                      <span className="text-caution mt-0.5 shrink-0 text-base" aria-hidden="true">⚠</span>
                       <div>
-                        <p className="font-semibold text-sm text-slate-800 dark:text-slate-200">{p.title}</p>
-                        <p className="mt-1.5 text-xs text-slate-500 dark:text-slate-400 leading-relaxed">{p.detail}</p>
+                        <p className="font-semibold text-sm text-ink dark:text-slate-200">{p.title}</p>
+                        <p className="mt-1.5 text-xs text-ink-soft dark:text-slate-400 leading-relaxed">{p.detail}</p>
                       </div>
                     </div>
                   </div>
@@ -418,10 +430,10 @@ export default function SupplyChainPage() {
             {tab === 'tools' && (
               <div className="grid sm:grid-cols-2 gap-3">
                 {node.tools.map((t, i) => (
-                  <div key={i} className="rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-4">
-                    <p className="font-semibold text-sm text-slate-800 dark:text-slate-200">{t.name}</p>
+                  <div key={i} className="rounded-xl bg-surface dark:bg-surface-dark border border-line dark:border-line-dark p-4">
+                    <p className="font-semibold text-sm text-ink dark:text-slate-200">{t.name}</p>
                     <p className={`text-[10px] font-medium mt-0.5 ${a.text}`}>{t.type}</p>
-                    <p className="text-xs text-slate-400 dark:text-slate-500 mt-1.5 font-medium">{t.cost}</p>
+                    <p className="text-xs text-ink-soft dark:text-slate-500 mt-1.5 font-medium tabular-nums">{t.cost}</p>
                   </div>
                 ))}
               </div>
@@ -431,8 +443,8 @@ export default function SupplyChainPage() {
       </div>
 
       {/* Full chain summary strip */}
-      <div className="mt-12 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6">
-        <p className="text-xs font-bold uppercase tracking-widest text-slate-400 dark:text-slate-600 mb-5">Full Chain at a Glance</p>
+      <div className="mt-12 rounded-2xl border border-line dark:border-line-dark bg-surface dark:bg-surface-dark p-6">
+        <p className="text-[0.6875rem] font-bold uppercase tracking-[0.12em] text-ink-soft dark:text-slate-500 mb-5">Full Chain at a Glance</p>
         <div className="flex flex-wrap items-center gap-0">
           {CHAIN.map((n, i) => {
             const ac = ACCENT[n.accent]
@@ -440,14 +452,14 @@ export default function SupplyChainPage() {
               <div key={n.id} className="flex items-center">
                 <button
                   onClick={() => { setActive(n.id); setTab('suppliers') }}
-                  className={`flex items-center gap-2 rounded-xl px-3 py-2 text-xs font-semibold transition-colors ${active === n.id ? `${ac.bg} ${ac.text}` : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300'}`}
+                  className={`flex items-center gap-2 rounded-xl px-3 py-2 text-xs font-semibold transition-colors ${active === n.id ? `${ac.bg} ${ac.text}` : 'text-ink-soft dark:text-slate-400 hover:text-ink dark:hover:text-slate-300'}`}
                 >
                   <span>{n.icon}</span>
                   <span className="hidden sm:inline">{n.stage.split(' ').slice(0, 2).join(' ')}</span>
-                  {n.isYou && <span className="rounded-full bg-indigo-600 text-white text-[8px] font-bold px-1.5 py-0.5">YOU</span>}
+                  {n.isYou && <span className="rounded-full bg-brand-600 text-white text-[8px] font-bold px-1.5 py-0.5">YOU</span>}
                 </button>
                 {i < CHAIN.length - 1 && (
-                  <span className="text-slate-300 dark:text-slate-700 mx-1 text-sm">→</span>
+                  <span className="text-line dark:text-line-dark mx-1 text-sm">→</span>
                 )}
               </div>
             )
@@ -455,7 +467,7 @@ export default function SupplyChainPage() {
         </div>
       </div>
 
-      <p className="mt-6 text-center text-xs text-slate-400 dark:text-slate-600">
+      <p className="mt-6 text-center text-xs text-ink-soft dark:text-slate-600">
         Data compiled from MNRE reports, NSDC solar sector skill gap studies, Mercom India, NISE, and interviews with solar O&M operators. Costs are indicative for FY2024.
       </p>
     </div>

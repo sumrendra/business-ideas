@@ -2,10 +2,12 @@
 
 import { useState, useEffect } from 'react'
 
+// Deliberate categorical data-viz palette (DESIGN.md map note) built only from
+// system tokens: brand indigo + the two warm semantic hues.
 const LINE_COLORS = [
-  { stroke: '#6366f1', fill: 'rgba(99,102,241,0.13)',  dot: 'bg-indigo-500', label: 'text-indigo-600 dark:text-indigo-400' },
-  { stroke: '#f59e0b', fill: 'rgba(245,158,11,0.10)',  dot: 'bg-amber-500',  label: 'text-amber-600 dark:text-amber-400'  },
-  { stroke: '#10b981', fill: 'rgba(16,185,129,0.10)', dot: 'bg-emerald-500', label: 'text-emerald-600 dark:text-emerald-400' },
+  { stroke: '#4f46e5', fill: 'rgba(79,70,229,0.13)',  dot: 'bg-brand-600',  label: 'text-brand-600 dark:text-brand-500' },
+  { stroke: '#b26a00', fill: 'rgba(178,106,0,0.10)',  dot: 'bg-caution',    label: 'text-caution' },
+  { stroke: '#1f8a55', fill: 'rgba(31,138,85,0.10)',  dot: 'bg-positive',   label: 'text-positive' },
 ]
 
 interface LineState {
@@ -17,14 +19,14 @@ interface LineState {
 }
 
 function trendDir(values: number[]): { arrow: string; cls: string } {
-  if (values.length < 6) return { arrow: '→', cls: 'text-slate-400' }
+  if (values.length < 6) return { arrow: '→', cls: 'text-ink-soft/60 dark:text-paper-dark/40' }
   const recent = values.slice(-6)
   const older  = values.slice(-18, -12)
   const avg    = (a: number[]) => a.length ? a.reduce((s, v) => s + v, 0) / a.length : 0
   const r = avg(recent); const o = avg(older)
-  if (o > 0 && r / o > 1.2)  return { arrow: '↑', cls: 'text-emerald-600 dark:text-emerald-400' }
-  if (o > 0 && r / o < 0.85) return { arrow: '↓', cls: 'text-rose-500 dark:text-rose-400' }
-  return { arrow: '→', cls: 'text-slate-400 dark:text-slate-500' }
+  if (o > 0 && r / o > 1.2)  return { arrow: '↑', cls: 'text-positive' }
+  if (o > 0 && r / o < 0.85) return { arrow: '↓', cls: 'text-alert' }
+  return { arrow: '→', cls: 'text-ink-soft/60 dark:text-paper-dark/40' }
 }
 
 function MultiLineChart({ lines }: { lines: LineState[] }) {
@@ -62,8 +64,8 @@ function MultiLineChart({ lines }: { lines: LineState[] }) {
         {[25, 50, 75].map(v => (
           <line key={v}
             x1={PAD.l} y1={y(v)} x2={W - PAD.r} y2={y(v)}
-            stroke="currentColor" strokeOpacity="0.06" strokeWidth="0.5"
-            className="text-slate-500"
+            stroke="currentColor" strokeOpacity="0.08" strokeWidth="0.5"
+            className="text-ink-soft"
           />
         ))}
 
@@ -100,7 +102,7 @@ function MultiLineChart({ lines }: { lines: LineState[] }) {
           <line
             x1={x(hoverIdx, refLen)} y1={PAD.t}
             x2={x(hoverIdx, refLen)} y2={H - PAD.b}
-            stroke="#94a3b8" strokeWidth="0.8" strokeDasharray="2 2"
+            stroke="#9a958c" strokeWidth="0.8" strokeDasharray="2 2"
             vectorEffect="non-scaling-stroke"
           />
         )}
@@ -121,7 +123,7 @@ function MultiLineChart({ lines }: { lines: LineState[] }) {
           const tot = active[0].labels.length
           if (i % 12 !== 0) return null
           return (
-            <text key={i} x={x(i, tot)} y={H - 2} textAnchor="middle" fontSize="7.5" fill="#94a3b8">
+            <text key={i} x={x(i, tot)} y={H - 2} textAnchor="middle" fontSize="7.5" fill="#9a958c">
               {label.split(' ')[1]}
             </text>
           )
@@ -130,17 +132,17 @@ function MultiLineChart({ lines }: { lines: LineState[] }) {
 
       {/* Tooltip */}
       {hoverIdx !== null && (
-        <div className="pointer-events-none absolute left-2 top-0 bg-slate-800/90 text-white rounded-lg px-2 py-1.5 text-[10px] space-y-0.5 shadow-lg z-10">
-          <p className="text-slate-400 text-[9px]">{active[0]?.labels[hoverIdx]}</p>
+        <div className="pointer-events-none absolute left-2 top-0 bg-ink/95 text-white rounded-md px-2 py-1.5 text-[10px] space-y-0.5 shadow-lg z-10">
+          <p className="text-white/60 text-[9px]">{active[0]?.labels[hoverIdx]}</p>
           {active.map((line, ci) => {
             const tot = line.values.length
             const i = Math.round((hoverIdx / (refLen - 1)) * (tot - 1))
             const v = line.values[Math.min(i, tot - 1)] ?? 0
             return (
               <div key={ci} className="flex items-center gap-1.5">
-                <span className="w-2 h-2 rounded-full shrink-0" style={{ background: LINE_COLORS[ci].stroke }} />
-                <span className="truncate max-w-[120px] text-slate-300">{line.keyword}</span>
-                <span className="font-bold ml-auto pl-2">{v}</span>
+                <span aria-hidden className="w-2 h-2 rounded-full shrink-0" style={{ background: LINE_COLORS[ci].stroke }} />
+                <span className="truncate max-w-[120px] text-white/80">{line.keyword}</span>
+                <span className="font-bold tabular-nums ml-auto pl-2">{v}</span>
               </div>
             )
           })}
@@ -191,36 +193,36 @@ export default function HyperlocalTrendsPanel({ keywords, stateCode, stateName }
   const hasData    = lines.some(l => !l.loading && !l.failed && l.values.length > 0)
 
   return (
-    <div className="pt-2 border-t border-slate-100 dark:border-slate-800 space-y-2">
+    <div className="pt-2 border-t border-line dark:border-line-dark space-y-2">
       <div className="flex items-center justify-between">
-        <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Search demand</p>
-        <span className="text-[9px] text-slate-400 dark:text-slate-500">{stateName} · 5yr</span>
+        <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-ink-soft dark:text-paper-dark/60">Search demand</p>
+        <span className="text-[9px] text-ink-soft/70 dark:text-paper-dark/50 tabular-nums">{stateName} · 5yr</span>
       </div>
 
       {anyLoading && (
-        <div className="rounded-lg border border-slate-100 dark:border-slate-800 p-2 space-y-1.5 animate-pulse">
-          <div className="h-[88px] bg-slate-100 dark:bg-slate-800 rounded" />
+        <div className="rounded-md border border-line dark:border-line-dark p-2 space-y-1.5 animate-pulse">
+          <div className="h-[88px] bg-surface-sunk dark:bg-surface-dark-raised rounded" />
           {kws.map((_, i) => (
             <div key={i} className="flex items-center gap-2">
-              <div className="w-2.5 h-2.5 rounded-full bg-slate-200 dark:bg-slate-700 shrink-0" />
-              <div className="h-2.5 bg-slate-100 dark:bg-slate-800 rounded flex-1" />
+              <div className="w-2.5 h-2.5 rounded-full bg-line dark:bg-line-dark shrink-0" />
+              <div className="h-2.5 bg-surface-sunk dark:bg-surface-dark-raised rounded flex-1" />
             </div>
           ))}
         </div>
       )}
 
       {!anyLoading && hasData && (
-        <div className="rounded-lg border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 px-2 pt-2 pb-1.5 overflow-hidden">
+        <div className="rounded-md border border-line dark:border-line-dark bg-surface dark:bg-surface-dark px-2 pt-2 pb-1.5 overflow-hidden">
           <MultiLineChart lines={lines} />
-          <div className="mt-1.5 space-y-1 border-t border-slate-100 dark:border-slate-800 pt-1.5">
+          <div className="mt-1.5 space-y-1 border-t border-line dark:border-line-dark pt-1.5">
             {lines.map((line, i) => {
               const { arrow, cls } = trendDir(line.values)
               return (
                 <div key={i} className="flex items-center gap-1.5">
-                  <span className={`w-2.5 h-2.5 rounded-full shrink-0 ${LINE_COLORS[i].dot}`} />
-                  <span className="flex-1 text-[10px] text-slate-500 dark:text-slate-400 truncate">{line.keyword}</span>
+                  <span aria-hidden className={`w-2.5 h-2.5 rounded-full shrink-0 ${LINE_COLORS[i].dot}`} />
+                  <span className="flex-1 text-[10px] text-ink-soft dark:text-paper-dark/60 truncate">{line.keyword}</span>
                   {line.failed
-                    ? <span className="text-[9px] text-slate-300 dark:text-slate-600 shrink-0">no data</span>
+                    ? <span className="text-[9px] text-ink-soft/50 dark:text-paper-dark/40 shrink-0">no data</span>
                     : <span className={`text-[10px] font-bold shrink-0 ${cls}`}>{arrow}</span>
                   }
                 </div>
@@ -231,7 +233,7 @@ export default function HyperlocalTrendsPanel({ keywords, stateCode, stateName }
       )}
 
       {!anyLoading && !hasData && (
-        <p className="text-[10px] text-slate-400 dark:text-slate-500 text-center py-2">
+        <p className="text-[10px] text-ink-soft/70 dark:text-paper-dark/50 text-center py-2">
           No trends data for {stateName}
         </p>
       )}

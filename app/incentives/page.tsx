@@ -137,15 +137,15 @@ export default async function IncentivesPage() {
 
         {/* ── Hero ─────────────────────────────────────────────────────── */}
         <header className="mb-8 max-w-3xl">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-indigo-600 dark:text-indigo-400">
+          <p className="text-[0.6875rem] font-bold uppercase tracking-[0.12em] text-brand-600 dark:text-brand-500">
             State Incentives
           </p>
-          <h1 className="mt-2 text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-100 sm:text-4xl">
+          <h1 className="mt-2 text-3xl font-bold tracking-tight text-ink dark:text-paper-dark sm:text-4xl">
             State-wise Business Incentive Database
           </h1>
-          <p className="mt-3 text-base text-slate-600 dark:text-slate-400 sm:text-lg">
-            <span className="font-semibold text-slate-900 dark:text-slate-100">{totalSchemes} verified schemes</span>{' '}
-            across <span className="font-semibold text-slate-900 dark:text-slate-100">{totalStates} states</span>{' '}
+          <p className="mt-3 text-base text-ink-soft dark:text-paper-dark/70 sm:text-lg">
+            <span className="font-semibold tabular-nums text-ink dark:text-paper-dark">{totalSchemes} verified schemes</span>{' '}
+            across <span className="font-semibold tabular-nums text-ink dark:text-paper-dark">{totalStates} states</span>{' '}
             — capital subsidies, GST reimbursements, stamp duty waivers and electricity concessions, sourced from official state industrial policies.
           </p>
         </header>
@@ -156,24 +156,24 @@ export default async function IncentivesPage() {
           href="https://pmsuryaghar.gov.in"
           target="_blank"
           rel="noopener noreferrer"
-          className="group mb-10 flex flex-col gap-3 rounded-2xl border border-slate-200 bg-gradient-to-br from-white via-indigo-50/30 to-white p-5 transition-all hover:border-indigo-300 hover:shadow-sm dark:border-slate-800 dark:from-slate-900 dark:via-indigo-950/20 dark:to-slate-900 dark:hover:border-indigo-700 sm:flex-row sm:items-center sm:gap-6 sm:p-6"
+          className="group mb-10 flex flex-col gap-3 rounded-lg border border-line bg-surface p-5 transition-all hover:border-brand-300 hover:shadow-[0_6px_24px_-8px_rgba(22,24,29,0.12)] dark:border-line-dark dark:bg-surface-dark dark:hover:border-brand-600/50 sm:flex-row sm:items-center sm:gap-6 sm:p-6"
         >
           <div className="flex items-center gap-3">
-            <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-100 text-amber-700 ring-1 ring-inset ring-amber-200 dark:bg-amber-500/10 dark:text-amber-300 dark:ring-amber-500/20">
+            <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-caution/10 text-caution ring-1 ring-inset ring-caution/20 dark:bg-caution/15 dark:ring-caution/25">
               <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <circle cx="12" cy="12" r="4" />
                 <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" />
               </svg>
             </span>
             <div className="min-w-0">
-              <p className="text-[10px] font-semibold uppercase tracking-widest text-amber-700 dark:text-amber-400">Featured · Central scheme</p>
-              <p className="text-sm font-semibold text-slate-900 dark:text-slate-100 sm:text-base">PM Surya Ghar: Muft Bijli Yojana</p>
+              <p className="text-[0.6875rem] font-bold uppercase tracking-[0.12em] text-caution">Featured · Central scheme</p>
+              <p className="text-sm font-semibold text-ink dark:text-paper-dark sm:text-base">PM Surya Ghar: Muft Bijli Yojana</p>
             </div>
           </div>
-          <div className="flex-1 text-sm text-slate-600 dark:text-slate-400">
-            Up to <span className="font-semibold text-slate-900 dark:text-slate-100">₹78,000 subsidy</span> on residential rooftop solar (up to 3&nbsp;kW) plus 300 free units/month for 25 years.
+          <div className="flex-1 text-sm text-ink-soft dark:text-paper-dark/70">
+            Up to <span className="font-semibold tabular-nums text-ink dark:text-paper-dark">₹78,000 subsidy</span> on residential rooftop solar (up to 3&nbsp;kW) plus 300 free units/month for 25 years.
           </div>
-          <span className="inline-flex shrink-0 items-center gap-1.5 text-sm font-semibold text-indigo-600 group-hover:text-indigo-500 dark:text-indigo-400 dark:group-hover:text-indigo-300">
+          <span className="inline-flex shrink-0 items-center gap-1.5 text-sm font-semibold text-brand-600 group-hover:text-brand-700 dark:text-brand-500 dark:group-hover:text-brand-200">
             Apply on portal
             <svg className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
               <path d="M7 17L17 7M9 7h8v8" />
@@ -185,7 +185,7 @@ export default async function IncentivesPage() {
         <IncentiveFinder incentives={all} />
 
         {/* ── Disclaimer ───────────────────────────────────────────────── */}
-        <p className="mt-10 text-xs text-slate-400 dark:text-slate-500">
+        <p className="mt-10 text-xs text-ink-soft/70 dark:text-paper-dark/50">
           Incentive details are based on publicly available policy documents and may change.
           Verify eligibility and current terms with the respective State Industries Department or DIC before applying.
           Zone- and district-specific rates may vary.
