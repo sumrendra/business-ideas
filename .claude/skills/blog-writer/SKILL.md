@@ -268,6 +268,11 @@ A hallucinated stat survives self-review but fails fact-check. This is the diffe
 
 Copy `.claude/skills/blog-writer/publish-template.mjs` to `scripts/seed-post-<slug>.mjs` and fill it in with the drafted content.
 
+**CRITICAL — string escaping (this has silently broken the publish before).** The seed body is JavaScript source. Every helper argument (`p('...')`, `h2('...')`, `quote('...')`, `seo_description`, `excerpt`, etc.) is a **single-quoted** string. Any apostrophe inside the text — `Meesho's`, `it's`, `don't`, `Mamaearth's`, `founder's` — MUST be handled, or `node` throws `SyntaxError: missing ) after argument list` and the post never publishes (the GitHub Action's publish step fails). Pick ONE rule and apply it to EVERY string:
+- **Preferred:** wrap any text containing an apostrophe in **double quotes**: `p("Meesho's logistics arm...")`. No apostrophe escaping needed (just escape any literal `"`).
+- **Or:** keep single quotes and escape *every* content apostrophe as `\'`: `p('Meesho\'s logistics arm...')`. Never half-escape — escaping one apostrophe but missing a later one in the same string is the exact bug that broke the May 24 run.
+After writing the file, scan every string for unescaped `'`. You cannot run `node --check` (the Action runs the seed, not you), so this visual pass is the only safety net.
+
 **Do not execute the seed script.** The GitHub Action at `.github/workflows/auto-merge-blogs.yml` will run it after step 9's push, using repo secrets `SANITY_WRITE_TOKEN` and `UNSPLASH_ACCESS_KEY` it owns. The agent has no access to those secrets and should not attempt the publish.
 
 ---
