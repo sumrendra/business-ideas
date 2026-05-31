@@ -38,3 +38,6 @@ feedback.jsonl
 # Ingestion caches (HTTP downloads, PDFs)
 scripts/ingest-startups/_cache/
 scripts/ingest-startups/.cache/
+
+# Startup enrichment batch payloads (regenerated per run)
+scripts/ingest-startups/_enrich-batch.json
